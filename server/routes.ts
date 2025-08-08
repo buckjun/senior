@@ -5,8 +5,26 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { aiService } from "./aiService";
-import { insertUserProfileSchema, insertIndividualProfileSchema, insertCompanyProfileSchema, insertJobPostingSchema, insertJobApplicationSchema } from "@shared/schema";
+import { insertUserProfileSchema, insertIndividualProfileSchema, insertCompanyProfileSchema, insertJobPostingSchema, insertJobApplicationSchema, insertSeniorReemploymentDataSchema } from "@shared/schema";
 import { z } from "zod";
+import multer from "multer";
+import * as XLSX from "xlsx";
+
+// Set up multer for file uploads
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.mimetype === 'application/vnd.ms-excel') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only Excel files are allowed'), false);
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -484,6 +502,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error setting resume file:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Excel upload endpoint for senior reemployment data
+  app.post("/api/upload-excel", isAuthenticated, upload.single('excelFile'), async (req: any, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "엑셀 파일이 필요합니다." });
+    }
+
+    try {
+      // Parse the Excel file
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      console.log('Excel 데이터 샘플:', JSON.stringify(jsonData.slice(0, 2), null, 2));
+
+      // Transform Excel data to our schema
+      const transformedData = jsonData.map((row: any, index: number) => {
+        try {
+          // Map Excel columns to our database fields
+          // This mapping may need adjustment based on your actual Excel structure
+          const mappedData = {
+            age: parseInt(row['나이'] || row['age'] || '0') || null,
+            gender: row['성별'] || row['gender'] || null,
+            region: row['지역'] || row['region'] || null,
+            educationLevel: row['학력'] || row['education'] || null,
+            
+            previousIndustry: row['이전직종'] || row['previous_industry'] || null,
+            previousPosition: row['이전직책'] || row['previous_position'] || null,
+            previousSalary: parseFloat(row['이전연봉'] || row['previous_salary'] || '0') || null,
+            careerBreakDuration: parseInt(row['경력단절기간'] || row['career_break'] || '0') || null,
+            
+            newIndustry: row['새직종'] || row['new_industry'] || null,
+            newPosition: row['새직책'] || row['new_position'] || null,
+            newSalary: parseFloat(row['새연봉'] || row['new_salary'] || '0') || null,
+            employmentType: row['고용형태'] || row['employment_type'] || null,
+            workSchedule: row['근무형태'] || row['work_schedule'] || null,
+            
+            jobSearchDuration: parseInt(row['구직기간'] || row['job_search_duration'] || '0') || null,
+            jobSearchMethods: row['구직방법'] ? [row['구직방법']] : null,
+            skillsTraining: row['교육이수'] ? [row['교육이수']] : null,
+            governmentSupport: row['정부지원'] ? [row['정부지원']] : null,
+            
+            successFactors: row['성공요인'] ? [row['성공요인']] : null,
+            challenges: row['어려움'] ? [row['어려움']] : null,
+            recommendations: row['조언'] || row['recommendations'] || null,
+            
+            companySize: row['회사규모'] || row['company_size'] || null,
+            companyType: row['회사유형'] || row['company_type'] || null,
+            
+            jobSatisfaction: parseInt(row['만족도'] || row['job_satisfaction'] || '0') || null,
+            workLifeBalance: parseInt(row['워라밸'] || row['work_life_balance'] || '0') || null,
+            salaryChange: parseFloat(row['연봉변화율'] || row['salary_change'] || '0') || null,
+            
+            dataSource: 'excel_import',
+            isVerified: false
+          };
+
+          // Filter out null values to avoid database issues
+          const cleanedData = Object.fromEntries(
+            Object.entries(mappedData).filter(([_, value]) => value !== null)
+          );
+
+          return cleanedData;
+        } catch (error) {
+          console.error(`행 ${index + 1} 변환 오류:`, error);
+          return null;
+        }
+      }).filter(Boolean);
+
+      // Validate and insert data
+      const validatedData = [];
+      const errors = [];
+
+      for (let i = 0; i < transformedData.length; i++) {
+        try {
+          const validated = insertSeniorReemploymentDataSchema.parse(transformedData[i]);
+          validatedData.push(validated);
+        } catch (error) {
+          errors.push(`행 ${i + 1}: ${error.message}`);
+        }
+      }
+
+      // Insert valid data
+      let insertedCount = 0;
+      if (validatedData.length > 0) {
+        const results = await storage.bulkCreateSeniorReemploymentData(validatedData);
+        insertedCount = results.length;
+      }
+
+      res.json({
+        success: true,
+        message: `엑셀 데이터 업로드 완료`,
+        totalRows: jsonData.length,
+        validRows: validatedData.length,
+        insertedRows: insertedCount,
+        errors: errors.slice(0, 10) // Show only first 10 errors
+      });
+
+    } catch (error) {
+      console.error('Excel 업로드 오류:', error);
+      res.status(500).json({ 
+        error: '엑셀 파일 처리 중 오류가 발생했습니다.',
+        details: error.message
+      });
+    }
+  });
+
+  // Get senior reemployment data with filters
+  app.get("/api/reemployment-data", isAuthenticated, async (req, res) => {
+    try {
+      const filters = {
+        age: req.query.age ? parseInt(req.query.age as string) : undefined,
+        region: req.query.region as string,
+        industry: req.query.industry as string,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 50
+      };
+
+      const data = await storage.getSeniorReemploymentData(filters);
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching reemployment data:', error);
+      res.status(500).json({ error: 'Failed to fetch reemployment data' });
+    }
+  });
+
+  // Get reemployment statistics
+  app.get("/api/reemployment-statistics", isAuthenticated, async (req, res) => {
+    try {
+      const category = req.query.category as string;
+      const stats = await storage.getReemploymentStatistics(category);
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+      res.status(500).json({ error: 'Failed to fetch statistics' });
     }
   });
 

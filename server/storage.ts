@@ -24,6 +24,12 @@ import {
   type InsertJobPosting,
   type InsertJobApplication,
   type InsertAiRecommendation,
+  seniorReemploymentData,
+  reemploymentStatistics,
+  type SeniorReemploymentData,
+  type ReemploymentStatistics,
+  type InsertSeniorReemploymentData,
+  type InsertReemploymentStatistics,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, like, or } from "drizzle-orm";
@@ -76,6 +82,18 @@ export interface IStorage {
 
   // Education programs operations
   getEducationPrograms(query?: string): Promise<EducationProgram[]>;
+  
+  // Senior reemployment data operations
+  createSeniorReemploymentData(data: InsertSeniorReemploymentData): Promise<SeniorReemploymentData>;
+  getSeniorReemploymentData(filters?: {
+    age?: number;
+    region?: string;
+    industry?: string;
+    limit?: number;
+  }): Promise<SeniorReemploymentData[]>;
+  createReemploymentStatistics(stats: InsertReemploymentStatistics): Promise<ReemploymentStatistics>;
+  getReemploymentStatistics(category?: string): Promise<ReemploymentStatistics[]>;
+  bulkCreateSeniorReemploymentData(dataArray: InsertSeniorReemploymentData[]): Promise<SeniorReemploymentData[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -401,6 +419,93 @@ export class DatabaseStorage implements IStorage {
       .limit(20);
     
     return programs;
+  }
+
+  // Senior reemployment data operations
+  async createSeniorReemploymentData(data: InsertSeniorReemploymentData): Promise<SeniorReemploymentData> {
+    const [reemploymentData] = await db
+      .insert(seniorReemploymentData)
+      .values(data)
+      .returning();
+    return reemploymentData;
+  }
+
+  async getSeniorReemploymentData(filters?: {
+    age?: number;
+    region?: string;
+    industry?: string;
+    limit?: number;
+  }): Promise<SeniorReemploymentData[]> {
+    const conditions = [];
+
+    if (filters?.age) {
+      conditions.push(eq(seniorReemploymentData.age, filters.age));
+    }
+
+    if (filters?.region) {
+      conditions.push(like(seniorReemploymentData.region, `%${filters.region}%`));
+    }
+
+    if (filters?.industry) {
+      conditions.push(
+        or(
+          like(seniorReemploymentData.previousIndustry, `%${filters.industry}%`),
+          like(seniorReemploymentData.newIndustry, `%${filters.industry}%`)
+        )!
+      );
+    }
+
+    let query = db.select().from(seniorReemploymentData);
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+
+    const data = await query
+      .orderBy(desc(seniorReemploymentData.createdAt))
+      .limit(filters?.limit || 100);
+
+    return data;
+  }
+
+  async createReemploymentStatistics(stats: InsertReemploymentStatistics): Promise<ReemploymentStatistics> {
+    const [statistics] = await db
+      .insert(reemploymentStatistics)
+      .values(stats)
+      .returning();
+    return statistics;
+  }
+
+  async getReemploymentStatistics(category?: string): Promise<ReemploymentStatistics[]> {
+    let query = db.select().from(reemploymentStatistics);
+
+    if (category) {
+      query = query.where(eq(reemploymentStatistics.category, category)) as any;
+    }
+
+    const stats = await query
+      .orderBy(desc(reemploymentStatistics.createdAt));
+
+    return stats;
+  }
+
+  async bulkCreateSeniorReemploymentData(dataArray: InsertSeniorReemploymentData[]): Promise<SeniorReemploymentData[]> {
+    if (dataArray.length === 0) return [];
+
+    // Batch insert in chunks of 100 to avoid database limits
+    const chunkSize = 100;
+    const results: SeniorReemploymentData[] = [];
+
+    for (let i = 0; i < dataArray.length; i += chunkSize) {
+      const chunk = dataArray.slice(i, i + chunkSize);
+      const chunkResults = await db
+        .insert(seniorReemploymentData)
+        .values(chunk)
+        .returning();
+      results.push(...chunkResults);
+    }
+
+    return results;
   }
 }
 

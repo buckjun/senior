@@ -14,6 +14,7 @@ import CompanySignup from "@/pages/company/signup";
 import CompanyDashboard from "@/pages/company/dashboard";
 import JobPosting from "@/pages/company/job-posting";
 import AIRecommendations from "@/pages/company/ai-recommendations";
+import ExcelUploadPage from "@/pages/admin/excel-upload";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -44,6 +45,7 @@ function Router() {
           <Route path="/company/dashboard" component={CompanyDashboard} />
           <Route path="/company/job-posting" component={JobPosting} />
           <Route path="/company/ai-recommendations" component={AIRecommendations} />
+          <Route path="/admin/excel-upload" component={ExcelUploadPage} />
         </>
       )}
       <Route component={NotFound} />

@@ -251,6 +251,23 @@ export default function IndividualDashboard() {
               </div>
             </Link>
           </div>
+          
+          {/* Data Management Section */}
+          <div className="mt-4">
+            <Link href="/admin/excel-upload">
+              <div className="card-mobile p-4 hover:shadow-lg transition-shadow" data-testid="button-excel-upload">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg mr-3 flex items-center justify-center">
+                    <FileText className="text-blue-600 w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-body font-semibold">재취업 데이터 업로드</p>
+                    <p className="text-sm text-gray-600">엑셀 파일로 성공 사례 관리</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
         </div>
         
         {/* Recent Activity */}

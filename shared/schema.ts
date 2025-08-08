@@ -171,6 +171,81 @@ export const educationPrograms = pgTable("education_programs", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Senior reemployment success cases / statistics
+export const seniorReemploymentData = pgTable("senior_reemployment_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  // Basic demographics
+  age: integer("age").notNull(),
+  gender: varchar("gender"), // "남성", "여성"
+  region: varchar("region"), // 지역 정보
+  educationLevel: varchar("education_level"), // 학력 수준
+  
+  // Previous career information
+  previousIndustry: varchar("previous_industry"), // 이전 업종
+  previousPosition: varchar("previous_position"), // 이전 직급/직책
+  previousSalary: decimal("previous_salary"), // 이전 연봉
+  careerBreakDuration: integer("career_break_duration"), // 경력단절 기간 (개월)
+  
+  // Reemployment information
+  newIndustry: varchar("new_industry"), // 새로운 업종
+  newPosition: varchar("new_position"), // 새로운 직급/직책
+  newSalary: decimal("new_salary"), // 새로운 연봉
+  employmentType: varchar("employment_type"), // "정규직", "계약직", "파트타임", "프리랜서"
+  workSchedule: varchar("work_schedule"), // "풀타임", "파트타임", "유연근무"
+  
+  // Job search process
+  jobSearchDuration: integer("job_search_duration"), // 구직기간 (개월)
+  jobSearchMethods: jsonb("job_search_methods"), // Array of search methods used
+  skillsTraining: jsonb("skills_training"), // Array of training programs attended
+  governmentSupport: jsonb("government_support"), // Array of government programs used
+  
+  // Success factors
+  successFactors: jsonb("success_factors"), // Array of factors that helped
+  challenges: jsonb("challenges"), // Array of challenges faced
+  recommendations: text("recommendations"), // 후배들에게 조언
+  
+  // Company information
+  companySize: varchar("company_size"), // "대기업", "중견기업", "중소기업", "스타트업"
+  companyType: varchar("company_type"), // "일반기업", "사회적기업", "정부기관" 등
+  
+  // Outcome metrics
+  jobSatisfaction: integer("job_satisfaction"), // 1-10 점수
+  workLifeBalance: integer("work_life_balance"), // 1-10 점수
+  salaryChange: decimal("salary_change"), // 연봉 변화율
+  
+  // Metadata
+  dataSource: varchar("data_source").default("excel_import"), // 데이터 출처
+  isVerified: boolean("is_verified").default(false), // 검증 여부
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Aggregated statistics for dashboard
+export const reemploymentStatistics = pgTable("reemployment_statistics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: varchar("category").notNull(), // "age_group", "industry", "region" 등
+  categoryValue: varchar("category_value").notNull(), // "50-54", "IT", "서울" 등
+  
+  // Success metrics
+  totalCases: integer("total_cases").default(0),
+  successfulReemployments: integer("successful_reemployments").default(0),
+  successRate: decimal("success_rate"), // 성공률 (백분율)
+  avgJobSearchDuration: decimal("avg_job_search_duration"), // 평균 구직기간
+  avgSalaryChange: decimal("avg_salary_change"), // 평균 연봉 변화율
+  
+  // Popular trends
+  topIndustries: jsonb("top_industries"), // 인기 업종 순위
+  topPositions: jsonb("top_positions"), // 인기 직책 순위
+  topSkills: jsonb("top_skills"), // 필요한 스킬 순위
+  
+  // Time period
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -217,6 +292,18 @@ export const insertAiRecommendationSchema = createInsertSchema(aiRecommendations
   updatedAt: true,
 });
 
+export const insertSeniorReemploymentDataSchema = createInsertSchema(seniorReemploymentData).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertReemploymentStatisticsSchema = createInsertSchema(reemploymentStatistics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 // Include id in UpsertUser for authentication
 export type UpsertUser = z.infer<typeof insertUserSchema> & { id: string };
@@ -236,3 +323,9 @@ export type InsertCompanyProfile = z.infer<typeof insertCompanyProfileSchema>;
 export type InsertJobPosting = z.infer<typeof insertJobPostingSchema>;
 export type InsertJobApplication = z.infer<typeof insertJobApplicationSchema>;
 export type InsertAiRecommendation = z.infer<typeof insertAiRecommendationSchema>;
+
+// New types for reemployment data
+export type SeniorReemploymentData = typeof seniorReemploymentData.$inferSelect;
+export type ReemploymentStatistics = typeof reemploymentStatistics.$inferSelect;
+export type InsertSeniorReemploymentData = z.infer<typeof insertSeniorReemploymentDataSchema>;
+export type InsertReemploymentStatistics = z.infer<typeof insertReemploymentStatisticsSchema>;
