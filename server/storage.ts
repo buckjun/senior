@@ -229,25 +229,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchJobPostings(query?: string, location?: string, jobType?: string): Promise<JobPosting[]> {
-    let queryBuilder = db
-      .select()
-      .from(jobPostings)
-      .where(eq(jobPostings.status, 'active'));
+    const conditions = [eq(jobPostings.status, 'active')];
 
     if (query) {
-      queryBuilder = queryBuilder.where(
+      conditions.push(
         or(
           like(jobPostings.title, `%${query}%`),
           like(jobPostings.description, `%${query}%`)
-        )
+        )!
       );
     }
 
     if (location) {
-      queryBuilder = queryBuilder.where(like(jobPostings.location, `%${location}%`));
+      conditions.push(like(jobPostings.location, `%${location}%`));
     }
 
-    const jobs = await queryBuilder
+    const jobs = await db
+      .select()
+      .from(jobPostings)
+      .where(and(...conditions))
       .orderBy(desc(jobPostings.createdAt))
       .limit(50);
     
@@ -382,21 +382,21 @@ export class DatabaseStorage implements IStorage {
 
   // Education programs operations
   async getEducationPrograms(query?: string): Promise<EducationProgram[]> {
-    let queryBuilder = db
-      .select()
-      .from(educationPrograms)
-      .where(eq(educationPrograms.isActive, true));
+    const conditions = [eq(educationPrograms.isActive, true)];
 
     if (query) {
-      queryBuilder = queryBuilder.where(
+      conditions.push(
         or(
           like(educationPrograms.title, `%${query}%`),
           like(educationPrograms.description, `%${query}%`)
-        )
+        )!
       );
     }
 
-    const programs = await queryBuilder
+    const programs = await db
+      .select()
+      .from(educationPrograms)
+      .where(and(...conditions))
       .orderBy(desc(educationPrograms.createdAt))
       .limit(20);
     

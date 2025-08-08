@@ -218,7 +218,8 @@ export const insertAiRecommendationSchema = createInsertSchema(aiRecommendations
 });
 
 // Types
-export type UpsertUser = z.infer<typeof insertUserSchema>;
+// Include id in UpsertUser for authentication
+export type UpsertUser = z.infer<typeof insertUserSchema> & { id: string };
 export type User = typeof users.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type IndividualProfile = typeof individualProfiles.$inferSelect;
