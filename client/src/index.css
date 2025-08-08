@@ -1,0 +1,302 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(224 14% 11%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(224 14% 11%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(224 14% 11%);
+  --primary: hsl(210 100% 56%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(129 59% 49%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --accent: hsl(29 100% 50%);
+  --accent-foreground: hsl(0 0% 100%);
+  --muted: hsl(220 14% 96%);
+  --muted-foreground: hsl(224 14% 11%);
+  --destructive: hsl(0 85% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(220 13% 91%);
+  --input: hsl(220 13% 91%);
+  --ring: hsl(210 100% 56%);
+  --kakao: hsl(55 100% 51%);
+  --naver: hsl(129 97% 43%);
+  --textPrimary: hsl(224 14% 11%);
+  --font-noto: 'Noto Sans KR', sans-serif;
+  --radius: 1rem;
+}
+
+.dark {
+  --background: hsl(224 14% 11%);
+  --foreground: hsl(0 0% 95%);
+  --card: hsl(224 14% 11%);
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(224 14% 11%);
+  --popover-foreground: hsl(0 0% 95%);
+  --primary: hsl(210 100% 56%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(129 59% 49%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --accent: hsl(29 100% 50%);
+  --accent-foreground: hsl(0 0% 100%);
+  --muted: hsl(215 28% 17%);
+  --muted-foreground: hsl(218 11% 65%);
+  --destructive: hsl(0 85% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(215 28% 17%);
+  --input: hsl(215 28% 17%);
+  --ring: hsl(210 100% 56%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-noto antialiased bg-background text-foreground;
+    font-size: 18px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  button {
+    @apply transition-transform duration-150 ease-in-out;
+  }
+
+  button:active {
+    @apply scale-95;
+  }
+}
+
+@layer utilities {
+  .font-noto {
+    font-family: var(--font-noto);
+  }
+
+  .text-body {
+    font-size: 18px;
+  }
+
+  .text-heading {
+    font-size: 24px;
+  }
+
+  .text-large {
+    font-size: 28px;
+  }
+
+  .bg-kakao {
+    background-color: hsl(var(--kakao));
+  }
+
+  .text-kakao {
+    color: hsl(var(--kakao));
+  }
+
+  .bg-naver {
+    background-color: hsl(var(--naver));
+  }
+
+  .text-naver {
+    color: hsl(var(--naver));
+  }
+
+  .text-textPrimary {
+    color: hsl(var(--textPrimary));
+  }
+
+  /* Mobile-specific styles */
+  .mobile-container {
+    max-width: 428px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: white;
+    position: relative;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Touch-friendly elements */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(217 91% 60%) 100%);
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(142 69% 58%) 100%);
+  }
+
+  /* Animation classes */
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-in;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Custom scrollbar for mobile */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 2px;
+  }
+}
+
+/* Input and form styling for mobile */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  @apply w-full p-4 border-2 border-border rounded-2xl text-body focus:border-primary outline-none transition-colors;
+  font-size: 16px; /* Prevents zoom on iOS */
+}
+
+/* Button variants */
+.btn-primary {
+  @apply bg-primary text-white py-4 px-6 rounded-2xl text-body font-semibold shadow-lg active:scale-95 transition-transform;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-white py-4 px-6 rounded-2xl text-body font-semibold shadow-lg active:scale-95 transition-transform;
+}
+
+.btn-outline {
+  @apply bg-white border-2 border-primary text-primary py-4 px-6 rounded-2xl text-body font-semibold shadow-lg active:scale-95 transition-transform;
+}
+
+.btn-ghost {
+  @apply bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl text-body font-semibold active:scale-95 transition-transform;
+}
+
+/* Card styling */
+.card-mobile {
+  @apply bg-white rounded-2xl p-5 shadow-lg border border-border;
+}
+
+/* Navigation styling */
+.mobile-nav {
+  @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-white border-t border-border;
+}
+
+.mobile-nav-item {
+  @apply flex flex-col items-center py-3 text-gray-400 transition-colors;
+}
+
+.mobile-nav-item.active {
+  @apply text-primary;
+}
+
+/* Modal and overlay styling */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center;
+}
+
+.modal-content {
+  @apply bg-white rounded-t-3xl p-6 w-full max-w-sm animate-slide-up;
+}
+
+/* Loading states */
+.loading-spinner {
+  @apply w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin;
+}
+
+/* Status indicators */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+}
+
+.status-success {
+  @apply bg-secondary bg-opacity-10 text-secondary;
+}
+
+.status-warning {
+  @apply bg-accent bg-opacity-10 text-accent;
+}
+
+.status-info {
+  @apply bg-primary bg-opacity-10 text-primary;
+}
+
+/* Responsive text sizes for mobile */
+@media (max-width: 428px) {
+  .text-large {
+    font-size: 26px;
+  }
+  
+  .text-heading {
+    font-size: 22px;
+  }
+  
+  .text-body {
+    font-size: 17px;
+  }
+}
