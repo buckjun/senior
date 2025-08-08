@@ -554,13 +554,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Previous career (simulated based on job category)
             previousIndustry: '일반사무', // Common previous role for career changers
             previousPosition: '사무원',
-            previousSalary: salaryAmount ? salaryAmount * 0.8 : null, // Assume 20% salary increase
+            previousSalary: salaryAmount ? (salaryAmount * 0.8).toString() : null, // Convert to string
             careerBreakDuration: Math.floor(Math.random() * 12) + 1, // 1-12 months
             
             // New career (from job posting)
             newIndustry: row['업종(카테고리)'] || null,
             newPosition: row['모집직무'] || null,
-            newSalary: salaryAmount,
+            newSalary: salaryAmount?.toString() || null,
             employmentType: row['고용형태'] || null,
             workSchedule: `${row['근무일수'] || ''} ${row['근무시간'] || ''}`.trim() || null,
             
@@ -582,7 +582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Satisfaction metrics (simulated based on employment type)
             jobSatisfaction: row['고용형태'] === '정규직' ? 4 : 3,
             workLifeBalance: row['근무일수']?.includes('5일') ? 4 : 3,
-            salaryChange: salaryAmount && salaryAmount > 250 ? 0.1 : -0.1,
+            salaryChange: (salaryAmount && salaryAmount > 250 ? "0.1" : "-0.1"),
             
             dataSource: 'job_posting_analysis',
             isVerified: false,
