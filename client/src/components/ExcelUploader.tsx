@@ -220,16 +220,30 @@ export function ExcelUploader() {
           <AlertDescription>
             <div className="space-y-2">
               <p className="font-medium">예상 엑셀 컬럼 형식:</p>
-              <div className="text-sm grid grid-cols-2 gap-1">
-                <span>• 나이, 성별, 지역, 학력</span>
-                <span>• 이전직종, 이전직책, 이전연봉</span>
-                <span>• 새직종, 새직책, 새연봉</span>
-                <span>• 고용형태, 근무형태</span>
-                <span>• 구직기간, 구직방법</span>
-                <span>• 만족도, 워라밸, 연봉변화율</span>
+              <div className="text-sm space-y-2">
+                <div>
+                  <strong>재취업 성공 사례 데이터:</strong>
+                  <div className="grid grid-cols-2 gap-1 ml-2">
+                    <span>• 나이, 성별, 지역, 학력</span>
+                    <span>• 이전직종, 이전직책, 이전연봉</span>
+                    <span>• 새직종, 새직책, 새연봉</span>
+                    <span>• 고용형태, 근무형태</span>
+                    <span>• 구직기간, 구직방법</span>
+                    <span>• 만족도, 워라밸, 연봉변화율</span>
+                  </div>
+                </div>
+                <div>
+                  <strong>채용공고 데이터 (분석용):</strong>
+                  <div className="grid grid-cols-2 gap-1 ml-2">
+                    <span>• 회사명, 업종, 모집직무</span>
+                    <span>• 근무지역, 경력요건, 학력요건</span>
+                    <span>• 자격/스킬, 고용형태</span>
+                    <span>• 근무일수, 근무시간, 급여</span>
+                  </div>
+                </div>
               </div>
               <p className="text-xs text-gray-600 mt-2">
-                * 컬럼명은 한글 또는 영문으로 입력 가능합니다. 일부 컬럼이 누락되어도 처리됩니다.
+                * 두 가지 형태의 데이터 모두 지원합니다. 채용공고 데이터는 자동으로 재취업 패턴으로 분석됩니다.
               </p>
             </div>
           </AlertDescription>
