@@ -6,7 +6,22 @@ This is an AI-powered career matching platform specifically designed for Korean 
 
 Preferred communication style: Simple, everyday language.
 
+## Design Guidelines
+- **Brand Consistency**: Use "일있슈" throughout the application (NOT "5060career")
+- **Color Theme**: Use bright colors consistent with splash/login screens (#006FFD blue accent)
+- **Design Integration**: NEVER separate old and new designs - always completely replace old design with new design
+- **File Modification Rule**: Always modify existing files instead of creating duplicates
+
 # Recent Changes (August 2025)
+
+## Brand and Color Theme Updates
+- **Date**: August 10, 2025
+- **Changes**: Complete brand identity and color theme unification
+  - **Brand Change**: Updated all instances of "5060career" → "일있슈" across the application
+  - **Color Theme Unification**: Applied consistent bright blue (#006FFD) theme from splash/login screens to all pages
+  - **Profile Pages**: Updated dashboard and profile view to use bright blue accent colors instead of gray tones
+  - **Design Integration**: Eliminated separation between old and new designs - maintaining single cohesive design system
+  - **User Avatar**: Updated user avatar backgrounds to light blue (#E8F4FD) with blue (#006FFD) icons
 
 ## UI/UX Redesign and Navigation Fixes
 - **Date**: August 10, 2025
