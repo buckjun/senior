@@ -1,5 +1,10 @@
 // Natural Language Processing Service for Resume Generation
-// Based on the algorithm from https://github.com/yurimlee09/five
+// Enhanced based on the algorithm from https://github.com/yurimlee09/five
+// Optimized for Korean seniors aged 50-60
+
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export interface ParsedResume {
   name: string;
@@ -8,8 +13,12 @@ export interface ParsedResume {
   phone: string;
   email: string;
   summary: string;
+  skills: string[];
+  experience: string[];
+  education: string[];
 }
 
+// Enhanced Korean natural language parsing for 5060 generation
 export function parseNaturalLanguage(text: string): ParsedResume {
   const clean = text.replace(/\s+/g, " ").trim();
   const result: ParsedResume = {
@@ -18,7 +27,10 @@ export function parseNaturalLanguage(text: string): ParsedResume {
     location: "",
     phone: "",
     email: "",
-    summary: ""
+    summary: "",
+    skills: [],
+    experience: [],
+    education: []
   };
 
   // Extract name - look for Korean name patterns
@@ -39,29 +51,87 @@ export function parseNaturalLanguage(text: string): ParsedResume {
     result.email = emailMatch[0];
   }
 
-  // Extract job title - expanded for 5060 generation
-  const titles = [
-    "개발자", "데이터 분석가", "데이터 사이언티스트", "프론트엔드", "백엔드",
-    "풀스택", "PM", "디자이너", "마케터", "교사", "요리사", "간호사", "영업",
-    // 5060 세대에 특화된 직업군 추가
-    "관리자", "팀장", "부장", "이사", "상무", "전무", "사무원", "회계", "총무",
-    "인사", "기획", "영업관리", "품질관리", "생산관리", "안전관리", "시설관리",
-    "고객상담", "접객", "판매", "매장관리", "창고관리", "운전", "배송",
-    "청소", "경비", "조리", "제조", "포장", "검사", "검수", "상담사",
-    "코디네이터", "어시스턴트", "보조", "지원", "서비스"
+  // Enhanced job title extraction for 5060 generation with industry patterns
+  const seniorJobTitles = [
+    // 관리직/임원급
+    "관리자", "팀장", "부장", "차장", "과장", "대리", "주임", "이사", "상무", "전무", "사장", "CEO", "CTO", "CFO",
+    
+    // 전문직
+    "회계사", "세무사", "변호사", "건축사", "의사", "간호사", "약사", "교사", "교수", "연구원", "컨설턴트",
+    
+    // 기술직
+    "개발자", "프로그래머", "시스템관리자", "네트워크관리자", "DB관리자", "웹개발자", "앱개발자",
+    "데이터분석가", "AI개발자", "머신러닝엔지니어",
+    
+    // 사무직
+    "사무원", "총무", "인사", "기획", "재무", "회계", "구매", "영업", "마케팅", "홍보", "비서", "경리",
+    
+    // 서비스직
+    "고객상담", "접객", "판매", "영업사원", "매장관리", "점장", "상담사", "코디네이터", "어드바이저",
+    
+    // 생산/기술직
+    "품질관리", "생산관리", "안전관리", "시설관리", "설비관리", "기계조작", "용접", "전기", "배관",
+    "건설", "토목", "조경", "운전", "배송", "물류", "창고관리",
+    
+    // 특수직
+    "보안", "경비", "청소", "조리", "제빵", "미용", "이용", "간병", "요양보호", "사회복지",
+    "문화예술", "강사", "트레이너", "코치"
   ];
 
-  result.title = titles.find(title => clean.includes(title)) || "";
+  // 직급과 직종을 분리하여 더 정확한 매칭
+  const jobPattern = new RegExp(`(${seniorJobTitles.join('|')})`, 'g');
+  const matches = clean.match(jobPattern);
+  result.title = matches ? matches[0] : "";
 
-  // Extract location
-  const locations = [
-    "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
-    "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
+  // 경력 정보 추출
+  const experiencePatterns = [
+    /(\d+)년\s*경력/g,
+    /(\d+)년간?\s*(근무|재직|담당)/g,
+    /(전|현)\s*([가-힣\s]+?)\s*(회사|기업|단체|기관)/g,
+    /([가-힣\s]+?)\s*(부서|팀|본부)\s*(근무|담당)/g
   ];
 
-  result.location = locations.find(location => clean.includes(location)) || "";
+  experiencePatterns.forEach(pattern => {
+    const matches = clean.match(pattern);
+    if (matches) {
+      result.experience.push(...matches);
+    }
+  });
 
-  // Create structured cover letter from the text
+  // 학력 정보 추출
+  const educationKeywords = ["대학교", "대학", "고등학교", "고교", "전문대", "대학원", "석사", "박사", "학사"];
+  educationKeywords.forEach(keyword => {
+    const pattern = new RegExp(`([가-힣\\s]*${keyword}[가-힣\\s]*)`, 'g');
+    const matches = clean.match(pattern);
+    if (matches) {
+      result.education.push(...matches.filter(match => match.trim().length > keyword.length));
+    }
+  });
+
+  // Enhanced location extraction with detailed areas
+  const detailedLocations = [
+    // 서울 세부 지역
+    "서울", "강남", "강북", "강서", "강동", "서초", "송파", "영등포", "마포", "용산", "종로", "중구",
+    "성북", "동작", "관악", "서대문", "은평", "노원", "도봉", "양천", "구로", "금천",
+    
+    // 광역시
+    "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+    
+    // 경기도 주요 도시
+    "수원", "성남", "안양", "부천", "광명", "평택", "안산", "고양", "과천", "구리", "남양주", "의정부",
+    "하남", "용인", "파주", "이천", "안성", "김포", "화성", "광주", "양주", "포천", "여주", "연천", "가평", "양평",
+    
+    // 기타 광역시도
+    "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주",
+    "춘천", "원주", "청주", "천안", "전주", "광주", "포항", "경주", "진주", "창원", "제주시", "서귀포"
+  ];
+
+  result.location = detailedLocations.find(location => clean.includes(location)) || "";
+
+  // Extract skills using enhanced algorithm
+  result.skills = extractSkills(clean);
+
+  // Create structured cover letter optimized for seniors
   result.summary = createSeniorFriendlyCoverLetter(clean, result.title);
 
   return result;
@@ -167,55 +237,160 @@ function createSeniorFriendlyCoverLetter(text: string, jobTitle: string): string
   return coverLetter;
 }
 
-// Enhanced for 5060 generation - extract skills from text
+// Enhanced skill extraction optimized for 5060 generation
 export function extractSkills(text: string): string[] {
-  const skillKeywords = [
-    // IT 관련
-    "Excel", "Word", "PowerPoint", "한글", "컴활", "정보처리",
-    "React", "JavaScript", "TypeScript", "Python", "Java", "HTML", "CSS",
+  const seniorSkillCategories = {
+    // 디지털 기초 스킬 (5060 세대 필수)
+    digitalBasic: [
+      "컴퓨터활용", "컴활", "Excel", "엑셀", "Word", "워드", "PowerPoint", "파워포인트", "한글",
+      "인터넷", "이메일", "카카오톡", "문서작성", "스프레드시트", "프레젠테이션"
+    ],
     
-    // 일반 업무 스킬
-    "회계", "세무", "인사", "총무", "기획", "영업", "마케팅", "고객상담",
-    "품질관리", "생산관리", "안전관리", "시설관리", "재고관리",
+    // 고급 IT 스킬
+    digitalAdvanced: [
+      "React", "JavaScript", "TypeScript", "Python", "Java", "HTML", "CSS", "SQL",
+      "데이터분석", "프로그래밍", "웹개발", "앱개발", "시스템관리", "네트워크"
+    ],
     
-    // 언어
-    "영어", "일본어", "중국어", "독일어", "프랑스어", "스페인어",
-    "토익", "토플", "JPT", "HSK",
+    // 업무 전문 스킬
+    businessProfessional: [
+      "회계", "세무", "재무관리", "예산관리", "인사관리", "노무관리", "총무", "기획",
+      "프로젝트관리", "영업관리", "마케팅", "홍보", "고객관리", "구매", "조달"
+    ],
     
-    // 자격증/면허
-    "운전면허", "지게차", "포크레인", "크레인", "용접", "전기", "가스",
-    "요리사", "제빵사", "미용사", "이용사", "간병사", "사회복지사",
+    // 생산/기술 스킬
+    technicalProduction: [
+      "품질관리", "생산관리", "공정관리", "안전관리", "시설관리", "설비관리", "재고관리",
+      "물류관리", "SCM", "용접", "전기", "기계", "건설", "토목", "배관", "자동화"
+    ],
     
-    // 소프트 스킬
-    "리더십", "소통", "협업", "문제해결", "의사결정", "멘토링", "교육",
-    "프레젠테이션", "협상", "조정", "중재"
-  ];
+    // 언어 능력
+    languages: [
+      "영어", "일본어", "중국어", "독일어", "프랑스어", "스페인어", "러시아어",
+      "토익", "토플", "텝스", "JPT", "JLPT", "HSK", "OPIc", "회화", "번역", "통역"
+    ],
+    
+    // 자격증/면허 (5060 세대 특화)
+    certifications: [
+      "운전면허", "1종면허", "2종면허", "지게차", "포크레인", "크레인", "굴삭기",
+      "용접기능사", "전기기능사", "가스기능사", "건설기계", "화물운송", "택시",
+      "요리사", "조리사", "제빵사", "제과사", "바리스타", "소믈리에",
+      "미용사", "이용사", "네일아트", "피부관리", "마사지",
+      "간병사", "요양보호사", "사회복지사", "보육교사", "평생교육사"
+    ],
+    
+    // 관리/리더십 스킬 (5060 세대 강점)
+    leadership: [
+      "리더십", "팀관리", "조직관리", "인력관리", "부서관리", "사업관리",
+      "의사결정", "문제해결", "위기관리", "갈등조정", "중재", "협상",
+      "멘토링", "코칭", "교육", "훈련", "지도", "상담"
+    ],
+    
+    // 커뮤니케이션 스킬
+    communication: [
+      "소통", "커뮤니케이션", "협업", "팀워크", "고객응대", "고객상담", "상담",
+      "프레젠테이션", "발표", "회의진행", "보고서작성", "기획서작성"
+    ],
+    
+    // 서비스업 특화 스킬
+    serviceIndustry: [
+      "접객", "고객서비스", "판매", "영업", "매장관리", "점포운영", "재고관리",
+      "POS", "계산", "진열", "상품관리", "클레임처리", "AS", "배송", "택배"
+    ]
+  };
 
+  const allSkills = Object.values(seniorSkillCategories).flat();
   const foundSkills: string[] = [];
   
-  skillKeywords.forEach(skill => {
+  // 정확한 매칭과 유사 키워드 매칭
+  allSkills.forEach(skill => {
     if (text.includes(skill) && !foundSkills.includes(skill)) {
       foundSkills.push(skill);
     }
   });
 
-  return foundSkills;
+  // 패턴 기반 스킬 추출 (예: "○○ 가능", "○○ 경험")
+  const skillPatterns = [
+    /([가-힣A-Za-z]+)\s*(가능|능력|경험|숙련|전문)/g,
+    /([가-힣A-Za-z]+)\s*(자격증|면허|기능사)/g,
+    /([가-힣A-Za-z]+)\s*(\d+급|\d+종)/g
+  ];
+
+  skillPatterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const skill = match[1].trim();
+      if (skill.length > 1 && !foundSkills.includes(skill)) {
+        foundSkills.push(skill);
+      }
+    }
+    pattern.lastIndex = 0; // Reset regex
+  });
+
+  return foundSkills.slice(0, 20); // 최대 20개로 제한
+}
+
+// AI-enhanced parsing using Gemini for better accuracy
+export async function parseResumeWithAI(text: string): Promise<ParsedResume> {
+  try {
+    const prompt = `
+다음 한국어 텍스트에서 50-60세 구직자의 이력서 정보를 추출해주세요.
+JSON 형식으로 응답하고, 다음 필드를 포함해주세요:
+
+{
+  "name": "추출된 이름 (없으면 빈 문자열)",
+  "title": "직책이나 희망 직종 (5060 세대 적합한 직종)",
+  "location": "지역 정보",
+  "phone": "전화번호 (01X-XXXX-XXXX 형식)",
+  "email": "이메일 주소",
+  "summary": "5060 세대에 적합한 자기소개서 (300자 이내, 경험과 성숙함 강조)",
+  "skills": ["추출된 스킬 목록 (최대 10개)"],
+  "experience": ["경력 정보 목록"],
+  "education": ["학력 정보 목록"]
+}
+
+입력 텍스트:
+${text}
+
+5060 세대의 특성을 고려하여:
+- 풍부한 경험과 노하우 강조
+- 성숙한 판단력과 책임감 언급
+- 멘토링과 협업 능력 부각
+- 안정적이고 신뢰할 수 있는 인상 전달
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: {
+        responseMimeType: "application/json",
+      },
+      contents: prompt,
+    });
+
+    const result = JSON.parse(response.text || '{}');
+    
+    // 기본값 설정 및 검증
+    return {
+      name: result.name || "",
+      title: result.title || "",
+      location: result.location || "",
+      phone: result.phone || "",
+      email: result.email || "",
+      summary: result.summary || createSeniorFriendlyCoverLetter(text, result.title || ""),
+      skills: Array.isArray(result.skills) ? result.skills.slice(0, 10) : extractSkills(text).slice(0, 10),
+      experience: Array.isArray(result.experience) ? result.experience : [],
+      education: Array.isArray(result.education) ? result.education : []
+    };
+
+  } catch (error) {
+    console.error('AI parsing failed, falling back to rule-based parsing:', error);
+    // AI 파싱 실패 시 기존 규칙 기반 파싱으로 폴백
+    return parseNaturalLanguage(text);
+  }
 }
 
 // Main function to process natural language input and return structured resume data
-export async function parseResumeFromText(text: string): Promise<any> {
-  const extractedInfo = parseNaturalLanguage(text);
-  const skills = extractSkills(text);
-  const summary = createSeniorFriendlyCoverLetter(text, extractedInfo.title);
-
-  // Return structured data with meaningful content when available
-  return {
-    name: extractedInfo.name || "",
-    title: extractedInfo.title || "",
-    location: extractedInfo.location || "",
-    phone: extractedInfo.phone || "",
-    email: extractedInfo.email || "",
-    summary: summary || "입력하신 내용을 바탕으로 자기소개서가 생성됩니다.",
-    skills: skills.length > 0 ? skills : []
-  };
+export async function parseResumeFromText(text: string): Promise<ParsedResume> {
+  // AI 파싱을 먼저 시도하고, 실패시 규칙 기반 파싱으로 폴백
+  return await parseResumeWithAI(text);
 }
