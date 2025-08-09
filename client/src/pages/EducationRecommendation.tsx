@@ -1,24 +1,38 @@
+import { useLocation } from "wouter";
+
 export default function EducationRecommendation() {
+  const [, setLocation] = useLocation();
+
   const handleClick = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const y = e.clientY - rect.top;
     
-    // 다른것도 보고싶어요 버튼 클릭 시
-    if (y > 915 && y < 965) {
-      // 추가 교육 추천 또는 다른 페이지로 이동
-      console.log('다른것도 보고싶어요 버튼 클릭');
+    // 뒤로가기 버튼
+    if (y > 50 && y < 100) {
+      setLocation('/purpose-selection');
+      return;
+    }
+    
+    // 완료 버튼 영역 (하단)
+    if (y > 900 && y < 950) {
+      setLocation('/');
+      return;
     }
   };
 
   return (
     <div className="w-full h-screen flex items-center justify-center bg-white">
-      <img 
-        src="/83-1599.png" 
-        alt="교육 추천 화면"
-        className="w-full h-full object-cover cursor-pointer"
+      <div 
+        className="w-full h-full cursor-pointer"
         style={{ maxWidth: '393px', maxHeight: '852px' }}
         onClick={handleClick}
-      />
+      >
+        <img 
+          src="/83-1599.png" 
+          alt="교육 추천 화면"
+          className="w-full h-full object-cover"
+        />
+      </div>
     </div>
   );
 }

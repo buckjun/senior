@@ -1,15 +1,15 @@
 import { useLocation } from "wouter";
 
-export default function Landing() {
+export default function JobBoard() {
   const [, setLocation] = useLocation();
 
   const handleClick = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const y = e.clientY - rect.top;
     
-    // 시작하기 버튼 영역 (하단 버튼)
-    if (y > 700 && y < 800) {
-      setLocation('/login');
+    // 뒤로가기 버튼 영역
+    if (y > 50 && y < 100) {
+      setLocation('/');
       return;
     }
   };
@@ -22,8 +22,8 @@ export default function Landing() {
         onClick={handleClick}
       >
         <img 
-          src="/83-1499.png" 
-          alt="스플래시 화면"
+          src="/83-1947.png" 
+          alt="일자리 게시판"
           className="w-full h-full object-cover"
         />
       </div>

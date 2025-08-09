@@ -1,15 +1,15 @@
 import { useLocation } from "wouter";
 
-export default function Landing() {
+export default function Welcome() {
   const [, setLocation] = useLocation();
 
   const handleClick = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const y = e.clientY - rect.top;
     
-    // 시작하기 버튼 영역 (하단 버튼)
+    // 계속하기 버튼 영역
     if (y > 700 && y < 800) {
-      setLocation('/login');
+      setLocation('/purpose-selection');
       return;
     }
   };
@@ -22,8 +22,8 @@ export default function Landing() {
         onClick={handleClick}
       >
         <img 
-          src="/83-1499.png" 
-          alt="스플래시 화면"
+          src="/83-1874.png" 
+          alt="가입환영"
           className="w-full h-full object-cover"
         />
       </div>
