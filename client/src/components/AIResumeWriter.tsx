@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResumePreview } from "@/components/ResumePreview";
+import { VoiceInput } from "@/components/VoiceInput";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Wand2, Save, Sparkles, AlertCircle } from "lucide-react";
+import { Wand2, Save, Sparkles, AlertCircle, Mic, Type } from "lucide-react";
 
 interface ParsedResume {
   name: string;
@@ -28,6 +30,7 @@ interface AIResumeWriterProps {
 export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResumeWriterProps) {
   const [inputText, setInputText] = useState("");
   const [parsedData, setParsedData] = useState<ParsedResume | null>(null);
+  const [voiceStatus, setVoiceStatus] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -127,29 +130,64 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Textarea
-              placeholder="예시: 안녕하십니까. 저는 김영수입니다. 25년간 제조업에서 생산관리 업무를 담당했습니다. 삼성전자에서 15년, LG전자에서 10년 근무했으며, 품질관리와 공정개선 분야에 전문성을 가지고 있습니다. 팀장으로 20명의 직원을 관리한 경험이 있고, ISO 9001 자격증을 보유하고 있습니다. 현재 경기도 수원에 거주하고 있습니다..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              rows={6}
-              className="resize-none text-sm"
-              data-testid="input-resume-text"
-            />
-            <div className="flex justify-between items-center">
-              <p className="text-xs text-gray-500">
-                💡 이름, 경력, 직책, 근무지, 보유 기술, 성과, 자격증 등을 자유롭게 말씀해주세요.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSampleText}
-                className="text-xs"
-              >
-                예시 입력하기
-              </Button>
-            </div>
-          </div>
+          <Tabs defaultValue="text" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="text" className="flex items-center gap-2" data-testid="tab-text">
+                <Type className="w-4 h-4" />
+                텍스트 입력
+              </TabsTrigger>
+              <TabsTrigger value="voice" className="flex items-center gap-2" data-testid="tab-voice">
+                <Mic className="w-4 h-4" />
+                음성 입력
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="text" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="예시: 안녕하십니까. 저는 김영수입니다. 25년간 제조업에서 생산관리 업무를 담당했습니다..."
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  rows={6}
+                  className="resize-none text-sm"
+                  data-testid="input-resume-text"
+                />
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-gray-500">
+                    💡 이름, 경력, 직책, 근무지, 보유 기술, 성과, 자격증 등을 자유롭게 말씀해주세요.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSampleText}
+                    className="text-xs"
+                  >
+                    예시 입력하기
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="voice" className="space-y-4 mt-4">
+              <VoiceInput
+                onTranscript={(transcript) => {
+                  // Append voice transcript to existing text
+                  setInputText(prevText => {
+                    const newText = prevText ? `${prevText} ${transcript}` : transcript;
+                    return newText.trim();
+                  });
+                }}
+                onStatusChange={setVoiceStatus}
+                disabled={parseResumeMutation.isPending}
+              />
+              {inputText && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">현재 입력된 내용:</div>
+                  <div className="text-sm">{inputText}</div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
           
           <Button 
             onClick={handleParseResume}

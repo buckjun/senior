@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Web Speech API — 간단 예제</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto;line-height:1.4;padding:18px}
+  button{margin:6px;}
+  .box{margin-top:12px;padding:10px;border:1px solid #ddd;border-radius:8px}
+  .transcript{font-weight:600}
+</style>
+</head>
+<body>
+  <h1>Web Speech API 간단 예제</h1>
+
+  <!-- 음성인식 -->
+  <div class="box">
+    <div>
+      <button id="recBtn">녹음 시작</button>
+      <button id="stopRecBtn">녹음 중지</button>
+    </div>
+    <div>인식 결과: <span class="transcript" id="result">—</span></div>
+    <div id="recStatus" style="color:#666;margin-top:6px">상태: 대기</div>
+  </div>
+
+  <!-- 음성합성 -->
+  <div class="box">
+    <input id="ttsText" type="text" placeholder="말하게 할 문장" style="width:70%" value="안녕하세요. Web Speech API 예제입니다." />
+    <button id="speakBtn">말하기</button>
+    <button id="stopSpeakBtn">정지</button>
+  </div>
+
+<script>
+/* === 1) Speech Recognition (음성인식) === */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'ko-KR';          // 인식 언어
+  recognition.interimResults = false;  // 중간결과 사용 여부
+  recognition.maxAlternatives = 1;
+
+  const recBtn = document.getElementById('recBtn');
+  const stopRecBtn = document.getElementById('stopRecBtn');
+  const resultEl = document.getElementById('result');
+  const statusEl = document.getElementById('recStatus');
+
+  recBtn.onclick = () => {
+    try {
+      recognition.start();
+      statusEl.textContent = '상태: 인식 중…';
+    } catch(e) { /* 이미 시작된 경우 등 예외 무시 */ }
+  };
+  stopRecBtn.onclick = () => { recognition.stop(); statusEl.textContent = '상태: 중지 요청됨'; };
+
+  recognition.onresult = (ev) => {
+    const text = ev.results[0][0].transcript;
+    resultEl.textContent = text;
+    statusEl.textContent = `상태: 완료 (신뢰도 ${Math.round(ev.results[0][0].confidence*100)}%)`;
+  };
+  recognition.onspeechend = () => { recognition.stop(); statusEl.textContent = '상태: 음성 입력 종료'; };
+  recognition.onerror = (e) => { statusEl.textContent = '오류: ' + e.error; };
+} else {
+  document.getElementById('recBtn').disabled = true;
+  document.getElementById('stopRecBtn').disabled = true;
+  document.getElementById('recStatus').textContent = '브라우저가 SpeechRecognition을 지원하지 않습니다.';
+}
+
+/* === 2) Speech Synthesis (음성합성) === */
+const synth = window.speechSynthesis;
+const speakBtn = document.getElementById('speakBtn');
+const stopSpeakBtn = document.getElementById('stopSpeakBtn');
+const ttsText = document.getElementById('ttsText');
+
+speakBtn.onclick = () => {
+  if (!synth) return alert('브라우저가 SpeechSynthesis를 지원하지 않습니다.');
+  if (synth.speaking) { return; } // 이미 재생 중이면 무시
+  const u = new SpeechSynthesisUtterance(ttsText.value || '내용이 없습니다.');
+  u.lang = 'ko-KR';
+  u.onend = () => console.log('TTS 완료');
+  u.onerror = (e) => console.error('TTS 오류', e);
+  synth.speak(u);
+};
+stopSpeakBtn.onclick = () => { if (synth && synth.speaking) synth.cancel(); };
+</script>
+</body>
+</html>
