@@ -8,15 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { JobCard } from "@/components/ui/job-card";
-// import { VoiceSearchModal } from "@/components/ui/voice-search-modal";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { AIResumeWriter } from "@/components/AIResumeWriter";
 import { ResumePreview } from "@/components/ResumePreview";
 import {
   Bell,
+  Search,
   Briefcase,
   FileText,
-  Mic,
   Users,
   Building,
   Wand2,
@@ -27,9 +27,10 @@ import {
   Mail,
   Calendar,
   Award,
-  Lightbulb,
-  Target,
-  Edit
+  Settings,
+  LogOut,
+  Home,
+  Plus
 } from "lucide-react";
 
 interface JobPosting {
@@ -47,9 +48,6 @@ interface JobPosting {
   postedDate: string;
   matchingScore?: number;
   isSaved?: boolean;
-  company?: {
-    companyName: string;
-  };
 }
 
 interface UserProfile {
@@ -71,7 +69,6 @@ export default function IndividualDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
   // Load recommended jobs
@@ -105,34 +102,14 @@ export default function IndividualDashboard() {
     }
   });
 
-  // Unsave job mutation
-  const unsaveJobMutation = useMutation({
-    mutationFn: (jobId: string) => apiRequest('DELETE', `/api/jobs/${jobId}/save`),
-    onSuccess: (_, jobId) => {
-      setSavedJobs(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(jobId);
-        return newSet;
-      });
-      toast({
-        title: "저장을 취소했습니다",
-      });
+  const getUserDisplayName = () => {
+    if (profile && typeof profile === 'object' && 'name' in profile && profile.name) {
+      return profile.name as string;
     }
-  });
-
-  const handleSaveJob = (jobId: string) => {
-    saveJobMutation.mutate(jobId);
-  };
-
-  const handleUnsaveJob = (jobId: string) => {
-    unsaveJobMutation.mutate(jobId);
-  };
-
-  const handleApplyJob = (jobId: string) => {
-    toast({
-      title: "지원이 완료되었습니다",
-      description: "회사에서 검토 후 연락드릴 예정입니다.",
-    });
+    if (user && typeof user === 'object' && 'email' in user && user.email && typeof user.email === 'string') {
+      return user.email.split('@')[0];
+    }
+    return '사용자';
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -145,381 +122,415 @@ export default function IndividualDashboard() {
     }
   };
 
-  const getUserDisplayName = () => {
-    if (profile && typeof profile === 'object' && 'name' in profile && profile.name) {
-      return profile.name as string;
-    }
-    if (user && typeof user === 'object' && 'email' in user && user.email && typeof user.email === 'string') {
-      return user.email.split('@')[0];
-    }
-    return '사용자';
-  };
-
-  const getUserExperience = () => {
-    if (profile && typeof profile === 'object' && 'experience' in profile) {
-      return '경력 15년 · 유통관리 전문';
-    }
-    return '프로필을 완성해주세요';
-  };
-
-  // Show push notification simulation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      toast({
-        title: "새로운 공고가 등록되었어요! 📋",
-        description: "시니어 바리스타 - 95% 매칭",
-      });
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [toast]);
-
   return (
-    <div className="min-h-screen pb-20">
-      {/* Header with Profile */}
-      <div className="gradient-primary px-4 py-6 text-white safe-area-top">
-        <div className="flex items-center justify-between mb-4">
-          <Link href="/individual/profile-setup">
-            <div className="flex items-center cursor-pointer">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-3 hover:bg-white/30 transition-colors">
-                <span className="text-white font-bold text-lg">
-                  {getUserDisplayName().charAt(0)}
-                </span>
-              </div>
-              <div>
-                <h2 className="text-body font-bold" data-testid="text-user-name">
-                  {getUserDisplayName()}님
-                </h2>
-                <p className="text-sm opacity-90" data-testid="text-user-experience">
-                  {getUserExperience()}
-                </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="container-web">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo and Navigation */}
+            <div className="flex items-center space-x-8">
+              <h1 className="text-heading font-bold text-blue-600">5060 Career</h1>
+              <nav className="hidden md:flex items-center space-x-6">
+                <Link href="/" className="flex items-center space-x-2 text-body text-gray-900 dark:text-gray-100 hover:text-blue-600">
+                  <Home className="w-4 h-4" />
+                  <span>홈</span>
+                </Link>
+                <Link href="/jobs" className="flex items-center space-x-2 text-body text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  <Briefcase className="w-4 h-4" />
+                  <span>채용정보</span>
+                </Link>
+                <Link href="/ai-resume" className="flex items-center space-x-2 text-body text-gray-600 dark:text-gray-400 hover:text-blue-600">
+                  <Wand2 className="w-4 h-4" />
+                  <span>AI 이력서</span>
+                </Link>
+              </nav>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex-1 max-w-lg mx-8">
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="직종, 회사명으로 검색해보세요"
+                  className="pl-10 text-body"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  data-testid="input-search"
+                />
+              </form>
+            </div>
+
+            {/* User Menu */}
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="sm">
+                <Bell className="w-4 h-4" />
+              </Button>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="hidden md:block">
+                  <div className="text-label font-medium">{getUserDisplayName()}님</div>
+                  <div className="text-caption text-gray-500">개인회원</div>
+                </div>
               </div>
             </div>
-          </Link>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="w-10 h-10 p-0 bg-white/20 hover:bg-white/30"
-            data-testid="button-notifications"
-          >
-            <Bell className="text-white w-5 h-5" />
-          </Button>
+          </div>
         </div>
-        
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="relative">
-          <Input
-            type="text"
-            placeholder="새로운 분야를 탐색해보세요 (예: 바리스타, 사회복지사)"
-            className="w-full p-4 rounded-2xl text-gray-800 text-body pr-12 border-0"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            data-testid="input-search"
-          />
-          <Button
-            type="button"
-            onClick={() => setIsVoiceSearchOpen(true)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-primary rounded-full flex items-center justify-center p-0"
-            data-testid="button-voice-search"
-          >
-            <Mic className="text-white w-4 h-4" />
-          </Button>
-        </form>
-      </div>
-      
-      <div className="p-4">
-        {/* Dashboard Tabs */}
-        <Tabs defaultValue="jobs" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="jobs" data-testid="tab-jobs">
-              <Briefcase className="w-4 h-4 mr-2" />
-              채용정보
-            </TabsTrigger>
-            <TabsTrigger value="ai-resume" data-testid="tab-ai-resume">
-              <Wand2 className="w-4 h-4 mr-2" />
-              AI 이력서
-            </TabsTrigger>
-            <TabsTrigger value="profile" data-testid="tab-profile">
-              <GraduationCap className="w-4 h-4 mr-2" />
-              내 정보
-            </TabsTrigger>
-          </TabsList>
+      </header>
 
-          {/* Jobs Tab */}
-          <TabsContent value="jobs" className="mt-6">
-            {/* AI Recommendations */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-body font-bold" data-testid="text-recommendations-title">
-                  AI 맞춤 추천
-                </h3>
-                <Badge className="status-badge status-info">
-                  새로 업데이트됨
-                </Badge>
-              </div>
-          
-              {/* Job Cards */}
-              {loadingJobs ? (
-                <div className="space-y-4">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="card-mobile animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-                      <div className="flex justify-between">
-                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                        <div className="h-8 bg-gray-200 rounded w-20"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : recommendedJobs && Array.isArray(recommendedJobs) && recommendedJobs.length > 0 ? (
-                <div className="space-y-4">
-                  {(recommendedJobs as any[]).slice(0, 3).map((job: any) => (
-                    <JobCard
-                      key={job.id}
-                      job={{
-                        ...job,
-                        company: { companyName: job.companyName || '우수기업' },
-                        matchingScore: Math.floor(Math.random() * 20) + 80, // 80-100% range
-                      }}
-                      onSave={handleSaveJob}
-                      onUnsave={handleUnsaveJob}
-                      onApply={handleApplyJob}
-                      showMatchingScore={true}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="card-mobile text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <FileText className="w-8 h-8 text-gray-400" />
+      {/* Main Content */}
+      <main className="container-web py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <aside className="lg:col-span-1">
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 text-blue-600" />
                   </div>
-                  <h4 className="text-body font-medium mb-2">맞춤 공고를 준비중입니다</h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    프로필을 완성하시면 더 정확한 추천을 받을 수 있어요
-                  </p>
+                  <div>
+                    <CardTitle className="text-body">{getUserDisplayName()}님</CardTitle>
+                    <CardDescription>개인회원</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
                   <Link href="/individual/profile-setup">
-                    <Button size="sm" data-testid="button-complete-profile">
-                      프로필 완성하기
+                    <Button variant="ghost" size="sm" className="w-full justify-start text-body">
+                      <User className="w-4 h-4 mr-2" />
+                      내 정보
                     </Button>
                   </Link>
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
+                    <Briefcase className="w-4 h-4 mr-2" />
+                    지원 현황
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
+                    <Award className="w-4 h-4 mr-2" />
+                    찜한 공고
+                  </Button>
+                  <Separator className="my-4" />
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
+                    <Settings className="w-4 h-4 mr-2" />
+                    설정
+                  </Button>
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-body text-red-600 hover:text-red-700">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    로그아웃
+                  </Button>
                 </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
+          </aside>
 
-            {/* Category Shortcuts */}
-            <div className="mb-6">
-              <h3 className="text-body font-bold mb-4">인기 직종</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { icon: Users, label: "고객상담", count: "24개" },
-                  { icon: Building, label: "사무직", count: "18개" },
-                  { icon: FileText, label: "관리직", count: "12개" },
-                  { icon: Award, label: "전문직", count: "8개" }
-                ].map((category, index) => (
-                  <div key={index} className="card-mobile p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
+          {/* Main Dashboard Content */}
+          <div className="lg:col-span-3">
+            <Tabs defaultValue="dashboard" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="dashboard" className="text-body" data-testid="tab-dashboard">
+                  <Home className="w-4 h-4 mr-2" />
+                  대시보드
+                </TabsTrigger>
+                <TabsTrigger value="ai-resume" className="text-body" data-testid="tab-ai-resume">
+                  <Wand2 className="w-4 h-4 mr-2" />
+                  AI 이력서
+                </TabsTrigger>
+                <TabsTrigger value="profile" className="text-body" data-testid="tab-profile">
+                  <User className="w-4 h-4 mr-2" />
+                  내 정보
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Dashboard Tab */}
+              <TabsContent value="dashboard" className="space-y-6">
+                {/* Welcome Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-title">안녕하세요, {getUserDisplayName()}님! 👋</CardTitle>
+                    <CardDescription>
+                      오늘도 새로운 기회를 찾아보세요. AI가 맞춤형 채용정보를 추천해드립니다.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-6">
                       <div className="flex items-center">
-                        <category.icon className="w-5 h-5 text-primary mr-2" />
-                        <span className="text-sm font-medium">{category.label}</span>
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Briefcase className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-label text-gray-500">추천 공고</div>
+                          <div className="text-title font-semibold">12개</div>
+                        </div>
                       </div>
-                      <span className="text-xs text-gray-500">{category.count}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* AI Resume Tab */}
-          <TabsContent value="ai-resume" className="mt-6">
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <h3 className="text-lg font-bold mb-2">AI 이력서 작성</h3>
-                <p className="text-gray-600 text-sm">
-                  자연스러운 문장으로 경력을 설명하면 AI가 이력서로 변환해드립니다
-                </p>
-              </div>
-              <AIResumeWriter />
-              <ResumePreview data={undefined} />
-            </div>
-          </TabsContent>
-
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="mt-6">
-            {loadingProfile ? (
-              <div className="space-y-4">
-                <div className="card-mobile p-6 animate-pulse">
-                  <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Profile Header */}
-                <div className="card-mobile p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold">기본 정보</h3>
-                    <Link href="/individual/profile-setup">
-                      <Button size="sm" variant="outline">
-                        <Edit className="w-4 h-4 mr-1" />
-                        수정
-                      </Button>
-                    </Link>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <User className="w-5 h-5 text-gray-400 mr-3" />
-                      <div>
-                        <p className="text-sm text-gray-600">이름</p>
-                        <p className="font-medium">
-                          {(profile as UserProfile)?.name || getUserDisplayName()}
-                        </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <FileText className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-label text-gray-500">지원 현황</div>
+                          <div className="text-title font-semibold">3건</div>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Award className="w-5 h-5 text-gray-400 mr-3" />
-                      <div>
-                        <p className="text-sm text-gray-600">희망 직종</p>
-                        <p className="font-medium">
-                          {(profile as UserProfile)?.title || '설정되지 않음'}
-                        </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <Award className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-label text-gray-500">찜한 공고</div>
+                          <div className="text-title font-semibold">8개</div>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <MapPin className="w-5 h-5 text-gray-400 mr-3" />
-                      <div>
-                        <p className="text-sm text-gray-600">희망 근무지</p>
-                        <p className="font-medium">
-                          {(profile as UserProfile)?.location || '설정되지 않음'}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Phone className="w-5 h-5 text-gray-400 mr-3" />
-                      <div>
-                        <p className="text-sm text-gray-600">연락처</p>
-                        <p className="font-medium">
-                          {(profile as UserProfile)?.phone || '설정되지 않음'}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <Mail className="w-5 h-5 text-gray-400 mr-3" />
-                      <div>
-                        <p className="text-sm text-gray-600">이메일</p>
-                        <p className="font-medium">
-                          {(profile as UserProfile)?.email || (user && typeof user === 'object' && 'email' in user && typeof user.email === 'string' ? user.email : '') || '설정되지 않음'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                {/* Summary */}
-                {(profile as UserProfile)?.summary && (
-                  <div className="card-mobile p-6">
-                    <h3 className="text-lg font-bold mb-4">자기소개</h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      {(profile as UserProfile).summary}
-                    </p>
-                  </div>
-                )}
-
-                {/* Skills */}
-                {(profile as UserProfile)?.skills && (profile as UserProfile).skills!.length > 0 && (
-                  <div className="card-mobile p-6">
-                    <h3 className="text-lg font-bold mb-4">보유 기술</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {(profile as UserProfile).skills!.map((skill, index) => (
-                        <Badge key={index} variant="secondary" className="text-sm">
-                          {skill}
-                        </Badge>
-                      ))}
+                {/* Recommended Jobs */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-heading">AI 맞춤 추천</CardTitle>
+                      <Badge className="status-badge status-info">새로 업데이트됨</Badge>
                     </div>
-                  </div>
-                )}
+                    <CardDescription>
+                      회원님의 경력과 선호도를 분석한 맞춤형 채용정보입니다
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingJobs ? (
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : recommendedJobs && Array.isArray(recommendedJobs) && recommendedJobs.length > 0 ? (
+                      <div className="space-y-4">
+                        {(recommendedJobs as any[]).slice(0, 5).map((job: any) => (
+                          <div key={job.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h3 className="text-body font-semibold mb-1">{job.title}</h3>
+                                <div className="flex items-center text-caption text-gray-500 space-x-4 mb-2">
+                                  <div className="flex items-center">
+                                    <Building className="w-3 h-3 mr-1" />
+                                    {job.companyName}
+                                  </div>
+                                  <div className="flex items-center">
+                                    <MapPin className="w-3 h-3 mr-1" />
+                                    {job.location}
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Badge variant="secondary" className="text-xs">{job.employmentType}</Badge>
+                                  {job.salaryRange && (
+                                    <Badge variant="outline" className="text-xs">{job.salaryRange}</Badge>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end space-y-2">
+                                <Badge className="status-badge status-success">
+                                  매칭 {Math.floor(Math.random() * 20) + 80}%
+                                </Badge>
+                                <Button size="sm" onClick={() => saveJobMutation.mutate(job.id)}>
+                                  지원하기
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Briefcase className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <div className="text-body mb-2">맞춤 공고를 준비중입니다</div>
+                        <div className="text-caption mb-4">프로필을 완성하시면 더 정확한 추천을 받을 수 있어요</div>
+                        <Link href="/individual/profile-setup">
+                          <Button size="sm">프로필 완성하기</Button>
+                        </Link>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-                {/* Experience */}
-                {(profile as UserProfile)?.experience && (profile as UserProfile).experience!.length > 0 && (
-                  <div className="card-mobile p-6">
-                    <h3 className="text-lg font-bold mb-4">경력 사항</h3>
-                    <div className="space-y-3">
-                      {(profile as UserProfile).experience!.map((exp, index) => (
-                        <div key={index} className="flex items-start">
-                          <Calendar className="w-4 h-4 text-gray-400 mr-3 mt-1" />
-                          <p className="text-gray-700">{exp}</p>
+                {/* Popular Categories */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-heading">인기 직종</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { icon: Users, label: "고객상담", count: "24개" },
+                        { icon: Building, label: "사무직", count: "18개" },
+                        { icon: FileText, label: "관리직", count: "12개" },
+                        { icon: Award, label: "전문직", count: "8개" }
+                      ].map((category, index) => (
+                        <div key={index} className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                          <div className="flex flex-col items-center text-center space-y-2">
+                            <category.icon className="w-6 h-6 text-blue-600" />
+                            <div className="text-body font-medium">{category.label}</div>
+                            <div className="text-caption text-gray-500">{category.count}</div>
+                          </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-                {/* Education */}
-                {(profile as UserProfile)?.education && (profile as UserProfile).education!.length > 0 && (
-                  <div className="card-mobile p-6">
-                    <h3 className="text-lg font-bold mb-4">학력 사항</h3>
-                    <div className="space-y-3">
-                      {(profile as UserProfile).education!.map((edu, index) => (
-                        <div key={index} className="flex items-start">
-                          <GraduationCap className="w-4 h-4 text-gray-400 mr-3 mt-1" />
-                          <p className="text-gray-700">{edu}</p>
+              {/* AI Resume Tab */}
+              <TabsContent value="ai-resume" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-title">AI 이력서 작성</CardTitle>
+                    <CardDescription>
+                      자연스러운 문장으로 경력을 설명하면 AI가 구조화된 이력서로 변환해드립니다
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AIResumeWriter />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-heading">미리보기</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResumePreview data={undefined} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Profile Tab */}
+              <TabsContent value="profile" className="space-y-6">
+                {loadingProfile ? (
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="animate-pulse space-y-4">
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <>
+                    {/* Basic Information */}
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-heading">기본 정보</CardTitle>
+                          <Link href="/individual/profile-setup">
+                            <Button size="sm" variant="outline">
+                              <Plus className="w-4 h-4 mr-1" />
+                              수정
+                            </Button>
+                          </Link>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="flex items-center space-x-3">
+                            <User className="w-4 h-4 text-gray-400" />
+                            <div>
+                              <div className="text-caption text-gray-500">이름</div>
+                              <div className="text-body font-medium">
+                                {(profile as UserProfile)?.name || getUserDisplayName()}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Award className="w-4 h-4 text-gray-400" />
+                            <div>
+                              <div className="text-caption text-gray-500">희망 직종</div>
+                              <div className="text-body font-medium">
+                                {(profile as UserProfile)?.title || '설정되지 않음'}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <MapPin className="w-4 h-4 text-gray-400" />
+                            <div>
+                              <div className="text-caption text-gray-500">희망 근무지</div>
+                              <div className="text-body font-medium">
+                                {(profile as UserProfile)?.location || '설정되지 않음'}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Phone className="w-4 h-4 text-gray-400" />
+                            <div>
+                              <div className="text-caption text-gray-500">연락처</div>
+                              <div className="text-body font-medium">
+                                {(profile as UserProfile)?.phone || '설정되지 않음'}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 md:col-span-2">
+                            <Mail className="w-4 h-4 text-gray-400" />
+                            <div>
+                              <div className="text-caption text-gray-500">이메일</div>
+                              <div className="text-body font-medium">
+                                {(profile as UserProfile)?.email || (user && typeof user === 'object' && 'email' in user && typeof user.email === 'string' ? user.email : '') || '설정되지 않음'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {/* Empty state for incomplete profile */}
-                {!(profile as UserProfile)?.summary && 
-                 !(profile as UserProfile)?.skills?.length && 
-                 !(profile as UserProfile)?.experience?.length && (
-                  <div className="card-mobile text-center py-8">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Lightbulb className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h4 className="text-body font-medium mb-2">프로필을 완성해보세요</h4>
-                    <p className="text-sm text-gray-600 mb-4">
-                      AI 이력서 기능을 사용하거나 직접 입력하여 프로필을 완성할 수 있습니다
-                    </p>
-                    <div className="space-y-2">
-                      <Link href="/individual/profile-setup">
-                        <Button size="sm" className="w-full">
-                          직접 프로필 작성하기
-                        </Button>
-                      </Link>
-                      <Button size="sm" variant="outline" className="w-full" onClick={() => {
-                        const tabs = document.querySelector('[data-testid="tab-ai-resume"]') as HTMLElement;
-                        tabs?.click();
-                      }}>
-                        AI 이력서로 자동 작성
-                      </Button>
-                    </div>
-                  </div>
+                    {/* Additional sections would go here */}
+                    {!(profile as UserProfile)?.summary && 
+                     !(profile as UserProfile)?.skills?.length && 
+                     !(profile as UserProfile)?.experience?.length && (
+                      <Card>
+                        <CardContent className="text-center py-8">
+                          <GraduationCap className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <div className="text-body font-medium mb-2">프로필을 완성해보세요</div>
+                          <div className="text-caption text-gray-500 mb-4">
+                            AI 이력서 기능을 사용하거나 직접 입력하여 프로필을 완성할 수 있습니다
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                            <Link href="/individual/profile-setup">
+                              <Button size="sm">직접 프로필 작성하기</Button>
+                            </Link>
+                            <Button size="sm" variant="outline" onClick={() => {
+                              const tabs = document.querySelector('[data-testid="tab-ai-resume"]') as HTMLElement;
+                              tabs?.click();
+                            }}>
+                              AI 이력서로 자동 작성
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
                 )}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Voice Search Modal - Temporarily disabled */}
-      {/* <VoiceSearchModal
-        isOpen={isVoiceSearchOpen}
-        onClose={() => setIsVoiceSearchOpen(false)}
-        onTranscript={(transcript: string) => {
-          setSearchQuery(transcript);
-          setIsVoiceSearchOpen(false);
-        }}
-      /> */}
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,302 +1,171 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(224 14% 11%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(224 14% 11%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(224 14% 11%);
-  --primary: hsl(210 100% 56%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(129 59% 49%);
-  --secondary-foreground: hsl(0 0% 100%);
-  --accent: hsl(29 100% 50%);
-  --accent-foreground: hsl(0 0% 100%);
-  --muted: hsl(220 14% 96%);
-  --muted-foreground: hsl(224 14% 11%);
-  --destructive: hsl(0 85% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(220 13% 91%);
-  --input: hsl(220 13% 91%);
-  --ring: hsl(210 100% 56%);
-  --kakao: hsl(55 100% 51%);
-  --naver: hsl(129 97% 43%);
-  --textPrimary: hsl(224 14% 11%);
-  --font-noto: 'Noto Sans KR', sans-serif;
-  --radius: 1rem;
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.5rem;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
 }
 
 .dark {
-  --background: hsl(224 14% 11%);
-  --foreground: hsl(0 0% 95%);
-  --card: hsl(224 14% 11%);
-  --card-foreground: hsl(0 0% 95%);
-  --popover: hsl(224 14% 11%);
-  --popover-foreground: hsl(0 0% 95%);
-  --primary: hsl(210 100% 56%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(129 59% 49%);
-  --secondary-foreground: hsl(0 0% 100%);
-  --accent: hsl(29 100% 50%);
-  --accent-foreground: hsl(0 0% 100%);
-  --muted: hsl(215 28% 17%);
-  --muted-foreground: hsl(218 11% 65%);
-  --destructive: hsl(0 85% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(215 28% 17%);
-  --input: hsl(215 28% 17%);
-  --ring: hsl(210 100% 56%);
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 84% 4.9%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 94.1%;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+* {
+  border-color: hsl(var(--border));
+}
 
-  body {
-    @apply font-noto antialiased bg-background text-foreground;
-    font-size: 18px;
-  }
-
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  h2 {
-    font-size: 24px;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-
-  h3 {
-    font-size: 20px;
-    font-weight: 600;
-    line-height: 1.4;
-  }
-
-  button {
-    @apply transition-transform duration-150 ease-in-out;
-  }
-
-  button:active {
-    @apply scale-95;
-  }
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 @layer utilities {
-  .font-noto {
-    font-family: var(--font-noto);
-  }
-
-  .text-body {
-    font-size: 18px;
-  }
-
-  .text-heading {
-    font-size: 24px;
-  }
-
-  .text-large {
-    font-size: 28px;
-  }
-
-  .bg-kakao {
-    background-color: hsl(var(--kakao));
-  }
-
-  .text-kakao {
-    color: hsl(var(--kakao));
-  }
-
-  .bg-naver {
-    background-color: hsl(var(--naver));
-  }
-
-  .text-naver {
-    color: hsl(var(--naver));
-  }
-
-  .text-textPrimary {
-    color: hsl(var(--textPrimary));
-  }
-
-  /* Mobile-specific styles */
-  .mobile-container {
-    max-width: 428px;
-    margin: 0 auto;
-    min-height: 100vh;
-    background: white;
-    position: relative;
-  }
-
-  .safe-area-top {
-    padding-top: env(safe-area-inset-top);
-  }
-
-  .safe-area-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  /* Touch-friendly elements */
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Gradient backgrounds */
-  .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(217 91% 60%) 100%);
-  }
-
-  .gradient-secondary {
-    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(142 69% 58%) 100%);
-  }
-
-  /* Animation classes */
-  .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.2s ease-in;
-  }
-
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  /* Custom scrollbar for mobile */
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--border)) transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--border));
-    border-radius: 2px;
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
-/* Input and form styling for mobile */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="tel"],
-input[type="number"],
-input[type="date"],
-textarea,
-select {
-  @apply w-full p-4 border-2 border-border rounded-2xl text-body focus:border-primary outline-none transition-colors;
-  font-size: 16px; /* Prevents zoom on iOS */
+/* Web App Typography Scale - Compact and Professional */
+.text-headline {
+  font-size: 1.5rem; /* 24px */
+  line-height: 1.875rem; /* 30px */
+  font-weight: 700;
 }
 
-/* Button variants */
-.btn-primary {
-  @apply bg-primary text-white py-4 px-6 rounded-2xl text-body font-semibold shadow-lg active:scale-95 transition-transform;
+.text-title {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem; /* 28px */
+  font-weight: 600;
 }
 
-.btn-secondary {
-  @apply bg-secondary text-white py-4 px-6 rounded-2xl text-body font-semibold shadow-lg active:scale-95 transition-transform;
+.text-heading {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.625rem; /* 26px */
+  font-weight: 600;
 }
 
-.btn-outline {
-  @apply bg-white border-2 border-primary text-primary py-4 px-6 rounded-2xl text-body font-semibold shadow-lg active:scale-95 transition-transform;
+.text-body {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
+  font-weight: 400;
 }
 
-.btn-ghost {
-  @apply bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl text-body font-semibold active:scale-95 transition-transform;
+.text-label {
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.125rem; /* 18px */
+  font-weight: 500;
 }
 
-/* Card styling */
-.card-mobile {
-  @apply bg-white rounded-2xl p-5 shadow-lg border border-border;
+.text-caption {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1rem; /* 16px */
+  font-weight: 400;
 }
 
-/* Navigation styling */
-.mobile-nav {
-  @apply fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-white border-t border-border;
+/* Web App Card Design - Cleaner and More Compact */
+.card-web {
+  @apply bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-4;
 }
 
-.mobile-nav-item {
-  @apply flex flex-col items-center py-3 text-gray-400 transition-colors;
+.card-compact {
+  @apply bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-3;
 }
 
-.mobile-nav-item.active {
-  @apply text-primary;
-}
-
-/* Modal and overlay styling */
-.modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center;
-}
-
-.modal-content {
-  @apply bg-white rounded-t-3xl p-6 w-full max-w-sm animate-slide-up;
-}
-
-/* Loading states */
-.loading-spinner {
-  @apply w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin;
-}
-
-/* Status indicators */
+/* Status badges - Smaller for web */
 .status-badge {
-  @apply px-3 py-1 rounded-full text-sm font-semibold;
+  @apply inline-flex items-center px-2 py-1 rounded text-xs font-medium;
 }
 
 .status-success {
-  @apply bg-secondary bg-opacity-10 text-secondary;
+  @apply bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-300;
 }
 
 .status-warning {
-  @apply bg-accent bg-opacity-10 text-accent;
+  @apply bg-yellow-50 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300;
+}
+
+.status-error {
+  @apply bg-red-50 text-red-700 dark:bg-red-900 dark:text-red-300;
 }
 
 .status-info {
-  @apply bg-primary bg-opacity-10 text-primary;
+  @apply bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300;
 }
 
-/* Responsive text sizes for mobile */
-@media (max-width: 428px) {
-  .text-large {
-    font-size: 26px;
-  }
-  
-  .text-heading {
-    font-size: 22px;
-  }
-  
-  .text-body {
-    font-size: 17px;
+/* Professional color palette */
+.text-primary {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+.bg-primary {
+  @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+}
+
+.gradient-primary {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600;
+}
+
+/* Web app layout helpers */
+.container-web {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.sidebar-width {
+  width: 240px;
+}
+
+.main-content {
+  margin-left: 240px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
   }
 }

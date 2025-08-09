@@ -8,6 +8,17 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
+## Complete Design Overhaul
+- **Date**: August 9, 2025
+- **Changes**: Complete redesign from mobile-first to web app optimized design
+  - Replaced Noto Sans KR with Inter font for better web app appearance  
+  - Scaled down all typography sizes for desktop/web use (14px base instead of 18px)
+  - Redesigned dashboard with sidebar navigation and card-based layout
+  - Removed mobile-specific elements (bottom navigation, large touch targets)
+  - Implemented professional web app color palette and spacing
+  - Added desktop-optimized header with search and user menu
+  - Created compact, efficient layouts suitable for desktop screens
+
 ## AI Resume System Implementation
 - **Date**: August 9, 2025
 - **Changes**: Complete implementation of AI-powered resume generation system
