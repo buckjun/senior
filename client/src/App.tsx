@@ -3,9 +3,15 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
+// 다크 테마 강제 적용
+if (typeof document !== 'undefined') {
+  document.documentElement.classList.add('dark');
+}
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Welcome from "@/pages/welcome";
+import Landing from "@/pages/Landing";
 import IndividualSignup from "@/pages/individual/signup";
 import IndividualProfileSetup from "@/pages/individual/profile-setup";
 import IndividualProfileView from "@/pages/individual/profile-view";
@@ -15,6 +21,7 @@ import CompanyRecommendations from "@/pages/individual/company-recommendations";
 import JobSearch from "@/pages/individual/job-search";
 import SavedJobs from "@/pages/individual/saved-jobs";
 import ManualInputPage from "@/pages/individual/manual-input";
+import MobileDashboard from "@/pages/individual/mobile-dashboard";
 import CompanySignup from "@/pages/company/signup";
 import CompanyDashboard from "@/pages/company/dashboard";
 import JobPosting from "@/pages/company/job-posting";
@@ -38,10 +45,10 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated ? (
-        <Route path="/" component={Welcome} />
+        <Route path="/" component={Landing} />
       ) : (
         <>
-          <Route path="/" component={IndividualDashboard} />
+          <Route path="/" component={MobileDashboard} />
           <Route path="/individual/signup" component={IndividualSignup} />
           <Route path="/individual/profile-setup" component={IndividualProfileSetup} />
           <Route path="/individual/profile-view" component={IndividualProfileView} />
