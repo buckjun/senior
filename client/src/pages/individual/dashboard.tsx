@@ -8,7 +8,7 @@ import { JobCard } from '@/components/ui/job-card';
 import { VoiceInput } from '@/components/ui/voice-input';
 import { AIResumeWriter } from '@/components/AIResumeWriter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Mic, GraduationCap, FileText, Clock, MapPin, Wand2 } from 'lucide-react';
+import { Bell, Mic, GraduationCap, FileText, Clock, MapPin, Wand2, Briefcase } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
@@ -97,15 +97,15 @@ export default function IndividualDashboard() {
 
   // Get user display info
   const getUserDisplayName = () => {
-    if (profile?.summary) {
+    if (profile && typeof profile === 'object' && 'summary' in profile) {
       const names = ['김민수', '이영희', '박정호', '최미경', '정수진'];
       return names[Math.floor(Math.random() * names.length)];
     }
-    return user?.firstName ? `${user.firstName}${user.lastName || ''}` : '사용자';
+    return (user as any)?.firstName ? `${(user as any).firstName}${(user as any).lastName || ''}` : '사용자';
   };
 
   const getUserExperience = () => {
-    if (profile?.experience) {
+    if (profile && typeof profile === 'object' && 'experience' in profile) {
       return '경력 15년 · 유통관리 전문';
     }
     return '프로필을 완성해주세요';
@@ -219,9 +219,9 @@ export default function IndividualDashboard() {
                 </div>
               ))}
             </div>
-          ) : recommendedJobs && recommendedJobs.length > 0 ? (
+          ) : recommendedJobs && Array.isArray(recommendedJobs) && recommendedJobs.length > 0 ? (
             <div className="space-y-4">
-              {recommendedJobs.slice(0, 3).map((job: JobPosting) => (
+              {(recommendedJobs as JobPosting[]).slice(0, 3).map((job: JobPosting) => (
                 <JobCard
                   key={job.id}
                   job={{
@@ -315,14 +315,14 @@ export default function IndividualDashboard() {
                 <div>
                   <label className="text-sm font-medium text-gray-600">자기소개</label>
                   <p className="mt-1 text-sm bg-gray-50 p-3 rounded">
-                    {profile.summary || "자기소개를 작성해주세요."}
+                    {(profile as any)?.summary || "자기소개를 작성해주세요."}
                   </p>
                 </div>
                 
                 <div>
                   <label className="text-sm font-medium text-gray-600">보유 스킬</label>
                   <div className="mt-1 flex flex-wrap gap-2">
-                    {profile.skills ? JSON.parse(profile.skills).map((skill: string, index: number) => (
+                    {(profile as any)?.skills ? JSON.parse((profile as any).skills).map((skill: string, index: number) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {skill}
                       </Badge>
@@ -335,7 +335,7 @@ export default function IndividualDashboard() {
                 <div>
                   <label className="text-sm font-medium text-gray-600">선호 직종</label>
                   <div className="mt-1 flex flex-wrap gap-2">
-                    {profile.preferredJobTypes ? JSON.parse(profile.preferredJobTypes).map((job: string, index: number) => (
+                    {(profile as any)?.preferredJobTypes ? JSON.parse((profile as any).preferredJobTypes).map((job: string, index: number) => (
                       <Badge key={index} variant="secondary" className="text-xs">
                         {job}
                       </Badge>

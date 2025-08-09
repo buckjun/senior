@@ -718,17 +718,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update profile with AI-generated data
       const updatedProfile = await storage.updateIndividualProfile(existingProfile.id, {
-        summary: summary || existingProfile.summary,
-        skills: skills ? JSON.stringify(skills) : existingProfile.skills,
-        experience: experience ? JSON.stringify(experience) : existingProfile.experience,
-        preferredJobTypes: title ? JSON.stringify([title]) : existingProfile.preferredJobTypes,
-        preferredLocations: location ? JSON.stringify([location]) : existingProfile.preferredLocations,
+        summary: (summary as string) || existingProfile.summary,
+        skills: skills ? JSON.stringify(skills) as any : existingProfile.skills,
+        experience: experience ? JSON.stringify(experience) as any : existingProfile.experience,
+        preferredJobTypes: title ? JSON.stringify([title]) as any : existingProfile.preferredJobTypes,
+        preferredLocations: location ? JSON.stringify([location]) as any : existingProfile.preferredLocations,
         aiAnalysis: JSON.stringify({
           lastGenerated: new Date().toISOString(),
           source: 'natural_language_input',
           extractedSkills: skills || [],
           generatedSummary: summary || ''
-        })
+        }) as any
       });
 
       res.json({ profile: updatedProfile });
