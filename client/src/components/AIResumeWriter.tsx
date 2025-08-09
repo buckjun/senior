@@ -179,30 +179,20 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
       </Card>
 
       {/* 분석 결과 미리보기 */}
-      <Card className={parsedData ? "border-green-200 bg-green-50/50" : "hidden"}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-800">
-            <Sparkles className="h-5 w-5" />
-            AI 분석 결과
-          </CardTitle>
-          <p className="text-sm text-green-700">
-            자연어 입력에서 다음 정보를 추출했습니다.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <ResumePreview resumeData={parsedData || {
-            name: "",
-            title: "",
-            location: "",
-            phone: "",
-            email: "",
-            summary: "",
-            skills: [],
-            experience: [],
-            education: []
-          }} />
-          
-          {parsedData && (
+      {parsedData && (
+        <Card className="border-green-200 bg-green-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-800">
+              <Sparkles className="h-5 w-5" />
+              AI 분석 결과
+            </CardTitle>
+            <p className="text-sm text-green-700">
+              자연어 입력에서 다음 정보를 추출했습니다.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ResumePreview data={parsedData} />
+            
             <div className="mt-6 pt-4 border-t">
               <div className="flex items-start gap-3 mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                 <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
@@ -234,9 +224,9 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
                 )}
               </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
