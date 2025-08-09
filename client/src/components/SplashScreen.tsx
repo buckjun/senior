@@ -26,17 +26,12 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFEF0 49.04%, #FFFFFF 100%)'
       }}
     >
-      {/* 상단 위젯 부분 제거됨 - 순수한 이미지만 표시 */}
-      <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
+      {/* 원본 이미지 그대로 사용 */}
+      <div className="w-full h-full flex items-center justify-center">
         <img 
           src={splashImage} 
           alt="일이시 로고" 
-          className="w-full h-full object-cover"
-          style={{
-            // 이미지에서 상단 상태바 부분을 자르기 위해 위쪽을 일부 잘라내기
-            transform: 'translateY(-8%)',
-            objectPosition: 'center bottom'
-          }}
+          className="w-full h-full object-contain"
         />
       </div>
     </div>
