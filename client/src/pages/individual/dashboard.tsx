@@ -85,6 +85,7 @@ export default function IndividualDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [parsedResumeData, setParsedResumeData] = useState<ParsedResume | undefined>(undefined);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // Load recommended jobs
   const { data: recommendedJobs, isLoading: loadingJobs } = useQuery({
@@ -187,26 +188,72 @@ export default function IndividualDashboard() {
               <Button variant="ghost" size="sm">
                 <Bell className="w-4 h-4" />
               </Button>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F0' }}>
-                  <User className="w-4 h-4" style={{ color: '#2F3036' }} />
-                </div>
-                <div className="hidden md:block">
-                  <div className="text-label font-medium">{getUserDisplayName()}님</div>
-                  <div className="text-caption text-gray-500">개인회원</div>
-                </div>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F0' }}>
+                    <User className="w-4 h-4" style={{ color: '#2F3036' }} />
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="text-label font-medium">{getUserDisplayName()}님</div>
+                    <div className="text-caption text-gray-500">개인회원</div>
+                  </div>
+                </button>
+
+                {/* Floating User Menu */}
+                {showUserMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setShowUserMenu(false)}
+                    />
+                    <div className="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <div className="p-4 border-b border-gray-100">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F0' }}>
+                            <User className="w-6 h-6" style={{ color: '#2F3036' }} />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900">{getUserDisplayName()}님</div>
+                            <div className="text-sm text-gray-500">개인회원</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <Link href="/individual/profile-view" onClick={() => setShowUserMenu(false)}>
+                          <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                            <User className="w-4 h-4 mr-3" />
+                            내 정보
+                          </button>
+                        </Link>
+                        <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                          <Briefcase className="w-4 h-4 mr-3" />
+                          지원 현황
+                        </button>
+                        <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                          <Award className="w-4 h-4 mr-3" />
+                          찜한 공고
+                        </button>
+                        <div className="border-t border-gray-100 my-1"></div>
+                        <button className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                          <Settings className="w-4 h-4 mr-3" />
+                          설정
+                        </button>
+                        <button 
+                          onClick={() => window.location.href = '/api/logout'}
+                          className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+                        >
+                          <LogOut className="w-4 h-4 mr-3" />
+                          로그아웃
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
-              {/* Logout Button */}
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => window.location.href = '/api/logout'}
-                className="text-gray-600 hover:text-red-600"
-                data-testid="button-logout"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden md:inline-block ml-2">로그아웃</span>
-              </Button>
+
             </div>
           </div>
         </div>
@@ -214,60 +261,8 @@ export default function IndividualDashboard() {
 
       {/* Main Content */}
       <main className="container-web py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F5F5F0' }}>
-                    <User className="w-6 h-6" style={{ color: '#2F3036' }} />
-                  </div>
-                  <div>
-                    <CardTitle className="text-body">{getUserDisplayName()}님</CardTitle>
-                    <CardDescription>개인회원</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  <Link href="/individual/profile-view">
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-body">
-                      <User className="w-4 h-4 mr-2" />
-                      내 정보
-                    </Button>
-                  </Link>
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    지원 현황
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
-                    <Award className="w-4 h-4 mr-2" />
-                    찜한 공고
-                  </Button>
-                  <Separator className="my-4" />
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
-                    <Settings className="w-4 h-4 mr-2" />
-                    설정
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full justify-start text-body text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => window.location.href = '/api/logout'}
-                    data-testid="button-logout-sidebar"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    로그아웃
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-
-          {/* Main Dashboard Content */}
-          <div className="lg:col-span-3">
-            <Tabs defaultValue="dashboard" className="space-y-6">
+        <div className="w-full">
+          <Tabs defaultValue="dashboard" className="space-y-6">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dashboard" className="text-body" data-testid="tab-dashboard">
                   <Home className="w-4 h-4 mr-2" />
@@ -612,7 +607,6 @@ export default function IndividualDashboard() {
                 )}
               </TabsContent>
             </Tabs>
-          </div>
         </div>
       </main>
     </div>
