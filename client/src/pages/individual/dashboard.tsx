@@ -236,20 +236,6 @@ export default function IndividualDashboard() {
                     <Briefcase className="w-4 h-4 mr-2" />
                     지원 현황
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full justify-start text-body text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => window.location.href = '/api/logout'}
-                    data-testid="button-logout-sidebar"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    로그아웃
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
-                    <Briefcase className="w-4 h-4 mr-2" />
-                    지원 현황
-                  </Button>
                   <Button variant="ghost" size="sm" className="w-full justify-start text-body">
                     <Award className="w-4 h-4 mr-2" />
                     찜한 공고
@@ -259,7 +245,13 @@ export default function IndividualDashboard() {
                     <Settings className="w-4 h-4 mr-2" />
                     설정
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-body text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-body text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => window.location.href = '/api/logout'}
+                    data-testid="button-logout-sidebar"
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     로그아웃
                   </Button>

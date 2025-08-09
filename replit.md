@@ -8,8 +8,26 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## Navigation and Data Synchronization Fixes
+## UI/UX Redesign and Navigation Fixes
 - **Date**: August 10, 2025
+- **Changes**: Complete UI overhaul and navigation flow optimization
+  - **Design Replacement**: Implemented new login screen based on uploaded design mockups
+    - Replaced welcome screen with clean gray gradient background
+    - Added individual/company member tabs with proper styling
+    - Implemented form fields matching design specifications
+    - Added Naver login integration button
+  - **Navigation Flow Fix**: Resolved login redirect loop issue
+    - Fixed issue where login flow was: splash → login → splash → profile
+    - Now properly flows: splash → login → dashboard
+    - Modified auth callback to redirect to `/dashboard` instead of `/`
+  - **Code Optimization**: Eliminated duplicate files and components
+    - Removed duplicate logout buttons (was showing 2 in sidebar)
+    - Deleted unused asset files: `background.png`, `login-design.png`
+    - Enforced single file principle: modify existing files instead of creating duplicates
+  - **Authentication**: Enhanced logout functionality in both header and sidebar
+
+## Navigation and Data Synchronization Fixes
+- **Date**: August 10, 2025 (Earlier)
 - **Changes**: Unified "내정보" button navigation and improved data synchronization
   - Fixed all "내정보" buttons to navigate to `/individual/profile-view` consistently
   - Enhanced profile-view.tsx to display comprehensive profile information and resume summary
