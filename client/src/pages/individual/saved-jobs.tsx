@@ -125,7 +125,7 @@ export default function SavedJobs() {
                   onUnsave={handleUnsaveJob}
                   onApply={handleApplyJob}
                   showMatchingScore={true}
-                  isSaved={true}
+
                 />
               ))}
             </div>

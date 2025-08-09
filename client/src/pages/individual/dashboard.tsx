@@ -128,21 +128,23 @@ export default function IndividualDashboard() {
       {/* Header with Profile */}
       <div className="gradient-primary px-4 py-6 text-white safe-area-top">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-3">
-              <span className="text-white font-bold text-lg">
-                {getUserDisplayName().charAt(0)}
-              </span>
+          <Link href="/individual/profile-setup">
+            <div className="flex items-center cursor-pointer">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-3 hover:bg-white/30 transition-colors">
+                <span className="text-white font-bold text-lg">
+                  {getUserDisplayName().charAt(0)}
+                </span>
+              </div>
+              <div>
+                <h2 className="text-body font-bold" data-testid="text-user-name">
+                  {getUserDisplayName()}님
+                </h2>
+                <p className="text-sm opacity-90" data-testid="text-user-experience">
+                  {getUserExperience()}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-body font-bold" data-testid="text-user-name">
-                {getUserDisplayName()}님
-              </h2>
-              <p className="text-sm opacity-90" data-testid="text-user-experience">
-                {getUserExperience()}
-              </p>
-            </div>
-          </div>
+          </Link>
           <Button 
             variant="ghost" 
             size="sm" 
