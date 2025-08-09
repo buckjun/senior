@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupCustomAuth, requireAuth, requireIndividualAuth, requireCompanyAuth } from "./customAuth";
 import { parseResumeFromText } from "./naturalLanguageService";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -29,30 +29,15 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Setup custom authentication
+  setupCustomAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      const profile = await storage.getUserProfile(userId);
-      
-      res.json({
-        ...user,
-        profile
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Note: Auth routes (/api/register, /api/login, /api/logout, /api/auth/user) are handled by setupCustomAuth
 
   // User profile routes
-  app.post('/api/profiles', isAuthenticated, async (req: any, res) => {
+  app.post('/api/profiles', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profileData = insertUserProfileSchema.parse({
         ...req.body,
         userId
@@ -66,9 +51,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/profiles', isAuthenticated, async (req: any, res) => {
+  app.put('/api/profiles', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const updates = req.body;
       
       const profile = await storage.updateUserProfile(userId, updates);
@@ -80,9 +65,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Individual profile routes
-  app.post('/api/individual-profiles', isAuthenticated, async (req: any, res) => {
+  app.post('/api/individual-profiles', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profileData = insertIndividualProfileSchema.parse({
         ...req.body,
         userId
@@ -96,9 +81,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/individual-profiles/me', isAuthenticated, async (req: any, res) => {
+  app.get('/api/individual-profiles/me', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profile = await storage.getIndividualProfile(userId);
       res.json(profile);
     } catch (error) {
@@ -107,9 +92,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/individual-profiles', isAuthenticated, async (req: any, res) => {
+  app.put('/api/individual-profiles', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const updates = req.body;
       
       const profile = await storage.updateIndividualProfile(userId, updates);
@@ -121,9 +106,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Company profile routes
-  app.post('/api/company-profiles', isAuthenticated, async (req: any, res) => {
+  app.post('/api/company-profiles', requireCompanyAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profileData = insertCompanyProfileSchema.parse({
         ...req.body,
         userId
@@ -141,9 +126,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/company-profiles/me', isAuthenticated, async (req: any, res) => {
+  app.get('/api/company-profiles/me', requireCompanyAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profile = await storage.getCompanyProfile(userId);
       res.json(profile);
     } catch (error) {
@@ -152,9 +137,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/company-profiles', isAuthenticated, async (req: any, res) => {
+  app.put('/api/company-profiles', requireCompanyAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const updates = req.body;
       
       const profile = await storage.updateCompanyProfile(userId, updates);
@@ -166,7 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Business verification route
-  app.post('/api/verify-business', isAuthenticated, async (req, res) => {
+  app.post('/api/verify-business', requireAuth, async (req, res) => {
     try {
       const { businessNumber } = req.body;
       const isVerified = await storage.verifyCompany(businessNumber);
@@ -178,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI analysis routes
-  app.post('/api/ai/analyze-career', isAuthenticated, async (req, res) => {
+  app.post('/api/ai/analyze-career', requireAuth, async (req, res) => {
     try {
       const { careerText, resumeText } = req.body;
       const analysis = await aiService.analyzeCareerProfile(careerText, resumeText);
@@ -189,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/ai/analyze-resume-image', isAuthenticated, async (req, res) => {
+  app.post('/api/ai/analyze-resume-image', requireAuth, async (req, res) => {
     try {
       const { base64Image } = req.body;
       const extractedText = await aiService.analyzeResumeImage(base64Image);
@@ -201,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/ai/process-voice', isAuthenticated, async (req, res) => {
+  app.post('/api/ai/process-voice', requireAuth, async (req, res) => {
     try {
       const { transcript } = req.body;
       const processedText = await aiService.processVoiceTranscript(transcript);
@@ -214,9 +199,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Job posting routes
-  app.post('/api/jobs', isAuthenticated, async (req: any, res) => {
+  app.post('/api/jobs', requireCompanyAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       
       if (!companyProfile) {
@@ -251,9 +236,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/jobs/recommended', isAuthenticated, async (req: any, res) => {
+  app.get('/api/jobs/recommended', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const jobs = await storage.getRecommendedJobs(userId);
       res.json(jobs);
     } catch (error) {
@@ -262,9 +247,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/jobs/my', isAuthenticated, async (req: any, res) => {
+  app.get('/api/jobs/my', requireCompanyAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       
       if (!companyProfile) {
@@ -292,9 +277,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/jobs/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/jobs/:id', requireCompanyAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       const job = await storage.getJobPosting(req.params.id);
       
@@ -312,9 +297,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Job application routes
-  app.post('/api/jobs/:jobId/apply', isAuthenticated, async (req: any, res) => {
+  app.post('/api/jobs/:jobId/apply', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const individualProfile = await storage.getIndividualProfile(userId);
       
       if (!individualProfile) {
@@ -344,9 +329,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/jobs/:jobId/applications', isAuthenticated, async (req: any, res) => {
+  app.get('/api/jobs/:jobId/applications', requireCompanyAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       const job = await storage.getJobPosting(req.params.jobId);
       
@@ -362,9 +347,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/applications/my', isAuthenticated, async (req: any, res) => {
+  app.get('/api/applications/my', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const individualProfile = await storage.getIndividualProfile(userId);
       
       if (!individualProfile) {
@@ -380,9 +365,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Saved jobs routes
-  app.post('/api/jobs/:jobId/save', isAuthenticated, async (req: any, res) => {
+  app.post('/api/jobs/:jobId/save', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const savedJob = await storage.saveJob(userId, req.params.jobId);
       res.json(savedJob);
     } catch (error) {
@@ -391,9 +376,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/jobs/:jobId/save', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/jobs/:jobId/save', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       await storage.unsaveJob(userId, req.params.jobId);
       res.json({ success: true });
     } catch (error) {
@@ -402,9 +387,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/saved-jobs', isAuthenticated, async (req: any, res) => {
+  app.get('/api/saved-jobs', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const savedJobs = await storage.getSavedJobs(userId);
       res.json(savedJobs);
     } catch (error) {
@@ -414,9 +399,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI recommendations routes
-  app.get('/api/jobs/:jobId/ai-recommendations', isAuthenticated, async (req: any, res) => {
+  app.get('/api/jobs/:jobId/ai-recommendations', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       const job = await storage.getJobPosting(req.params.jobId);
       
@@ -445,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Object storage routes for file uploads
-  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
+  app.get("/objects/:objectPath(*)", requireAuth, async (req: any, res) => {
     const userId = req.user?.claims?.sub;
     const objectStorageService = new ObjectStorageService();
     try {
@@ -470,13 +455,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/objects/upload", isAuthenticated, async (req, res) => {
+  app.post("/api/objects/upload", requireAuth, async (req, res) => {
     const objectStorageService = new ObjectStorageService();
     const uploadURL = await objectStorageService.getObjectEntityUploadURL();
     res.json({ uploadURL });
   });
 
-  app.put("/api/resume-files", isAuthenticated, async (req: any, res) => {
+  app.put("/api/resume-files", requireAuth, async (req: any, res) => {
     if (!req.body.resumeFileURL) {
       return res.status(400).json({ error: "resumeFileURL is required" });
     }
@@ -508,7 +493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Excel upload endpoint for senior reemployment data
-  app.post("/api/upload-excel", isAuthenticated, upload.single('excelFile'), async (req: any, res) => {
+  app.post("/api/upload-excel", requireAuth, upload.single('excelFile'), async (req: any, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "엑셀 파일이 필요합니다." });
     }
@@ -644,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get senior reemployment data with filters
-  app.get("/api/reemployment-data", isAuthenticated, async (req, res) => {
+  app.get("/api/reemployment-data", requireAuth, async (req, res) => {
     try {
       const filters = {
         age: req.query.age ? parseInt(req.query.age as string) : undefined,
@@ -662,7 +647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get reemployment statistics
-  app.get("/api/reemployment-statistics", isAuthenticated, async (req, res) => {
+  app.get("/api/reemployment-statistics", requireAuth, async (req, res) => {
     try {
       const category = req.query.category as string;
       const stats = await storage.getReemploymentStatistics(category);
@@ -699,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Natural language processing for resume generation
-  app.post('/api/parse-resume', isAuthenticated, async (req: any, res) => {
+  app.post('/api/parse-resume', requireAuth, async (req: any, res) => {
     try {
       const { text } = req.body;
       
@@ -720,9 +705,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update individual profile with AI-generated resume data
-  app.post('/api/individual-profiles/ai-resume', isAuthenticated, async (req: any, res) => {
+  app.post('/api/individual-profiles/ai-resume', requireIndividualAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { 
         summary, 
         skills, 
@@ -805,7 +790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Job categories endpoints
-  app.get("/api/job-categories", isAuthenticated, async (req, res) => {
+  app.get("/api/job-categories", requireAuth, async (req, res) => {
     try {
       const categories = await storage.getAllJobCategories();
       res.json(categories);
@@ -815,7 +800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/user/job-categories", isAuthenticated, async (req: any, res) => {
+  app.get("/api/user/job-categories", requireAuth, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
       const categories = await storage.getUserJobCategories(userId);
@@ -826,7 +811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/user/job-categories", isAuthenticated, async (req: any, res) => {
+  app.post("/api/user/job-categories", requireAuth, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
       const { categoryIds } = req.body;
@@ -844,7 +829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Company recommendations endpoint
-  app.get("/api/recommendations", isAuthenticated, async (req: any, res) => {
+  app.get("/api/recommendations", requireAuth, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
       

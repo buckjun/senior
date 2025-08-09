@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface LoginFormProps {
   isIndividual: boolean;
@@ -11,9 +13,29 @@ interface LoginFormProps {
 export function LoginForm({ isIndividual }: LoginFormProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     id: "",
     password: ""
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await apiRequest('POST', '/api/login', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      // 사용자 정보 다시 가져오기
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      setLocation('/dashboard');
+    },
+    onError: (error) => {
+      toast({
+        title: "로그인 실패",
+        description: "아이디 또는 비밀번호가 올바르지 않습니다.",
+        variant: "destructive",
+      });
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -29,9 +51,10 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
       return;
     }
 
-    // 임시: 입력이 모두 되어있으면 Replit Auth로 진행
-    // 추후 커스텀 인증 시스템으로 교체 예정
-    window.location.href = "/api/login";
+    loginMutation.mutate({
+      email: formData.id,
+      password: formData.password
+    });
   };
 
   const handleNaverLogin = () => {

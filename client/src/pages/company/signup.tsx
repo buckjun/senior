@@ -91,16 +91,30 @@ export default function CompanySignup() {
     }
   });
 
-  const createCompanyProfileMutation = useMutation({
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const createCompanyMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('POST', '/api/company-profiles', data);
+      // 먼저 사용자 등록
+      const registerResponse = await apiRequest('POST', '/api/register', {
+        userType: 'company',
+        name: data.contactPerson,
+        email: data.contactEmail,
+        password: password,
+        phone: data.contactPhone
+      });
+      
+      // 그 다음 회사 프로필 생성
+      const profileResponse = await apiRequest('POST', '/api/company-profiles', data);
+      return profileResponse.json();
     },
     onSuccess: () => {
       toast({
         title: "가입 완료",
         description: "기업 회원가입이 완료되었습니다.",
       });
-      setLocation('/company/dashboard');
+      setLocation('/dashboard');
     },
     onError: () => {
       toast({
@@ -160,14 +174,24 @@ export default function CompanySignup() {
       setCurrentStep(2);
     } else if (currentStep === 2) {
       // Validate required fields for step 2
-      if (!formData.contactPerson || !formData.contactPhone || !formData.contactEmail) {
+      if (!formData.contactPerson || !formData.contactPhone || !formData.contactEmail || !password || !confirmPassword) {
         toast({
           title: "입력 오류",
-          description: "모든 담당자 정보를 입력해주세요.",
+          description: "모든 담당자 정보와 비밀번호를 입력해주세요.",
           variant: "destructive",
         });
         return;
       }
+      
+      if (password !== confirmPassword) {
+        toast({
+          title: "비밀번호 불일치",
+          description: "비밀번호가 일치하지 않습니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setCurrentStep(3);
     }
   };
@@ -175,7 +199,26 @@ export default function CompanySignup() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    createCompanyProfileMutation.mutate({
+    // Password validation
+    if (!password || !confirmPassword) {
+      toast({
+        title: "입력 오류",
+        description: "비밀번호를 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "비밀번호 불일치",
+        description: "비밀번호가 일치하지 않습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createCompanyMutation.mutate({
       companyName: formData.companyName,
       businessNumber: formData.businessNumber.replace(/[^0-9]/g, ''),
       ceoName: formData.ceoName,
@@ -391,6 +434,36 @@ export default function CompanySignup() {
                   data-testid="input-contact-email"
                 />
               </div>
+              
+              <div>
+                <Label htmlFor="password" className="block text-body font-semibold mb-2">
+                  비밀번호 <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="비밀번호를 입력해주세요"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  data-testid="input-password"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="confirmPassword" className="block text-body font-semibold mb-2">
+                  비밀번호 확인 <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="비밀번호를 다시 입력해주세요"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  data-testid="input-confirm-password"
+                />
+              </div>
             </>
           )}
 
@@ -468,10 +541,10 @@ export default function CompanySignup() {
               <Button
                 type="submit"
                 className="flex-1 btn-primary"
-                disabled={createCompanyProfileMutation.isPending}
+                disabled={createCompanyMutation.isPending}
                 data-testid="button-complete-signup"
               >
-                {createCompanyProfileMutation.isPending ? '가입 중...' : '가입 완료'}
+                {createCompanyMutation.isPending ? '가입 중...' : '가입 완료'}
               </Button>
             )}
           </div>

@@ -25,19 +25,21 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for Replit Auth
+// User types
+export const userTypeEnum = pgEnum('user_type', ['individual', 'company']);
+
+// User storage table for custom auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password").notNull(), // 해시된 비밀번호
+  name: varchar("name").notNull(),
+  phone: varchar("phone"),
+  userType: userTypeEnum("user_type").notNull(),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
-
-// User types
-export const userTypeEnum = pgEnum('user_type', ['individual', 'company']);
 
 // User profiles (extends users table)
 export const userProfiles = pgTable("user_profiles", {
@@ -302,6 +304,25 @@ export const insertReemploymentStatisticsSchema = createInsertSchema(reemploymen
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+// Export types
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+// Auth schemas
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  name: z.string().min(1),
+  phone: z.string().optional(),
+  userType: z.enum(['individual', 'company']),
 });
 
 // Job categories for 5060 generation

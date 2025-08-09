@@ -19,12 +19,12 @@ export default function IndividualSignup() {
   const [isAgreed, setIsAgreed] = useState(false);
   const { toast } = useToast();
 
-  const createProfileMutation = useMutation({
+  const registerMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('POST', '/api/profiles', data);
+      return apiRequest('POST', '/api/register', data);
     },
     onSuccess: () => {
-      setLocation('/individual/profile-setup');
+      setLocation('/dashboard');
     },
     onError: (error) => {
       toast({
@@ -60,10 +60,11 @@ export default function IndividualSignup() {
       return;
     }
     
-    createProfileMutation.mutate({
+    registerMutation.mutate({
       userType: 'individual',
       name: formData.name,
       email: formData.email,
+      password: formData.password,
       phone: formData.phone
     });
   };
