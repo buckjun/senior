@@ -318,10 +318,10 @@ export default function IndividualSignup() {
                 backgroundColor: '#006FFD',
                 fontFamily: 'Inter, sans-serif'
               }}
-              disabled={createProfileMutation.isPending}
+              disabled={registerMutation.isPending}
               data-testid="button-signup"
             >
-              {createProfileMutation.isPending ? '가입 중...' : '가입하기'}
+              {registerMutation.isPending ? '가입 중...' : '가입하기'}
             </Button>
           </div>
         </form>

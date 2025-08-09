@@ -8,8 +8,28 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## Login Flow Customization and Input Validation  
+## Complete Custom Authentication System Migration
 - **Date**: August 10, 2025 (Latest)
+- **Changes**: Fully migrated from Replit Auth to custom authentication system
+  - **Backend Migration**: Converted all API endpoints from Replit Auth to custom authentication
+    - Replaced `isAuthenticated` middleware with `requireAuth` and `requireIndividualAuth`/`requireCompanyAuth` 
+    - Updated user access from `req.user.claims.sub` to `req.user.id`
+    - All 14 protected endpoints now use custom authentication system
+  - **Frontend Registration**: Updated signup flows for both individual and company users
+    - Individual signup: Uses `/api/register` endpoint with password validation
+    - Company signup: Enhanced with password fields and two-step user/profile creation
+    - Both flows redirect to `/dashboard` upon successful registration
+  - **Frontend Login**: Converted LoginForm component to use custom `/api/login` endpoint
+    - Replaced Replit Auth redirect with proper form submission and validation
+    - Added error handling for authentication failures
+    - Success cases invalidate auth cache and redirect to dashboard
+  - **User Experience**: Maintained all existing UI/UX while switching authentication backend
+    - Login validation prevents empty submissions
+    - Password confirmation required for all signups
+    - Proper error messages for authentication failures
+
+## Login Flow Customization and Input Validation  
+- **Date**: August 10, 2025
 - **Changes**: Customized login process and improved user experience
   - **Input Validation**: Added validation to login form preventing empty submissions
     - Shows error message when ID or password fields are empty
@@ -118,10 +138,11 @@ Preferred communication style: Simple, everyday language.
 - **Development**: Hot module replacement via Vite integration
 
 ## Authentication & Authorization
-- **Provider**: Replit Auth integration with OpenID Connect
-- **Session Management**: PostgreSQL-backed session storage with connect-pg-simple
+- **Provider**: Custom authentication system with email/password login
+- **Session Management**: PostgreSQL-backed session storage with express-session
 - **User Types**: Dual authentication flows for individual users and companies
-- **Security**: HTTP-only cookies with CSRF protection
+- **Security**: Password hashing with scrypt, HTTP-only cookies with CSRF protection
+- **Middleware**: Custom requireAuth, requireIndividualAuth, and requireCompanyAuth middleware
 
 ## Data Storage
 - **Primary Database**: PostgreSQL via Neon serverless
