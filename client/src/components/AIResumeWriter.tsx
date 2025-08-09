@@ -195,11 +195,11 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
             <ResumePreview data={parsedData} />
             
             <div className="mt-6 pt-4 border-t">
-              <div className="flex items-start gap-3 mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div className="flex items-start gap-3 mb-4 p-3 bg-[#F5F5DC]/50 rounded-lg border border-[#2F3036]/20">
+                <AlertCircle className="h-5 w-5 text-[#2F3036] mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium text-blue-800 dark:text-blue-200">프로필 업데이트 확인</p>
-                  <p className="text-blue-700 dark:text-blue-300 mt-1">
+                  <p className="font-medium text-[#2F3036]">프로필 업데이트 확인</p>
+                  <p className="text-[#2F3036]/70 mt-1">
                     위 정보로 내 프로필을 업데이트하시겠습니까? 기존 정보는 새로운 정보로 덮어쓰기됩니다.
                   </p>
                 </div>

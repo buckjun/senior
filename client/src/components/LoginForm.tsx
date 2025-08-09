@@ -33,7 +33,7 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
             placeholder="아이디"
             value={formData.id}
             onChange={(e) => setFormData(prev => ({ ...prev, id: e.target.value }))}
-            className="w-full h-12 px-4 bg-white border border-gray-200 rounded-lg text-gray-600 placeholder-gray-400"
+            className="w-full h-12 px-4 bg-white border border-[#2F3036]/20 rounded-lg text-[#2F3036] placeholder-[#2F3036]/50"
             data-testid="input-login-id"
           />
         </div>
@@ -45,7 +45,7 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
             placeholder="비밀번호"
             value={formData.password}
             onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-            className="w-full h-12 px-4 bg-white border border-gray-200 rounded-lg text-gray-600 placeholder-gray-400"
+            className="w-full h-12 px-4 bg-white border border-[#2F3036]/20 rounded-lg text-[#2F3036] placeholder-[#2F3036]/50"
             data-testid="input-login-password"
           />
         </div>
@@ -53,7 +53,7 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
         {/* 로그인 버튼 */}
         <Button
           type="submit"
-          className="w-full h-12 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+          className="w-full h-12 bg-[#2F3036] text-white rounded-lg font-medium hover:bg-[#2F3036]/90 transition-colors"
           data-testid="button-login"
         >
           로그인
@@ -61,23 +61,23 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
       </form>
 
       {/* 하단 링크들 */}
-      <div className="flex justify-center space-x-6 mt-6 text-sm text-gray-600">
+      <div className="flex justify-center space-x-6 mt-6 text-sm text-[#2F3036]/70">
         <button 
-          className="hover:text-gray-800 transition-colors"
+          className="hover:text-[#2F3036] transition-colors"
           data-testid="link-signup"
           onClick={() => window.location.href = "/api/login"}
         >
           회원가입
         </button>
         <button 
-          className="hover:text-gray-800 transition-colors"
+          className="hover:text-[#2F3036] transition-colors"
           data-testid="link-find-id"
           onClick={() => window.location.href = "/api/login"}
         >
           아이디 찾기
         </button>
         <button 
-          className="hover:text-gray-800 transition-colors"
+          className="hover:text-[#2F3036] transition-colors"
           data-testid="link-find-password"
           onClick={() => window.location.href = "/api/login"}
         >

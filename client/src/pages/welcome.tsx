@@ -5,12 +5,7 @@ export default function Welcome() {
   const [isIndividual, setIsIndividual] = useState(true);
 
   return (
-    <div 
-      className="min-h-screen flex flex-col"
-      style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFEF0 49.04%, #FFFFFF 100%)'
-      }}
-    >
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white via-[#FFFEF0] to-white">
       {/* Status Bar Space */}
       <div className="h-12"></div>
 

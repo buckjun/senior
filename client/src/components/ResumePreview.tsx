@@ -23,9 +23,9 @@ interface ResumePreviewProps {
 export function ResumePreview({ data }: ResumePreviewProps) {
   if (!data || (!data.name && !data.title && !data.summary && data.skills?.length === 0)) {
     return (
-      <Card className="w-full bg-gray-50 dark:bg-gray-900">
-        <CardContent className="p-8 text-center text-gray-500">
-          <User className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+      <Card className="w-full bg-[#F5F5DC]/30 border-[#2F3036]/20">
+        <CardContent className="p-8 text-center text-[#2F3036]/70">
+          <User className="mx-auto mb-4 h-12 w-12 text-[#2F3036]/50" />
           <p>위에 자연어로 이력서 정보를 입력하시면</p>
           <p>여기에 미리보기가 표시됩니다</p>
         </CardContent>
@@ -38,14 +38,14 @@ export function ResumePreview({ data }: ResumePreviewProps) {
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+            <CardTitle className="text-2xl font-bold text-[#2F3036]">
               {data.name || '이름 미입력'}
             </CardTitle>
-            <p className="text-lg text-gray-600 dark:text-gray-300 font-medium">
+            <p className="text-lg text-[#2F3036]/80 font-medium">
               {data.title || '희망 직종'}
             </p>
           </div>
-          <div className="text-right text-sm text-gray-500 space-y-1">
+          <div className="text-right text-sm text-[#2F3036]/70 space-y-1">
             {data.location && (
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />

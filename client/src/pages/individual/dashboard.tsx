@@ -216,7 +216,7 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="container-web py-8 pb-32">
+      <main className="container-web py-8 pb-20">
         <div className="w-full space-y-6">
           {/* Welcome Card */}
           <Card>
@@ -344,52 +344,52 @@ export default function Dashboard() {
       </main>
       
       {/* Bottom Bar for Touch Interactions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 shadow-lg z-50">
-        <div className="flex justify-center space-x-12">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-3 py-2 shadow-lg z-50">
+        <div className="flex justify-center space-x-6">
           <button
             onClick={() => setActiveBottomSection(activeBottomSection === 'categories' ? null : 'categories')}
-            className={`flex flex-col items-center space-y-2 p-4 rounded-xl transition-all duration-200 ${
+            className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-colors ${
               activeBottomSection === 'categories' 
-                ? 'bg-[#F5F5DC] text-[#2F3036] scale-105' 
-                : 'text-[#2F3036]/70 hover:text-[#2F3036] hover:bg-gray-50'
+                ? 'bg-[#F5F5DC] text-[#2F3036]' 
+                : 'text-[#2F3036]/70 hover:text-[#2F3036]'
             }`}
             data-testid="button-categories"
           >
-            <Layers className="w-7 h-7" />
-            <span className="text-sm font-medium">인기 직종</span>
+            <Layers className="w-4 h-4" />
+            <span className="text-xs font-medium">인기 직종</span>
           </button>
           
           <button
             onClick={() => setActiveBottomSection(activeBottomSection === 'jobs' ? null : 'jobs')}
-            className={`flex flex-col items-center space-y-2 p-4 rounded-xl transition-all duration-200 ${
+            className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-colors ${
               activeBottomSection === 'jobs' 
-                ? 'bg-[#F5F5DC] text-[#2F3036] scale-105' 
-                : 'text-[#2F3036]/70 hover:text-[#2F3036] hover:bg-gray-50'
+                ? 'bg-[#F5F5DC] text-[#2F3036]' 
+                : 'text-[#2F3036]/70 hover:text-[#2F3036]'
             }`}
             data-testid="button-jobs"
           >
-            <Briefcase className="w-7 h-7" />
-            <span className="text-sm font-medium">추천 공고</span>
+            <Briefcase className="w-4 h-4" />
+            <span className="text-xs font-medium">추천 공고</span>
           </button>
           
           <button
             onClick={() => setActiveBottomSection(activeBottomSection === 'profile' ? null : 'profile')}
-            className={`flex flex-col items-center space-y-2 p-4 rounded-xl transition-all duration-200 ${
+            className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-colors ${
               activeBottomSection === 'profile' 
-                ? 'bg-[#F5F5DC] text-[#2F3036] scale-105' 
-                : 'text-[#2F3036]/70 hover:text-[#2F3036] hover:bg-gray-50'
+                ? 'bg-[#F5F5DC] text-[#2F3036]' 
+                : 'text-[#2F3036]/70 hover:text-[#2F3036]'
             }`}
             data-testid="button-profile-quick"
           >
-            <User className="w-7 h-7" />
-            <span className="text-sm font-medium">내 프로필</span>
+            <User className="w-4 h-4" />
+            <span className="text-xs font-medium">내 프로필</span>
           </button>
         </div>
       </div>
 
       {/* Bottom Content Panel */}
       {activeBottomSection && (
-        <div className="fixed bottom-24 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 max-h-80 overflow-y-auto">
+        <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 max-h-80 overflow-y-auto">
           <div className="p-4">
             {activeBottomSection === 'categories' && (
               <div>

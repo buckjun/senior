@@ -69,12 +69,7 @@ export default function IndividualSignup() {
   };
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFEF0 49.04%, #FFFFFF 100%)'
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#FFFEF0] to-white">
       {/* Back Button */}
       <div className="px-6 pt-4 pb-2">
         <Link href="/">

@@ -160,14 +160,9 @@ export default function IndividualProfileView() {
   }
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFEF0 49.04%, #FFFFFF 100%)'
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#FFFEF0] to-white">
       {/* Header */}
-      <div className="bg-white px-4 py-4 border-b border-border sticky top-0 z-10 safe-area-top">
+      <div className="bg-white/90 backdrop-blur-sm px-4 py-4 border-b border-[#2F3036]/20 sticky top-0 z-10">
         <div className="flex items-center">
           <Button 
             variant="ghost" 
@@ -178,7 +173,7 @@ export default function IndividualProfileView() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="flex-1 text-heading font-bold text-center">내 정보</h2>
+          <h2 className="flex-1 text-heading font-bold text-center text-[#2F3036]">내 정보</h2>
           <Link href="/individual/profile-setup">
             <Button variant="ghost" size="sm" data-testid="button-edit-profile">
               <Edit className="w-4 h-4" />
@@ -191,27 +186,27 @@ export default function IndividualProfileView() {
         {/* Basic Information */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" style={{ color: '#2F3036' }} />
+            <CardTitle className="flex items-center gap-2 text-[#2F3036]">
+              <User className="w-5 h-5 text-[#2F3036]" />
               기본 정보
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center space-x-3">
-                <User className="w-4 h-4 text-gray-400" />
+                <User className="w-4 h-4 text-[#2F3036]/50" />
                 <div>
-                  <div className="text-caption text-gray-500">이름</div>
-                  <div className="text-body font-medium">
+                  <div className="text-caption text-[#2F3036]/70">이름</div>
+                  <div className="text-body font-medium text-[#2F3036]">
                     {profileData?.name || getUserDisplayName()}
                   </div>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-gray-400" />
+                <Mail className="w-4 h-4 text-[#2F3036]/50" />
                 <div>
-                  <div className="text-caption text-gray-500">이메일</div>
-                  <div className="text-body font-medium">
+                  <div className="text-caption text-[#2F3036]/70">이메일</div>
+                  <div className="text-body font-medium text-[#2F3036]">
                     {profileData?.email || (user as any)?.email || '설정되지 않음'}
                   </div>
                 </div>
