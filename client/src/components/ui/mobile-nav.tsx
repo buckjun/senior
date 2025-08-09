@@ -13,7 +13,7 @@ export function MobileNav({ type = 'individual' }: MobileNavProps) {
     { path: '/individual/dashboard', icon: Home, label: '홈', testId: 'nav-home' },
     { path: '/individual/search', icon: Search, label: '탐색', testId: 'nav-search' },
     { path: '/saved-jobs', icon: Heart, label: '찜한공고', testId: 'nav-saved' },
-    { path: '/individual/profile-setup', icon: User, label: '내정보', testId: 'nav-profile' },
+    { path: '/individual/profile-view', icon: User, label: '내정보', testId: 'nav-profile' },
   ];
 
   const companyNavItems = [

@@ -351,6 +351,21 @@ export default function IndividualProfileView() {
           </Card>
         )}
 
+        {/* AI Analysis */}
+        {profileData?.aiAnalysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-purple-600" />
+                AI 분석 결과
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-body text-gray-700">{profileData.aiAnalysis}</p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Edit Profile Button */}
         <div className="text-center pt-4">
           <Link href="/individual/profile-setup">

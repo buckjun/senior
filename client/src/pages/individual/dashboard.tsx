@@ -215,7 +215,7 @@ export default function IndividualDashboard() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-2">
-                  <Link href="/individual/profile-setup">
+                  <Link href="/individual/profile-view">
                     <Button variant="ghost" size="sm" className="w-full justify-start text-body">
                       <User className="w-4 h-4 mr-2" />
                       내 정보
@@ -453,9 +453,11 @@ export default function IndividualDashboard() {
                       onResumeGenerated={(data) => setParsedResumeData(data)}
                       onProfileUpdated={() => {
                         queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
+                        queryClient.invalidateQueries({ queryKey: ['/api/recommendations'] });
+                        queryClient.invalidateQueries({ queryKey: ['/api/jobs/recommended'] });
                         toast({
                           title: "프로필 업데이트 완료",
-                          description: "AI 분석 결과가 내 정보에 적용되었습니다.",
+                          description: "AI 분석 결과가 내 정보에 적용되었습니다. 추천 시스템에도 반영됩니다.",
                         });
                       }}
                     />

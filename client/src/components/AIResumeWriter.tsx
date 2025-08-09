@@ -73,6 +73,7 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/jobs/recommended'] });
       onProfileUpdated?.();
       
       toast({

@@ -8,6 +8,19 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
+## Navigation and Data Synchronization Fixes
+- **Date**: August 10, 2025
+- **Changes**: Unified "내정보" button navigation and improved data synchronization
+  - Fixed all "내정보" buttons to navigate to `/individual/profile-view` consistently
+  - Enhanced profile-view.tsx to display comprehensive profile information and resume summary
+  - Added AI analysis results section to profile view
+  - Improved data synchronization: profile updates now immediately reflect in:
+    - Profile view pages (`/api/individual-profiles/me`)
+    - Job recommendations (`/api/jobs/recommended`)
+    - Company recommendations (`/api/recommendations`)
+  - Added multiple cache invalidation for real-time updates across all sections
+  - Users can now see updated profile information immediately after AI resume generation
+
 ## Job Category Selection and Company Recommendation System
 - **Date**: August 9, 2025 
 - **Changes**: Complete implementation of job category selection and company recommendation workflow
