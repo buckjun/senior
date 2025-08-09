@@ -24,7 +24,7 @@ import AIRecommendations from "@/pages/company/ai-recommendations";
 import ExcelUploadPage from "@/pages/admin/excel-upload";
 
 function Router() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
   const [showSplash, setShowSplash] = useState(() => {
     // 세션에서 스플래시 표시 여부 확인
