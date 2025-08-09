@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { parseNaturalLanguage, extractSkills } from "./naturalLanguageService";
+import { parseResumeFromText } from "./naturalLanguageService";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { aiService } from "./aiService";
@@ -681,13 +681,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "텍스트가 필요합니다." });
       }
 
-      const parsed = parseNaturalLanguage(text);
-      const skills = extractSkills(text);
+      const result = await parseResumeFromText(text);
       
-      res.json({ 
-        ...parsed,
-        skills: skills
-      });
+      res.json(result);
     } catch (error) {
       console.error('자연어 처리 오류:', error);
       res.status(500).json({ 
@@ -709,11 +705,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         location 
       } = req.body;
 
-      // Get existing profile
-      const existingProfile = await storage.getIndividualProfile(userId);
+      // Get existing profile or create one if it doesn't exist
+      let existingProfile = await storage.getIndividualProfile(userId);
       
       if (!existingProfile) {
-        return res.status(404).json({ error: "프로필을 찾을 수 없습니다." });
+        // Create a new profile for the user
+        existingProfile = await storage.createIndividualProfile({
+          userId: userId,
+          summary: '',
+          skills: JSON.stringify([]),
+          experience: JSON.stringify([]),
+          preferredJobTypes: JSON.stringify([]),
+          preferredLocations: JSON.stringify([])
+        });
       }
 
       // Prepare update data - only update fields that have values

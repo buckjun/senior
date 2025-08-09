@@ -201,3 +201,21 @@ export function extractSkills(text: string): string[] {
 
   return foundSkills;
 }
+
+// Main function to process natural language input and return structured resume data
+export async function parseResumeFromText(text: string): Promise<any> {
+  const extractedInfo = parseNaturalLanguage(text);
+  const skills = extractSkills(text);
+  const summary = createSeniorFriendlyCoverLetter(text, extractedInfo.title);
+
+  // Return structured data with meaningful content when available
+  return {
+    name: extractedInfo.name || "",
+    title: extractedInfo.title || "",
+    location: extractedInfo.location || "",
+    phone: extractedInfo.phone || "",
+    email: extractedInfo.email || "",
+    summary: summary || "입력하신 내용을 바탕으로 자기소개서가 생성됩니다.",
+    skills: skills.length > 0 ? skills : []
+  };
+}

@@ -163,8 +163,11 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-green-600" />
-              생성된 이력서
+              생성된 이력서 미리보기
             </CardTitle>
+            <p className="text-sm text-gray-600">
+              AI가 분석한 정보를 확인하고 내 프로필에 적용하세요.
+            </p>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Personal Info */}
