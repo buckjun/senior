@@ -42,7 +42,7 @@ export default function ManualInputPage() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<InsertIndividualProfile>) => {
-      return await apiRequest('/api/individual-profiles/me', {
+      return await apiRequest('/api/individual-profiles', {
         method: 'PUT',
         body: JSON.stringify(profileData),
         headers: {

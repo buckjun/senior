@@ -5,6 +5,7 @@ import { ArrowLeft, Mic, Upload, Camera, Edit } from 'lucide-react';
 import { Link } from 'wouter';
 import { VoiceInput } from '@/components/ui/voice-input';
 import { ObjectUploader } from '@/components/ObjectUploader';
+import { AIResumeWriter } from '@/components/AIResumeWriter';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +14,7 @@ import type { UploadResult } from '@uppy/core';
 export default function IndividualProfileSetup() {
   const [location, setLocation] = useLocation();
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isAIResumeModalOpen, setIsAIResumeModalOpen] = useState(false);
   const [profileData, setProfileData] = useState({
     careerText: '',
     resumeFileUrl: ''
@@ -243,6 +245,30 @@ export default function IndividualProfileSetup() {
             />
           </div>
           
+          {/* Natural Language AI Conversion */}
+          <div className="border-2 border-blue-200 rounded-2xl p-6 bg-blue-50/50">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                <Edit className="text-blue-600 text-xl" />
+              </div>
+              <div>
+                <h3 className="text-body font-bold">자연어로 AI 이력서 작성</h3>
+                <p className="text-gray-600">평소 말하듯이 작성하면 AI가 변환</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setIsAIResumeModalOpen(true)}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              data-testid="button-ai-resume-writer"
+            >
+              <Edit className="mr-2 h-5 w-5" />
+              AI 이력서 작성 시작
+            </Button>
+            <p className="text-sm text-gray-500 mt-2 text-center">
+              "저는 25년간 제조업에서 생산관리를..."
+            </p>
+          </div>
+
           {/* Manual Input */}
           <div className="border-2 border-gray-200 rounded-2xl p-6">
             <div className="flex items-center mb-4">
@@ -281,6 +307,27 @@ export default function IndividualProfileSetup() {
         onTranscript={handleVoiceTranscript}
         placeholder="경력에 대해 자유롭게 말씀해주세요"
       />
+
+      {/* AI Resume Writer Modal */}
+      {isAIResumeModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
+              <h2 className="text-xl font-semibold">AI 이력서 작성</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsAIResumeModalOpen(false)}
+              >
+                닫기
+              </Button>
+            </div>
+            <div className="p-6">
+              <AIResumeWriter />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
