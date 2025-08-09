@@ -8,6 +8,20 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
+## Login Flow Customization and Input Validation
+- **Date**: August 10, 2025 (Latest)
+- **Changes**: Customized login process and improved user experience
+  - **Input Validation**: Added validation to login form preventing empty submissions
+    - Shows error message when ID or password fields are empty
+    - No longer redirects to Replit Auth with blank credentials
+  - **Modified Redirect Flow**: Changed post-login behavior
+    - Success redirect: `/dashboard` → `/` (welcome screen)
+    - Failure redirect: `/api/login` → `/` (welcome screen)
+    - Logout redirect: points to `/` (welcome screen)
+  - **User Experience**: Login button now requires actual input before processing
+    - Prevents accidental navigation to Replit Auth
+    - Provides clear feedback for missing credentials
+
 ## UI/UX Redesign and Navigation Fixes
 - **Date**: August 10, 2025
 - **Changes**: Complete UI overhaul and navigation flow optimization

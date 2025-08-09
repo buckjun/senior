@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 interface LoginFormProps {
   isIndividual: boolean;
@@ -9,6 +10,7 @@ interface LoginFormProps {
 
 export function LoginForm({ isIndividual }: LoginFormProps) {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     id: "",
     password: ""
@@ -16,12 +18,24 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // 기존 Replit Auth 사용
+    
+    // 입력 검증
+    if (!formData.id.trim() || !formData.password.trim()) {
+      toast({
+        title: "입력 오류",
+        description: "아이디와 비밀번호를 모두 입력해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 임시: 입력이 모두 되어있으면 Replit Auth로 진행
+    // 추후 커스텀 인증 시스템으로 교체 예정
     window.location.href = "/api/login";
   };
 
   const handleNaverLogin = () => {
-    // 네이버 로그인은 현재 Replit Auth로 처리
+    // 네이버 로그인으로 바로 Replit Auth 진행
     window.location.href = "/api/login";
   };
 
