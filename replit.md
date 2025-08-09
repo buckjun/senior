@@ -8,27 +8,31 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## Complete Revert to Replit Auth and Individual Signup Removal
+## Complete Revert to Replit Auth with Individual Signup Restoration
 - **Date**: August 10, 2025 (Latest)
-- **Changes**: Completely reverted from custom authentication back to Replit Auth and removed all individual signup functionality
-  - **Complete Individual Signup Removal**: Deleted all individual user-related functionality
-    - Removed individual signup pages, components, and all related files
-    - Deleted individual profiles, job categories, and all individual-related database tables
-    - Eliminated AI resume system, voice input, and natural language conversion features
-    - Removed job matching, recommendations, and saved jobs functionality
+- **Changes**: Completely reverted from custom authentication back to Replit Auth and restored individual signup functionality
+  - **Individual Signup Restoration with Replit Auth**: Restored all individual user functionality using Replit Auth
+    - Recreated individual signup pages and profile system using Replit OAuth
+    - Restored individual_profiles, job_categories, user_job_categories, companies tables
+    - Both individual and company signup now use Replit Auth for authentication
+    - Individual users: Replit Auth → Profile Setup → Dashboard with AI features
+    - Company users: Replit Auth → Company Profile → Company Dashboard
   - **Revert to Replit Auth**: Switched back from custom authentication to original Replit Auth
     - Restored `isAuthenticated` middleware from Replit Auth blueprint
     - Updated user access back to `req.user.claims.sub` format
     - Replaced custom login/register endpoints with Replit Auth OAuth flow
     - All authentication now handles through `/api/login`, `/api/logout`, `/api/callback`
-  - **Company-Only Focus**: Platform now exclusively serves company users
-    - Company signup: Uses Replit Auth login then company profile creation
-    - Welcome page: Shows only company signup option with individual disabled
-    - Database schema: Cleaned up to only include users (Replit Auth) and company_profiles tables
-  - **Database Cleanup**: Completely restructured database schema
-    - Dropped all individual-related tables (individual_profiles, user_job_categories, etc.)
-    - Users table reverted to Replit Auth schema (id, email, first_name, last_name, profile_image_url)
-    - Maintained only company_profiles table for business functionality
+  - **Dual User Type Support**: Platform now serves both individual and company users with Replit Auth
+    - Welcome page: Shows both individual and company signup options
+    - Profile selection system: Users choose individual or company profile after Replit Auth login
+    - Smart routing: UserDashboard component detects existing profiles and redirects appropriately
+  - **Database Restoration**: Restored complete database schema for both user types
+    - users table: Replit Auth schema (id, email, first_name, last_name, profile_image_url)
+    - individual_profiles: Full profile system for job seekers with AI analysis fields
+    - company_profiles: Business profile system with verification features
+    - job_categories: 9 main categories for 50-60 age group job matching
+    - user_job_categories: User selection system (max 2 categories)
+    - companies: CSV data integration for job recommendations
 
 ## Login Flow Customization and Input Validation  
 - **Date**: August 10, 2025

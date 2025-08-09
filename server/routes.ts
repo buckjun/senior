@@ -19,7 +19,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Company profile routes (only company features remain)
+  // Individual profile routes
+  app.get('/api/individual-profiles/me', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profile = await storage.getIndividualProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "Individual profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching individual profile:", error);
+      res.status(500).json({ message: "Failed to fetch individual profile" });
+    }
+  });
+
+  app.post('/api/individual-profiles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profileData = {
+        ...req.body,
+        userId,
+      };
+      const profile = await storage.createIndividualProfile(profileData);
+      res.status(201).json(profile);
+    } catch (error) {
+      console.error("Error creating individual profile:", error);
+      res.status(500).json({ message: "Failed to create individual profile" });
+    }
+  });
+
+  app.put('/api/individual-profiles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profile = await storage.updateIndividualProfile(userId, req.body);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating individual profile:", error);
+      res.status(500).json({ message: "Failed to update individual profile" });
+    }
+  });
+
+  // Company profile routes
   app.get('/api/company-profiles/me', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -46,6 +87,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating company profile:", error);
       res.status(500).json({ message: "Failed to create company profile" });
+    }
+  });
+
+  // Job category routes
+  app.get('/api/job-categories', async (req, res) => {
+    try {
+      const categories = await storage.getAllJobCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching job categories:", error);
+      res.status(500).json({ message: "Failed to fetch job categories" });
+    }
+  });
+
+  app.get('/api/user/job-categories', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const categories = await storage.getUserJobCategories(userId);
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching user job categories:", error);
+      res.status(500).json({ message: "Failed to fetch user job categories" });
+    }
+  });
+
+  app.post('/api/user/job-categories', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { categoryId } = req.body;
+      const category = await storage.addUserJobCategory({ userId, categoryId });
+      res.status(201).json(category);
+    } catch (error) {
+      console.error("Error adding user job category:", error);
+      res.status(500).json({ message: "Failed to add user job category" });
+    }
+  });
+
+  // Company recommendations
+  app.get('/api/recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const recommendations = await storage.getCompanyRecommendations(userId);
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      res.status(500).json({ message: "Failed to fetch recommendations" });
     }
   });
 

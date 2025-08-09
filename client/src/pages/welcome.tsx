@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
-import { Building2 } from 'lucide-react';
+import { Building2, User } from 'lucide-react';
 
 export default function Welcome() {
   return (
@@ -56,12 +56,20 @@ export default function Welcome() {
           </div>
         </div>
 
-        {/* Notice */}
-        <div className="max-w-sm mx-auto w-full mt-8">
-          <div className="bg-gray-100 rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-500">
-              현재 기업 회원가입만 가능합니다
+        {/* Individual Signup */}
+        <div className="max-w-sm mx-auto w-full mt-6">
+          <div className="bg-blue-50/50 rounded-xl p-4 text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              50-60세 구직자를 위한 맞춤형 일자리를 찾아보세요
             </p>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full h-10 bg-blue-600 text-white border-blue-600 hover:bg-blue-700"
+              data-testid="button-individual-signup"
+            >
+              <Link href="/individual/signup">개인 회원가입</Link>
+            </Button>
           </div>
         </div>
         
