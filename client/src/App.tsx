@@ -22,6 +22,9 @@ import JobSearch from "@/pages/individual/job-search";
 import SavedJobs from "@/pages/individual/saved-jobs";
 import ManualInputPage from "@/pages/individual/manual-input";
 import MobileDashboard from "@/pages/individual/mobile-dashboard";
+import Onboarding from "@/pages/individual/onboarding";
+import VoiceResume from "@/pages/individual/voice-resume";
+import JobMatches from "@/pages/individual/job-matches";
 import CompanySignup from "@/pages/company/signup";
 import CompanyDashboard from "@/pages/company/dashboard";
 import JobPosting from "@/pages/company/job-posting";
@@ -49,12 +52,15 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={MobileDashboard} />
+          <Route path="/onboarding" component={Onboarding} />
           <Route path="/individual/signup" component={IndividualSignup} />
           <Route path="/individual/profile-setup" component={IndividualProfileSetup} />
           <Route path="/individual/profile-view" component={IndividualProfileView} />
           <Route path="/individual/manual-input" component={ManualInputPage} />
+          <Route path="/individual/voice-resume" component={VoiceResume} />
           <Route path="/individual/job-categories" component={JobCategorySelection} />
           <Route path="/individual/recommendations" component={CompanyRecommendations} />
+          <Route path="/individual/job-matches" component={JobMatches} />
           <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/search" component={JobSearch} />
           <Route path="/saved-jobs" component={SavedJobs} />

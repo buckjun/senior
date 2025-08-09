@@ -1,76 +1,80 @@
-import { MobileLayout } from '@/components/layout/MobileLayout';
-import { MobileButton } from '@/components/ui/mobile-card';
-import { useLocation } from 'wouter';
-import { BrainCircuit, Sparkles, Users, Target } from 'lucide-react';
+import { Wifi, Signal, Battery } from 'lucide-react';
 
 export default function Landing() {
-  const [location, setLocation] = useLocation();
-
   return (
-    <MobileLayout showHeader={false} showBottomNav={false}>
-      <div className="flex-1 flex flex-col">
-        {/* 히어로 섹션 */}
-        <div className="flex-1 flex flex-col justify-center items-center p-6 bg-gradient-to-br from-background via-muted/10 to-background">
-          <div className="text-center space-y-8 max-w-sm">
-            {/* 로고 및 아이콘 - 원본 디자인처럼 귀여운 캐릭터 느낌 */}
-            <div className="w-32 h-32 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
-              <div className="text-5xl">👤</div>
-            </div>
+    <div className="w-full max-w-sm mx-auto min-h-screen flex flex-col" style={{ backgroundColor: '#FEF7E6' }}>
+      {/* Status Bar */}
+      <div className="flex justify-between items-center px-6 py-2 text-black text-sm font-medium">
+        <div className="flex items-center space-x-1">
+          <Signal className="w-4 h-4" />
+          <Wifi className="w-4 h-4" />
+        </div>
+        <div className="text-center font-semibold">1:47</div>
+        <div className="flex items-center space-x-1">
+          <Battery className="w-4 h-4" />
+          <span className="text-xs">100%</span>
+        </div>
+      </div>
 
-            {/* 메인 제목 */}
-            <div className="space-y-3">
-              <h1 className="text-3xl font-bold" data-testid="text-app-title">
-                일있슈
-              </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                50-60대를 위한<br />
-                <span className="text-primary font-semibold">AI 기반 맞춤형</span><br />
-                일자리 추천 서비스
-              </p>
-            </div>
-
-            {/* 특징 */}
-            <div className="space-y-4">
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Sparkles className="w-4 h-4 text-primary mr-2" />
-                <span>AI 음성 인식으로 간편한 이력서 작성</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Target className="w-4 h-4 text-primary mr-2" />
-                <span>개인 맞춤형 일자리 및 회사 추천</span>
-              </div>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Users className="w-4 h-4 text-primary mr-2" />
-                <span>50-60대 전문 취업 지원</span>
-              </div>
-            </div>
-
-            {/* CTA 버튼 */}
-            <div className="space-y-4">
-              <MobileButton 
-                fullWidth 
-                size="lg"
-                onClick={() => window.location.href = '/api/login'}
-                className="bg-primary hover:bg-primary/90 text-white font-medium shadow-lg"
-                testId="button-start"
-              >
-                지금 시작하기
-              </MobileButton>
-              <p className="text-xs text-muted-foreground px-4">
-                로그인하면 개인 맞춤형 AI 분석과<br />
-                전문적인 일자리 추천을 받으실 수 있습니다
-              </p>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col justify-center items-center px-8">
+        {/* Character with Star */}
+        <div className="relative mb-8">
+          {/* Star above character */}
+          <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.09 8.26L20 9.27L15.82 13.14L16.91 19.02L12 16.77L7.09 19.02L8.18 13.14L4 9.27L9.91 8.26L12 2Z" fill="#FFB000" />
+            </svg>
+          </div>
+          
+          {/* Main Character */}
+          <div className="w-32 h-32 rounded-full flex items-center justify-center relative" style={{ backgroundColor: '#FF8B47' }}>
+            {/* Character Eyes */}
+            <div className="flex space-x-3">
+              <div className="w-2 h-2 bg-black rounded-full"></div>
+              <div className="w-2 h-2 bg-black rounded-full"></div>
             </div>
           </div>
         </div>
 
-        {/* 하단 브랜딩 */}
-        <div className="p-6 text-center border-t border-border/50">
-          <p className="text-xs text-muted-foreground">
-            © 2025 일있슈 - 경험이 자산이 되는 곳
-          </p>
+        {/* Briefcase Icon */}
+        <div className="relative mb-6">
+          <div className="w-16 h-12 rounded-md flex items-center justify-center relative" style={{ backgroundColor: '#FF8B47' }}>
+            {/* Briefcase handle */}
+            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-2 border-2 border-orange-600 rounded-t-md bg-transparent"></div>
+            
+            {/* Checkmark */}
+            <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#FFD700' }}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6L4.5 8.5L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
         </div>
+
+        {/* Main Title */}
+        <div className="text-center">
+          <h1 
+            className="text-6xl font-bold mb-8" 
+            style={{ 
+              color: '#FFB000',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              letterSpacing: '-0.02em'
+            }}
+            data-testid="text-app-title"
+          >
+            일있슈
+          </h1>
+        </div>
+
+        {/* Touch area for navigation */}
+        <button 
+          onClick={() => window.location.href = '/api/login'}
+          className="absolute inset-0 w-full h-full bg-transparent"
+          style={{ zIndex: 10 }}
+          aria-label="앱 시작하기"
+        />
       </div>
-    </MobileLayout>
+    </div>
   );
 }
