@@ -80,8 +80,13 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
       
       toast({
         title: "프로필 업데이트 완료! 🎉",
-        description: "AI가 생성한 이력서 정보로 내 정보가 업데이트되었습니다.",
+        description: "이제 맞춤 회사 추천을 받으실 수 있습니다.",
       });
+
+      // Navigate to recommendations after profile update
+      setTimeout(() => {
+        window.location.href = '/individual/recommendations';
+      }, 1500);
     },
     onError: (error: any) => {
       console.error('Profile update error:', error);

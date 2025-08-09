@@ -35,8 +35,8 @@ export default function JobCategorySelectionPage() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/user/job-categories'] });
       
-      // Redirect to company recommendations
-      setLocation('/individual/recommendations');
+      // Redirect to AI resume writer
+      setLocation('/individual/profile-setup');
     },
     onError: (error: any) => {
       toast({

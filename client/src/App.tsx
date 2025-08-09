@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Welcome from "@/pages/welcome";
 import IndividualSignup from "@/pages/individual/signup";
 import IndividualProfileSetup from "@/pages/individual/profile-setup";
+import IndividualProfileView from "@/pages/individual/profile-view";
 import IndividualDashboard from "@/pages/individual/dashboard";
 import JobCategorySelection from "@/pages/individual/job-category-selection";
 import CompanyRecommendations from "@/pages/individual/company-recommendations";
@@ -42,6 +43,7 @@ function Router() {
           <Route path="/" component={IndividualDashboard} />
           <Route path="/individual/signup" component={IndividualSignup} />
           <Route path="/individual/profile-setup" component={IndividualProfileSetup} />
+          <Route path="/individual/profile-view" component={IndividualProfileView} />
           <Route path="/individual/job-categories" component={JobCategorySelection} />
           <Route path="/individual/recommendations" component={CompanyRecommendations} />
           <Route path="/individual/dashboard" component={IndividualDashboard} />

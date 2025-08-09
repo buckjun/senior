@@ -500,10 +500,10 @@ export default function IndividualDashboard() {
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-heading">기본 정보</CardTitle>
-                          <Link href="/individual/profile-setup">
+                          <Link href="/individual/profile-view">
                             <Button size="sm" variant="outline">
                               <Plus className="w-4 h-4 mr-1" />
-                              수정
+                              보기
                             </Button>
                           </Link>
                         </div>

@@ -27,7 +27,7 @@ export default function IndividualProfileSetup() {
     onSuccess: (response) => {
       // Store AI analysis results
       localStorage.setItem('aiAnalysis', JSON.stringify(response));
-      setLocation('/individual/dashboard');
+      setLocation('/individual/recommendations');
     },
     onError: () => {
       toast({
@@ -40,15 +40,16 @@ export default function IndividualProfileSetup() {
 
   const analyzeImageMutation = useMutation({
     mutationFn: async (base64Image: string) => {
-      return apiRequest('POST', '/api/ai/analyze-resume-image', { base64Image });
+      const response = await apiRequest('POST', '/api/ai/analyze-resume-image', { base64Image });
+      return await response.json();
     },
-    onSuccess: (response) => {
-      localStorage.setItem('aiAnalysis', JSON.stringify(response.analysis));
+    onSuccess: (data) => {
+      localStorage.setItem('aiAnalysis', JSON.stringify(data.analysis));
       toast({
         title: "분석 완료",
         description: "이력서 이미지가 성공적으로 분석되었습니다.",
       });
-      setLocation('/individual/dashboard');
+      setLocation('/individual/recommendations');
     },
     onError: () => {
       toast({
@@ -61,15 +62,16 @@ export default function IndividualProfileSetup() {
 
   const processVoiceMutation = useMutation({
     mutationFn: async (transcript: string) => {
-      return apiRequest('POST', '/api/ai/process-voice', { transcript });
+      const response = await apiRequest('POST', '/api/ai/process-voice', { transcript });
+      return await response.json();
     },
-    onSuccess: (response) => {
-      localStorage.setItem('aiAnalysis', JSON.stringify(response.analysis));
+    onSuccess: (data) => {
+      localStorage.setItem('aiAnalysis', JSON.stringify(data.analysis));
       toast({
         title: "분석 완료",
         description: "음성 입력이 성공적으로 분석되었습니다.",
       });
-      setLocation('/individual/dashboard');
+      setLocation('/individual/recommendations');
     },
     onError: () => {
       toast({
