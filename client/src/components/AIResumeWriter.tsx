@@ -124,11 +124,11 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
       {/* 자연어 입력 섹션 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Wand2 className="h-5 w-5 text-blue-600" />
+          <CardTitle className="flex items-center gap-2 text-[#2F3036]">
+            <Wand2 className="h-5 w-5 text-[#2F3036]" />
             자연어로 이력서 작성하기
           </CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-[#2F3036]/70">
             평소 말하듯이 자연스럽게 경력과 경험을 설명해주세요. AI가 자동으로 이력서 형태로 정리해드립니다.
           </p>
         </CardHeader>
@@ -181,13 +181,13 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
 
       {/* 분석 결과 미리보기 */}
       {parsedData && (
-        <Card className="border-green-200 bg-green-50/50">
+        <Card className="border-[#2F3036]/20 bg-[#F5F5DC]/30">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-800">
+            <CardTitle className="flex items-center gap-2 text-[#2F3036]">
               <Sparkles className="h-5 w-5" />
               AI 분석 결과
             </CardTitle>
-            <p className="text-sm text-green-700">
+            <p className="text-sm text-[#2F3036]/70">
               자연어 입력에서 다음 정보를 추출했습니다.
             </p>
           </CardHeader>
