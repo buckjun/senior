@@ -107,8 +107,15 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
       recognition.onerror = (event) => {
         setIsListening(false);
         const errorMessage = getErrorMessage(event.error);
-        setStatus(`오류: ${errorMessage}`);
-        onStatusChange?.(`오류: ${errorMessage}`);
+        
+        // Don't show error for aborted (often user-initiated)
+        if (event.error !== 'aborted') {
+          setStatus(`오류: ${errorMessage}`);
+          onStatusChange?.(`오류: ${errorMessage}`);
+        } else {
+          setStatus('음성 인식 중단됨');
+          onStatusChange?.('음성 인식 중단됨');
+        }
       };
 
       recognitionRef.current = recognition;
@@ -120,7 +127,7 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
 
     return () => {
       if (recognitionRef.current && isListening) {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort(); // Use abort for cleaner cleanup
       }
     };
   }, [onTranscript, onStatusChange]);
@@ -144,14 +151,18 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
     }
   };
 
-  const startListening = () => {
+  const startListening = async () => {
     if (!recognitionRef.current || isListening || disabled) return;
     
     try {
+      // Request microphone permission
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      
       recognitionRef.current.start();
     } catch (error) {
-      setStatus('음성 인식을 시작할 수 없습니다');
-      onStatusChange?.('음성 인식을 시작할 수 없습니다');
+      console.error('Microphone permission or start error:', error);
+      setStatus('마이크 권한이 필요합니다');
+      onStatusChange?.('마이크 권한이 필요합니다');
     }
   };
 

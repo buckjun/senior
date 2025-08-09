@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Mic, MicOff, Square } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -61,38 +61,75 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
       setIsListening(false);
       setIsRecording(false);
       
-      toast({
-        title: "음성인식 오류",
-        description: "음성인식 중 오류가 발생했습니다. 다시 시도해주세요.",
-        variant: "destructive",
-      });
+      // Handle specific error types
+      let errorMessage = "음성인식 중 오류가 발생했습니다.";
+      let shouldShowToast = true;
+      
+      switch (event.error) {
+        case 'aborted':
+          errorMessage = "음성인식이 중단되었습니다.";
+          shouldShowToast = false; // Don't show toast for aborted (often user-initiated)
+          break;
+        case 'no-speech':
+          errorMessage = "음성이 감지되지 않았습니다. 다시 시도해주세요.";
+          break;
+        case 'not-allowed':
+          errorMessage = "마이크 권한이 필요합니다. 브라우저 설정에서 마이크를 허용해주세요.";
+          break;
+        case 'network':
+          errorMessage = "네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.";
+          break;
+        case 'service-not-allowed':
+          errorMessage = "음성인식 서비스가 차단되었습니다.";
+          break;
+        default:
+          errorMessage = `음성인식 오류: ${event.error}`;
+      }
+      
+      if (shouldShowToast) {
+        toast({
+          title: "음성인식 오류",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     };
 
     recognition.current.onend = () => {
       setIsListening(false);
-      if (isRecording) {
-        // Restart recognition if still recording
-        recognition.current.start();
-      }
+      // Remove automatic restart to prevent "aborted" errors
+      // User needs to manually restart if needed
     };
 
     return () => {
-      if (recognition.current) {
-        recognition.current.stop();
+      if (recognition.current && isListening) {
+        recognition.current.abort(); // Use abort instead of stop for cleaner cleanup
       }
     };
   }, [isRecording, toast]);
 
-  const startRecording = () => {
+  const startRecording = async () => {
     if (!recognition.current) return;
     
-    setTranscript('');
-    setIsRecording(true);
-    recognition.current.start();
+    try {
+      // Request microphone permission
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      setTranscript('');
+      setIsRecording(true);
+      recognition.current.start();
+    } catch (error) {
+      console.error('Microphone permission denied:', error);
+      toast({
+        title: "권한 필요",
+        description: "마이크 권한이 필요합니다. 브라우저 설정에서 마이크를 허용해주세요.",
+        variant: "destructive",
+      });
+    }
   };
 
   const stopRecording = () => {
-    if (recognition.current) {
+    if (recognition.current && isListening) {
       recognition.current.stop();
     }
     setIsRecording(false);
@@ -116,6 +153,10 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="mobile-container max-w-sm mx-auto bottom-0 top-auto translate-y-0 rounded-t-3xl rounded-b-none border-0 p-6">
+        <DialogHeader className="sr-only">
+          <DialogTitle>음성 입력</DialogTitle>
+          <DialogDescription>음성으로 텍스트를 입력하세요.</DialogDescription>
+        </DialogHeader>
         <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
         
         <div className="text-center mb-8">
