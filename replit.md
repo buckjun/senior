@@ -8,25 +8,27 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## Complete Custom Authentication System Migration
+## Complete Revert to Replit Auth and Individual Signup Removal
 - **Date**: August 10, 2025 (Latest)
-- **Changes**: Fully migrated from Replit Auth to custom authentication system
-  - **Backend Migration**: Converted all API endpoints from Replit Auth to custom authentication
-    - Replaced `isAuthenticated` middleware with `requireAuth` and `requireIndividualAuth`/`requireCompanyAuth` 
-    - Updated user access from `req.user.claims.sub` to `req.user.id`
-    - All 14 protected endpoints now use custom authentication system
-  - **Frontend Registration**: Updated signup flows for both individual and company users
-    - Individual signup: Uses `/api/register` endpoint with password validation
-    - Company signup: Enhanced with password fields and two-step user/profile creation
-    - Both flows redirect to `/dashboard` upon successful registration
-  - **Frontend Login**: Converted LoginForm component to use custom `/api/login` endpoint
-    - Replaced Replit Auth redirect with proper form submission and validation
-    - Added error handling for authentication failures
-    - Success cases invalidate auth cache and redirect to dashboard
-  - **User Experience**: Maintained all existing UI/UX while switching authentication backend
-    - Login validation prevents empty submissions
-    - Password confirmation required for all signups
-    - Proper error messages for authentication failures
+- **Changes**: Completely reverted from custom authentication back to Replit Auth and removed all individual signup functionality
+  - **Complete Individual Signup Removal**: Deleted all individual user-related functionality
+    - Removed individual signup pages, components, and all related files
+    - Deleted individual profiles, job categories, and all individual-related database tables
+    - Eliminated AI resume system, voice input, and natural language conversion features
+    - Removed job matching, recommendations, and saved jobs functionality
+  - **Revert to Replit Auth**: Switched back from custom authentication to original Replit Auth
+    - Restored `isAuthenticated` middleware from Replit Auth blueprint
+    - Updated user access back to `req.user.claims.sub` format
+    - Replaced custom login/register endpoints with Replit Auth OAuth flow
+    - All authentication now handles through `/api/login`, `/api/logout`, `/api/callback`
+  - **Company-Only Focus**: Platform now exclusively serves company users
+    - Company signup: Uses Replit Auth login then company profile creation
+    - Welcome page: Shows only company signup option with individual disabled
+    - Database schema: Cleaned up to only include users (Replit Auth) and company_profiles tables
+  - **Database Cleanup**: Completely restructured database schema
+    - Dropped all individual-related tables (individual_profiles, user_job_categories, etc.)
+    - Users table reverted to Replit Auth schema (id, email, first_name, last_name, profile_image_url)
+    - Maintained only company_profiles table for business functionality
 
 ## Login Flow Customization and Input Validation  
 - **Date**: August 10, 2025
