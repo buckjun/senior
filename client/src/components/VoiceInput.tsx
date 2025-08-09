@@ -57,7 +57,7 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
       
       // Configure recognition
       recognition.lang = 'ko-KR';
-      recognition.continuous = true;
+      recognition.continuous = false; // Prevent multiple sessions and accumulation
       recognition.interimResults = true;
       recognition.maxAlternatives = 1;
 
@@ -68,28 +68,32 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
       };
 
       recognition.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
+        let currentFinal = '';
+        let currentInterim = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
+          const transcriptPart = event.results[i][0].transcript;
           
           if (event.results[i].isFinal) {
-            finalTranscript += transcript;
+            currentFinal += transcriptPart;
           } else {
-            interimTranscript += transcript;
+            currentInterim += transcriptPart;
           }
         }
 
-        const fullTranscript = finalTranscript || interimTranscript;
-        if (fullTranscript.trim()) {
-          setTranscript(fullTranscript);
+        // Only update transcript with current results, don't accumulate interim
+        const displayText = currentFinal || currentInterim;
+        if (displayText.trim()) {
+          setTranscript(displayText);
           
-          if (finalTranscript) {
-            onTranscript(finalTranscript);
+          if (currentFinal) {
+            onTranscript(currentFinal);
             const confidence = event.results[event.results.length - 1][0].confidence || 0;
             setStatus(`음성 인식 완료 (신뢰도: ${Math.round(confidence * 100)}%)`);
             onStatusChange?.(`음성 인식 완료 (신뢰도: ${Math.round(confidence * 100)}%)`);
+          } else {
+            setStatus('음성 인식 중...');
+            onStatusChange?.('음성 인식 중...');
           }
         }
       };
@@ -106,6 +110,9 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
 
       recognition.onerror = (event) => {
         setIsListening(false);
+        // Clear transcript on error to prevent accumulation
+        setTranscript('');
+        
         const errorMessage = getErrorMessage(event.error);
         
         // Don't show error for aborted (often user-initiated)
@@ -157,6 +164,9 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
     try {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Clear previous results to prevent accumulation
+      setTranscript('');
       
       recognitionRef.current.start();
     } catch (error) {

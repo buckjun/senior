@@ -176,11 +176,14 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
             <TabsContent value="voice" className="space-y-4 mt-4">
               <VoiceInput
                 onTranscript={(transcript) => {
-                  // Append voice transcript to existing text
-                  setInputText(prevText => {
-                    const newText = prevText ? `${prevText} ${transcript}` : transcript;
-                    return newText.trim();
-                  });
+                  // Append voice transcript to existing text (clean way)
+                  const cleanTranscript = transcript.trim();
+                  if (cleanTranscript) {
+                    setInputText(prevText => {
+                      const newText = prevText ? `${prevText} ${cleanTranscript}` : cleanTranscript;
+                      return newText.trim();
+                    });
+                  }
                 }}
                 onStatusChange={setVoiceStatus}
                 disabled={parseResumeMutation.isPending}

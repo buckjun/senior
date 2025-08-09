@@ -14,6 +14,8 @@ interface VoiceInputProps {
 export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말씀해주세요..." }: VoiceInputProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [finalTranscript, setFinalTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
   const recognition = useRef<any>(null);
   const { toast } = useToast();
@@ -32,34 +34,56 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     recognition.current = new SpeechRecognition();
     
-    recognition.current.continuous = true;
+    recognition.current.continuous = false; // Prevent multiple sessions
     recognition.current.interimResults = true;
     recognition.current.lang = 'ko-KR';
+    recognition.current.maxAlternatives = 1;
 
     recognition.current.onstart = () => {
       setIsListening(true);
     };
 
     recognition.current.onresult = (event: any) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
+      let currentFinal = '';
+      let currentInterim = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcriptPart = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += transcriptPart;
+          currentFinal += transcriptPart;
         } else {
-          interimTranscript += transcriptPart;
+          currentInterim += transcriptPart;
         }
       }
 
-      setTranscript(prev => prev + finalTranscript + interimTranscript);
+      // Update final transcript (accumulate only final results)
+      if (currentFinal) {
+        setFinalTranscript(prev => prev + currentFinal);
+      }
+      
+      // Update interim transcript (replace, don't accumulate)
+      setInterimTranscript(currentInterim);
+      
+      // Update display transcript (final + current interim, no accumulation)
+      if (currentFinal) {
+        // Only use the final result, clear interim
+        setTranscript(prevFinal => prevFinal + currentFinal);
+        setInterimTranscript('');
+      } else if (currentInterim) {
+        // Show interim results without accumulating
+        setTranscript(prevFinal => prevFinal + currentInterim);
+      }
     };
 
     recognition.current.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
       setIsListening(false);
       setIsRecording(false);
+      
+      // Clear all transcripts on error to prevent accumulation
+      setTranscript('');
+      setFinalTranscript('');
+      setInterimTranscript('');
       
       // Handle specific error types
       let errorMessage = "음성인식 중 오류가 발생했습니다.";
@@ -97,8 +121,12 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
 
     recognition.current.onend = () => {
       setIsListening(false);
-      // Remove automatic restart to prevent "aborted" errors
-      // User needs to manually restart if needed
+      // Clear interim results on end
+      setInterimTranscript('');
+      // If recording is still active, allow user to start again
+      if (isRecording) {
+        setIsRecording(false);
+      }
     };
 
     return () => {
@@ -115,7 +143,10 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
       
+      // Clear all transcripts
       setTranscript('');
+      setFinalTranscript('');
+      setInterimTranscript('');
       setIsRecording(true);
       recognition.current.start();
     } catch (error) {
@@ -137,10 +168,13 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
   };
 
   const handleComplete = () => {
-    if (transcript.trim()) {
-      onTranscript(transcript.trim());
+    const finalText = finalTranscript.trim();
+    if (finalText) {
+      onTranscript(finalText);
       onClose();
       setTranscript('');
+      setFinalTranscript('');
+      setInterimTranscript('');
     }
   };
 
@@ -148,6 +182,8 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
     stopRecording();
     onClose();
     setTranscript('');
+    setFinalTranscript('');
+    setInterimTranscript('');
   };
 
   return (
