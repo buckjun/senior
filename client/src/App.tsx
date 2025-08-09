@@ -64,7 +64,7 @@ function Router() {
         </>
       ) : (
         <>
-          <Route path="/" component={Welcome} />
+          <Route path="/" component={IndividualDashboard} />
           <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/profile-setup" component={IndividualProfileSetup} />
           <Route path="/individual/profile-view" component={IndividualProfileView} />

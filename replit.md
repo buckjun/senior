@@ -8,16 +8,20 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## Login Flow Customization and Input Validation
+## Login Flow Customization and Input Validation  
 - **Date**: August 10, 2025 (Latest)
 - **Changes**: Customized login process and improved user experience
   - **Input Validation**: Added validation to login form preventing empty submissions
     - Shows error message when ID or password fields are empty
     - No longer redirects to Replit Auth with blank credentials
   - **Modified Redirect Flow**: Changed post-login behavior
-    - Success redirect: `/dashboard` → `/` (welcome screen)
+    - Success redirect: `/dashboard` → `/` (individual dashboard)
     - Failure redirect: `/api/login` → `/` (welcome screen)
-    - Logout redirect: points to `/` (welcome screen)
+    - Logout redirect: points to `/` (welcome screen) 
+  - **Fixed 404 Error**: Resolved routing issue for authenticated users
+    - Authenticated users now see dashboard at "/" instead of welcome screen
+    - Eliminated infinite loading loops from auth query failures
+    - Custom 401 error handling in useAuth hook prevents request spam
   - **User Experience**: Login button now requires actual input before processing
     - Prevents accidental navigation to Replit Auth
     - Provides clear feedback for missing credentials
