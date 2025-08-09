@@ -160,7 +160,12 @@ export default function IndividualProfileView() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div 
+      className="min-h-screen"
+      style={{
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFEF0 49.04%, #FFFFFF 100%)'
+      }}
+    >
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-border sticky top-0 z-10 safe-area-top">
         <div className="flex items-center">
@@ -187,7 +192,7 @@ export default function IndividualProfileView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" style={{ color: '#006FFD' }} />
+              <User className="w-5 h-5" style={{ color: '#2F3036' }} />
               기본 정보
             </CardTitle>
           </CardHeader>
@@ -238,7 +243,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5" style={{ color: '#006FFD' }} />
+                <Star className="w-5 h-5" style={{ color: '#2F3036' }} />
                 자기소개
               </CardTitle>
             </CardHeader>
@@ -255,7 +260,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5" style={{ color: '#006FFD' }} />
+                <Award className="w-5 h-5" style={{ color: '#2F3036' }} />
                 보유 기술
               </CardTitle>
             </CardHeader>
@@ -276,14 +281,14 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Briefcase className="w-5 h-5" style={{ color: '#006FFD' }} />
+                <Briefcase className="w-5 h-5" style={{ color: '#2F3036' }} />
                 경력 사항
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {experience.map((exp, index) => (
-                  <div key={index} className="border-l-2 pl-4 py-2" style={{ borderColor: '#006FFD' }}>
+                  <div key={index} className="border-l-2 pl-4 py-2" style={{ borderColor: '#2F3036' }}>
                     <p className="text-body">{exp}</p>
                   </div>
                 ))}
@@ -297,7 +302,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="w-5 h-5" style={{ color: '#006FFD' }} />
+                <GraduationCap className="w-5 h-5" style={{ color: '#2F3036' }} />
                 학력 사항
               </CardTitle>
             </CardHeader>
@@ -318,7 +323,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5" style={{ color: '#006FFD' }} />
+                <Target className="w-5 h-5" style={{ color: '#2F3036' }} />
                 희망 조건
               </CardTitle>
             </CardHeader>
