@@ -9,20 +9,20 @@ export default function LoginSelection() {
     const rect = e.currentTarget.getBoundingClientRect();
     const y = e.clientY - rect.top;
     
-    // 입력 필드 영역 클릭 시 키보드 표시
-    if (y > 360 && y < 500) {
+    // 입력 필드 영역 클릭 시 키보드 표시 (아이디, 비밀번호 입력 박스)
+    if (y > 390 && y < 510) {
       setShowKeyboard(true);
       return;
     }
     
     // 로그인 버튼 영역 클릭 시
-    if (y > 515 && y < 570) {
+    if (y > 520 && y < 570) {
       window.location.href = '/api/login';
       return;
     }
     
     // 회원가입 버튼 영역 클릭 시
-    if (y > 605 && y < 635) {
+    if (y > 595 && y < 610) {
       setLocation('/registration');
       return;
     }
@@ -33,20 +33,28 @@ export default function LoginSelection() {
 
   return (
     <div className="w-full h-screen flex items-center justify-center bg-white relative overflow-hidden">
-      {/* 메인 이미지 - 키보드 부분을 잘라낸 버전 */}
       <div 
-        className="w-full h-full cursor-pointer relative"
+        className="w-full cursor-pointer relative"
         style={{ maxWidth: '393px', maxHeight: '852px' }}
         onClick={handleClick}
       >
-        <img 
-          src="/83-1531.png" 
-          alt="로그인 선택 화면"
-          className="w-full h-full object-cover"
+        {/* 키보드 없는 상태에서는 원본 이미지를 키보드 부분만 잘라서 표시 */}
+        <div 
+          className="w-full"
           style={{ 
-            clipPath: 'inset(0 0 250px 0)'
+            height: showKeyboard ? '602px' : '852px',
+            transition: 'height 0.3s ease-out'
           }}
-        />
+        >
+          <img 
+            src="/83-1531.png" 
+            alt="로그인 선택 화면"
+            className="w-full h-full object-cover object-top"
+            style={{ 
+              clipPath: showKeyboard ? 'inset(0 0 29.3% 0)' : 'inset(0 0 29.3% 0)'
+            }}
+          />
+        </div>
         
         {/* 키보드 오버레이 - 입력 필드 클릭 시에만 표시 */}
         {showKeyboard && (
