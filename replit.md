@@ -6,6 +6,25 @@ This is an AI-powered career matching platform specifically designed for Korean 
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes (August 2025)
+
+## AI Resume System Implementation
+- **Date**: August 9, 2025
+- **Changes**: Complete implementation of AI-powered resume generation system
+  - Integrated Google Gemini AI for Korean natural language processing
+  - Built real-time preview system with ResumePreview component  
+  - Implemented complete workflow from text input to profile update
+  - Added example input functionality for testing ("문동주" baseball player example)
+  - Verified successful parsing and profile updates through server logs
+
+## Navigation System Fixes
+- **Date**: August 9, 2025  
+- **Changes**: Unified all profile navigation paths
+  - Fixed 404 errors in bottom navigation
+  - Connected top-right profile avatar and bottom-right "내정보" button to same route
+  - Added SavedJobs page for "찜한공고" functionality
+  - All profile-related buttons now route to `/individual/profile-setup`
+
 # System Architecture
 
 ## Frontend Architecture
@@ -37,13 +56,14 @@ Preferred communication style: Simple, everyday language.
 - **Object ACL**: Custom access control system for file permissions
 
 ## AI Integration
-- **Provider**: OpenAI GPT-4o for natural language processing
+- **Provider**: Google Gemini AI (gemini-2.5-flash) for natural language processing
 - **Features**: 
-  - Career profile analysis from voice input or text
-  - Automatic resume parsing and skill extraction
-  - Job matching algorithms with scoring
+  - AI-powered resume parsing from natural language Korean text
+  - Automatic skill extraction optimized for 5060 generation
+  - Real-time resume preview with structured data
   - Korean language optimization for senior job seekers
-- **Use Cases**: Profile enhancement, job recommendations, skills assessment
+  - Complete workflow: text input → AI analysis → preview → profile update
+- **Use Cases**: Resume generation, profile enhancement, job recommendations, skills assessment
 
 ## File Upload System
 - **Library**: Uppy.js for drag-and-drop file handling
