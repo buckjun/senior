@@ -64,12 +64,25 @@ interface UserProfile {
   [key: string]: any;
 }
 
+interface ParsedResume {
+  name: string;
+  title: string;
+  location: string;
+  phone: string;
+  email: string;
+  summary: string;
+  skills: string[];
+  experience: string[];
+  education: string[];
+}
+
 export default function IndividualDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
+  const [parsedResumeData, setParsedResumeData] = useState<ParsedResume | undefined>(undefined);
 
   // Load recommended jobs
   const { data: recommendedJobs, isLoading: loadingJobs } = useQuery({
@@ -408,15 +421,34 @@ export default function IndividualDashboard() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <AIResumeWriter />
+                    <AIResumeWriter 
+                      onResumeGenerated={(data) => setParsedResumeData(data)}
+                      onProfileUpdated={() => {
+                        queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
+                        toast({
+                          title: "프로필 업데이트 완료",
+                          description: "AI 분석 결과가 내 정보에 적용되었습니다.",
+                        });
+                      }}
+                    />
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-heading">미리보기</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-heading">미리보기</CardTitle>
+                      {parsedResumeData && (
+                        <Badge className="status-badge status-success">분석 완료</Badge>
+                      )}
+                    </div>
+                    {parsedResumeData && (
+                      <CardDescription>
+                        AI가 분석한 이력서 정보를 확인하고 "내 정보"에 적용할 수 있습니다
+                      </CardDescription>
+                    )}
                   </CardHeader>
                   <CardContent>
-                    <ResumePreview data={undefined} />
+                    <ResumePreview data={parsedResumeData} />
                   </CardContent>
                 </Card>
               </TabsContent>

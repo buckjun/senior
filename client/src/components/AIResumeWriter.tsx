@@ -34,7 +34,8 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
   // Parse resume mutation
   const parseResumeMutation = useMutation({
     mutationFn: async (text: string): Promise<ParsedResume> => {
-      const result = await apiRequest("POST", "/api/parse-resume", { text }) as ParsedResume;
+      const response = await apiRequest("POST", "/api/parse-resume", { text });
+      const result = await response.json();
       return result;
     },
     onSuccess: (data) => {
