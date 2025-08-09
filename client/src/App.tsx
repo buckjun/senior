@@ -63,12 +63,15 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated ? (
-        <Route path="/" component={Welcome} />
+        <>
+          <Route path="/" component={Welcome} />
+          <Route path="/individual/signup" component={IndividualSignup} />
+          <Route path="/company/signup" component={CompanySignup} />
+        </>
       ) : (
         <>
           <Route path="/" component={IndividualDashboard} />
           <Route path="/dashboard" component={IndividualDashboard} />
-          <Route path="/individual/signup" component={IndividualSignup} />
           <Route path="/individual/profile-setup" component={IndividualProfileSetup} />
           <Route path="/individual/profile-view" component={IndividualProfileView} />
           <Route path="/individual/manual-input" component={ManualInputPage} />
@@ -77,7 +80,6 @@ function Router() {
           <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/search" component={JobSearch} />
           <Route path="/saved-jobs" component={SavedJobs} />
-          <Route path="/company/signup" component={CompanySignup} />
           <Route path="/company/dashboard" component={CompanyDashboard} />
           <Route path="/company/job-posting" component={JobPosting} />
           <Route path="/company/ai-recommendations" component={AIRecommendations} />
