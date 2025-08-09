@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LoginForm } from '@/components/LoginForm';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from 'wouter';
 
 export default function Welcome() {
   const [isIndividual, setIsIndividual] = useState(true);
+  const { isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  // 로그인된 사용자는 대시보드로 리다이렉트
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      setLocation('/individual/dashboard');
+    }
+  }, [isAuthenticated, isLoading, setLocation]);
 
   return (
     <div 

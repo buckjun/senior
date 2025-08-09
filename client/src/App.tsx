@@ -38,13 +38,7 @@ function Router() {
     setShowSplash(false);
   };
 
-  // URL이 /dashboard인 경우 스플래시 스킵 (로그인 후 리다이렉트)
-  useEffect(() => {
-    if (location === '/dashboard') {
-      sessionStorage.setItem('hasShownSplash', 'true');
-      setShowSplash(false);
-    }
-  }, [location]);
+
 
   // 스플래시 화면 표시 중이면 스플래시 화면만 보여주기
   if (showSplash) {
@@ -70,14 +64,13 @@ function Router() {
         </>
       ) : (
         <>
-          <Route path="/" component={IndividualDashboard} />
-          <Route path="/dashboard" component={IndividualDashboard} />
+          <Route path="/" component={Welcome} />
+          <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/profile-setup" component={IndividualProfileSetup} />
           <Route path="/individual/profile-view" component={IndividualProfileView} />
           <Route path="/individual/manual-input" component={ManualInputPage} />
           <Route path="/individual/job-categories" component={JobCategorySelection} />
           <Route path="/individual/recommendations" component={CompanyRecommendations} />
-          <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/search" component={JobSearch} />
           <Route path="/saved-jobs" component={SavedJobs} />
           <Route path="/company/dashboard" component={CompanyDashboard} />
