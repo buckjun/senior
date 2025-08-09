@@ -30,7 +30,9 @@ import {
   Settings,
   LogOut,
   Home,
-  Plus
+  Plus,
+  Layers,
+  ArrowRight
 } from "lucide-react";
 
 interface JobPosting {
@@ -382,6 +384,32 @@ export default function IndividualDashboard() {
                         </Link>
                       </div>
                     )}
+                  </CardContent>
+                </Card>
+
+                {/* Job Category Selection */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-heading">직종 선택</CardTitle>
+                    <CardDescription>관심 있는 직종을 선택하여 맞춤 회사를 추천받으세요</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col space-y-4">
+                      <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg">
+                        <Layers className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                        <h3 className="text-body font-medium mb-2">직종을 선택해주세요</h3>
+                        <p className="text-caption text-gray-500 mb-4">
+                          1-2개의 관심 직종을 선택하시면 맞춤 회사를 추천해드립니다
+                        </p>
+                        <Link href="/individual/job-categories">
+                          <Button data-testid="button-select-job-categories">
+                            <Layers className="w-4 h-4 mr-2" />
+                            직종 선택하기
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 

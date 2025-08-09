@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { UploadResult } from '@uppy/core';
 
 export default function IndividualProfileSetup() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [profileData, setProfileData] = useState({
     careerText: '',
@@ -136,16 +136,25 @@ export default function IndividualProfileSetup() {
     setLocation('/individual/dashboard');
   };
 
+  const handleBackButton = () => {
+    // Navigate back to dashboard instead of previous page to avoid auth issues
+    setLocation('/individual/dashboard');
+  };
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-border sticky top-0 z-10 safe-area-top">
         <div className="flex items-center">
-          <Link href="/individual/signup">
-            <Button variant="ghost" size="sm" className="w-10 h-10 p-0" data-testid="button-back">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-10 h-10 p-0" 
+            onClick={handleBackButton}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <h2 className="flex-1 text-heading font-bold text-center">프로필 생성</h2>
           <div className="w-10"></div>
         </div>
