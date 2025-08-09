@@ -145,7 +145,7 @@ export default function IndividualDashboard() {
           <div className="flex items-center justify-between h-16">
             {/* Logo and Navigation */}
             <div className="flex items-center space-x-8">
-              <h1 className="text-heading font-bold text-blue-600">5060 Career</h1>
+              <h1 className="text-heading font-bold text-gray-800">일있슈</h1>
               <nav className="hidden md:flex items-center space-x-6">
                 <Link href="/" className="flex items-center space-x-2 text-body text-gray-900 dark:text-gray-100 hover:text-blue-600">
                   <Home className="w-4 h-4" />
@@ -183,8 +183,8 @@ export default function IndividualDashboard() {
                 <Bell className="w-4 h-4" />
               </Button>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="hidden md:block">
                   <div className="text-label font-medium">{getUserDisplayName()}님</div>
@@ -215,8 +215,8 @@ export default function IndividualDashboard() {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 text-gray-600" />
                   </div>
                   <div>
                     <CardTitle className="text-body">{getUserDisplayName()}님</CardTitle>

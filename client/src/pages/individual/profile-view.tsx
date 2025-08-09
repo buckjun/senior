@@ -187,7 +187,7 @@ export default function IndividualProfileView() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-600" />
+              <User className="w-5 h-5 text-gray-600" />
               기본 정보
             </CardTitle>
           </CardHeader>
@@ -238,7 +238,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-blue-600" />
+                <Star className="w-5 h-5 text-gray-600" />
                 자기소개
               </CardTitle>
             </CardHeader>
@@ -255,7 +255,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-blue-600" />
+                <Award className="w-5 h-5 text-gray-600" />
                 보유 기술
               </CardTitle>
             </CardHeader>
@@ -276,14 +276,14 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-blue-600" />
+                <Briefcase className="w-5 h-5 text-gray-600" />
                 경력 사항
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {experience.map((exp, index) => (
-                  <div key={index} className="border-l-2 border-blue-200 pl-4 py-2">
+                  <div key={index} className="border-l-2 border-gray-200 pl-4 py-2">
                     <p className="text-body">{exp}</p>
                   </div>
                 ))}
@@ -297,7 +297,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-blue-600" />
+                <GraduationCap className="w-5 h-5 text-gray-600" />
                 학력 사항
               </CardTitle>
             </CardHeader>
@@ -318,7 +318,7 @@ export default function IndividualProfileView() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-600" />
+                <Target className="w-5 h-5 text-gray-600" />
                 희망 조건
               </CardTitle>
             </CardHeader>
