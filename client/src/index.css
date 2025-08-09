@@ -4,35 +4,35 @@
 @tailwind utilities;
 
 :root {
-  /* Pixso 다크 테마 기반 */
-  --background: 220 23% 5%;  /* #0a0a17 */
-  --foreground: 0 0% 85%;    /* hsla(0, 0%, 100%, 0.85) */
-  --card: 220 19% 14%;       /* #222531 */
-  --card-foreground: 0 0% 85%;
-  --popover: 220 19% 14%;
-  --popover-foreground: 0 0% 85%;
-  --primary: 222 100% 50%;   /* #0035ff */
+  /* 원본 디자인 기반 밝은 테마 */
+  --background: 45 75% 95%;  /* 따뜻한 크림색 배경 #fef7e6 */
+  --foreground: 220 50% 18%;    /* 어두운 텍스트 #1e293b */
+  --card: 0 0% 100%;       /* 흰색 카드 #ffffff */
+  --card-foreground: 220 50% 18%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 50% 18%;
+  --primary: 18 100% 60%;   /* 주황색 #ff6b35 */
   --primary-foreground: 0 0% 100%;
-  --secondary: 219 15% 18%;  /* #2b2f40 */
-  --secondary-foreground: 0 0% 65%;
-  --muted: 219 15% 18%;
-  --muted-foreground: 0 0% 36%;
-  --accent: 222 100% 50%;
-  --accent-foreground: 0 0% 100%;
+  --secondary: 45 50% 92%;  /* 연한 크림색 #f8f4e6 */
+  --secondary-foreground: 220 15% 40%;
+  --muted: 210 40% 95%;
+  --muted-foreground: 220 15% 40%;
+  --accent: 30 100% 95%;
+  --accent-foreground: 220 50% 18%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 219 15% 18%;
-  --input: 219 22% 12%;      /* #1c1f2a */
-  --ring: 222 100% 50%;
+  --border: 220 13% 91%;
+  --input: 0 0% 97%;      /* 연한 회색 입력창 */
+  --ring: 18 100% 60%;
   --radius: 0.125rem;        /* 2px */
   
-  /* 추가 Pixso 컬러 */
-  --bg-primary: 220 23% 5%;      /* #0a0a17 */
-  --bg-secondary: 219 22% 12%;   /* #1c1f2a */
-  --bg-tertiary: 219 24% 10%;    /* #191c28 */
-  --bg-hover: 218 15% 22%;       /* #363945 */
-  --text-muted: 0 0% 36%;
-  --text-disabled: 0 0% 16%;
+  /* 추가 밝은 테마 컬러 */
+  --bg-primary: 45 75% 95%;      /* 크림색 배경 */
+  --bg-secondary: 0 0% 100%;     /* 흰색 */
+  --bg-tertiary: 45 50% 92%;     /* 연한 크림 */
+  --bg-hover: 30 100% 95%;       /* 연한 오렌지 호버 */
+  --text-muted: 220 15% 40%;
+  --text-disabled: 220 15% 70%;
   
   --chart-1: 12 76% 61%;
   --chart-2: 173 58% 39%;
@@ -42,26 +42,26 @@
 }
 
 .dark {
-  /* 다크 테마는 기본값과 동일 (이미 다크 테마 기반이므로) */
+  /* 다크 모드 지원 (필요시) */
   --background: 220 23% 5%;
   --foreground: 0 0% 85%;
   --card: 220 19% 14%;
   --card-foreground: 0 0% 85%;
   --popover: 220 19% 14%;
   --popover-foreground: 0 0% 85%;
-  --primary: 222 100% 50%;
+  --primary: 18 100% 60%;  /* 주황색 유지 */
   --primary-foreground: 0 0% 100%;
   --secondary: 219 15% 18%;
   --secondary-foreground: 0 0% 65%;
   --muted: 219 15% 18%;
   --muted-foreground: 0 0% 36%;
-  --accent: 222 100% 50%;
+  --accent: 18 100% 60%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
   --border: 219 15% 18%;
   --input: 219 22% 12%;
-  --ring: 222 100% 50%;
+  --ring: 18 100% 60%;
 }
 
 * {

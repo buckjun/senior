@@ -4,9 +4,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-// 다크 테마 강제 적용
+// 라이트 모드 기본 설정 (원본 디자인 기반)
 if (typeof document !== 'undefined') {
-  document.documentElement.classList.add('dark');
+  document.documentElement.classList.remove('dark');
 }
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
@@ -74,8 +74,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="font-noto bg-background text-textPrimary overflow-x-hidden">
-          <div className="max-w-sm mx-auto bg-white min-h-screen relative">
+        <div className="font-noto bg-background text-foreground overflow-x-hidden">
+          <div className="max-w-sm mx-auto bg-background min-h-screen relative">
             <Toaster />
             <Router />
           </div>

@@ -12,9 +12,9 @@ export default function Landing() {
         {/* 히어로 섹션 */}
         <div className="flex-1 flex flex-col justify-center items-center p-6 bg-gradient-to-br from-background via-muted/10 to-background">
           <div className="text-center space-y-8 max-w-sm">
-            {/* 로고 및 아이콘 */}
-            <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl flex items-center justify-center mx-auto mb-4">
-              <BrainCircuit className="w-12 h-12 text-primary" />
+            {/* 로고 및 아이콘 - 원본 디자인처럼 귀여운 캐릭터 느낌 */}
+            <div className="w-32 h-32 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg">
+              <div className="text-5xl">👤</div>
             </div>
 
             {/* 메인 제목 */}
@@ -51,7 +51,7 @@ export default function Landing() {
                 fullWidth 
                 size="lg"
                 onClick={() => window.location.href = '/api/login'}
-                className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-medium shadow-lg"
+                className="bg-primary hover:bg-primary/90 text-white font-medium shadow-lg"
                 testId="button-start"
               >
                 지금 시작하기
