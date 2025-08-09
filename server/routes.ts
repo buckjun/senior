@@ -6,6 +6,7 @@ import { parseResumeFromText } from "./naturalLanguageService";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { aiService } from "./aiService";
+import { verifyBusinessRegistration } from "./ntsApi";
 import { insertUserProfileSchema, insertIndividualProfileSchema, insertCompanyProfileSchema, insertJobPostingSchema, insertJobApplicationSchema, insertSeniorReemploymentDataSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -669,6 +670,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching statistics:', error);
       res.status(500).json({ error: 'Failed to fetch statistics' });
+    }
+  });
+
+  // Business registration verification endpoint
+  app.post('/api/verify-business', async (req, res) => {
+    try {
+      const { businessNumber } = req.body;
+      
+      if (!businessNumber) {
+        return res.status(400).json({ 
+          valid: false, 
+          status: 'unknown',
+          errorMessage: '사업자등록번호를 입력해주세요.' 
+        });
+      }
+
+      const result = await verifyBusinessRegistration(businessNumber);
+      res.json(result);
+    } catch (error) {
+      console.error('사업자등록번호 검증 오류:', error);
+      res.status(500).json({ 
+        valid: false, 
+        status: 'unknown',
+        errorMessage: '검증 중 오류가 발생했습니다.' 
+      });
     }
   });
 

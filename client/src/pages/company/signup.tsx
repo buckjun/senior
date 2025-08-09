@@ -36,7 +36,12 @@ export default function CompanySignup() {
     employeeCount: '',
     description: '',
   });
+
   const { toast } = useToast();
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const verifyBusinessMutation = useMutation({
     mutationFn: async (businessNumber: string) => {
@@ -44,16 +49,35 @@ export default function CompanySignup() {
       return response.json();
     },
     onSuccess: (data) => {
-      if (data.isVerified) {
+      if (data.valid && data.status === 'active') {
         setIsBusinessVerified(true);
+        // 사업자 정보 자동 입력
+        const updatedData: any = {};
+        if (data.businessName) {
+          updatedData.companyName = data.businessName;
+        }
+        if (data.representativeName) {
+          updatedData.ceoName = data.representativeName;
+        }
+        if (data.businessAddress) {
+          updatedData.address = data.businessAddress;
+        }
+        if (data.businessType) {
+          updatedData.businessType = data.businessType;
+        }
+        
+        if (Object.keys(updatedData).length > 0) {
+          setFormData(prev => ({ ...prev, ...updatedData }));
+        }
         toast({
           title: "사업자 인증 완료",
-          description: "유효한 사업자등록번호입니다.",
+          description: "유효한 사업자등록번호입니다. 사업자 정보가 자동으로 입력되었습니다.",
         });
       } else {
+        const errorMsg = data.errorMessage || '운영 중이지 않거나 유효하지 않은 사업자등록번호입니다.';
         toast({
           title: "인증 실패",
-          description: "유효하지 않은 사업자등록번호입니다.",
+          description: errorMsg,
           variant: "destructive",
         });
       }
@@ -86,10 +110,6 @@ export default function CompanySignup() {
       });
     }
   });
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
 
   const handleBusinessVerification = () => {
     if (formData.businessNumber.length === 12) { // Format: 000-00-00000
