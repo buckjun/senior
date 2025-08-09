@@ -8,6 +8,19 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
+## Job Category Selection and Company Recommendation System
+- **Date**: August 9, 2025 
+- **Changes**: Complete implementation of job category selection and company recommendation workflow
+  - Successfully imported 348 company records from CSV files across 9 industry categories
+  - Built JobCategorySelector component with 1-2 category selection limit
+  - Created job-category-selection page with progress indicator and user guidance
+  - Implemented company-recommendations page with detailed matching scores and company info
+  - Added storage methods for job categories and user selections
+  - Created matching algorithm with priority system: Field > Experience > Education > Employment type
+  - Added certification bonus system for relevant qualifications
+  - Integrated complete API endpoints: /api/job-categories, /api/user/job-categories, /api/recommendations
+  - Total companies per category: 마케팅(40), 공급업(25), 정보통신(52), 의료(26), 운수 및 창고업(40), 과학 기술 서비스업(30), 예술(26), 제조업(109)
+
 ## Complete Design Overhaul
 - **Date**: August 9, 2025
 - **Changes**: Complete redesign from mobile-first to web app optimized design

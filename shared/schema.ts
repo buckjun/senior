@@ -304,6 +304,57 @@ export const insertReemploymentStatisticsSchema = createInsertSchema(reemploymen
   updatedAt: true,
 });
 
+// Job categories for 5060 generation
+export const jobCategories = pgTable("job_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  displayName: varchar("display_name", { length: 100 }).notNull(),
+  description: varchar("description", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User selected job categories (max 2)
+export const userJobCategories = pgTable("user_job_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  categoryId: varchar("category_id").notNull().references(() => jobCategories.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Companies table from CSV data
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: varchar("company_name", { length: 200 }).notNull(),
+  jobTitle: varchar("job_title", { length: 300 }).notNull(),
+  location: varchar("location", { length: 100 }),
+  education: varchar("education", { length: 50 }),
+  experience: varchar("experience", { length: 100 }),
+  category: varchar("category", { length: 100 }).notNull(), // 분야
+  deadline: varchar("deadline", { length: 50 }),
+  employmentType: varchar("employment_type", { length: 50 }), // 고용형태
+  companySize: varchar("company_size", { length: 50 }), // 기업규모
+  salary: integer("salary"), // 급여(만원)
+  skills: varchar("skills", { length: 1000 }), // 관련 기술/자격증
+  sourceFile: varchar("source_file", { length: 100 }), // 원본 CSV 파일명
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Job category insert schemas
+export const insertJobCategorySchema = createInsertSchema(jobCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserJobCategorySchema = createInsertSchema(userJobCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCompanySchema = createInsertSchema(companies).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 // Include id in UpsertUser for authentication
 export type UpsertUser = z.infer<typeof insertUserSchema> & { id: string };
@@ -329,3 +380,11 @@ export type SeniorReemploymentData = typeof seniorReemploymentData.$inferSelect;
 export type ReemploymentStatistics = typeof reemploymentStatistics.$inferSelect;
 export type InsertSeniorReemploymentData = z.infer<typeof insertSeniorReemploymentDataSchema>;
 export type InsertReemploymentStatistics = z.infer<typeof insertReemploymentStatisticsSchema>;
+
+// Job category types
+export type JobCategory = typeof jobCategories.$inferSelect;
+export type UserJobCategory = typeof userJobCategories.$inferSelect;
+export type Company = typeof companies.$inferSelect;
+export type InsertJobCategory = z.infer<typeof insertJobCategorySchema>;
+export type InsertUserJobCategory = z.infer<typeof insertUserJobCategorySchema>;
+export type InsertCompany = z.infer<typeof insertCompanySchema>;

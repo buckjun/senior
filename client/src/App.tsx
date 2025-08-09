@@ -9,6 +9,8 @@ import Welcome from "@/pages/welcome";
 import IndividualSignup from "@/pages/individual/signup";
 import IndividualProfileSetup from "@/pages/individual/profile-setup";
 import IndividualDashboard from "@/pages/individual/dashboard";
+import JobCategorySelection from "@/pages/individual/job-category-selection";
+import CompanyRecommendations from "@/pages/individual/company-recommendations";
 import JobSearch from "@/pages/individual/job-search";
 import SavedJobs from "@/pages/individual/saved-jobs";
 import CompanySignup from "@/pages/company/signup";
@@ -40,6 +42,8 @@ function Router() {
           <Route path="/" component={IndividualDashboard} />
           <Route path="/individual/signup" component={IndividualSignup} />
           <Route path="/individual/profile-setup" component={IndividualProfileSetup} />
+          <Route path="/individual/job-categories" component={JobCategorySelection} />
+          <Route path="/individual/recommendations" component={CompanyRecommendations} />
           <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/search" component={JobSearch} />
           <Route path="/saved-jobs" component={SavedJobs} />

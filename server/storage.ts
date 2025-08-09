@@ -8,6 +8,9 @@ import {
   savedJobs,
   aiRecommendations,
   educationPrograms,
+  jobCategories,
+  userJobCategories,
+  companies,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -18,12 +21,16 @@ import {
   type SavedJob,
   type AiRecommendation,
   type EducationProgram,
+  type JobCategory,
+  type UserJobCategory,
+  type Company,
   type InsertUserProfile,
   type InsertIndividualProfile,
   type InsertCompanyProfile,
   type InsertJobPosting,
   type InsertJobApplication,
   type InsertAiRecommendation,
+  type InsertUserJobCategory,
   seniorReemploymentData,
   reemploymentStatistics,
   type SeniorReemploymentData,
@@ -94,6 +101,14 @@ export interface IStorage {
   createReemploymentStatistics(stats: InsertReemploymentStatistics): Promise<ReemploymentStatistics>;
   getReemploymentStatistics(category?: string): Promise<ReemploymentStatistics[]>;
   bulkCreateSeniorReemploymentData(dataArray: InsertSeniorReemploymentData[]): Promise<SeniorReemploymentData[]>;
+
+  // Job category operations
+  getAllJobCategories(): Promise<JobCategory[]>;
+  getUserJobCategories(userId: string): Promise<JobCategory[]>;
+  saveUserJobCategories(userId: string, categoryIds: string[]): Promise<void>;
+  
+  // Company operations  
+  getCompaniesByCategories(categories: string[]): Promise<Company[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -506,6 +521,67 @@ export class DatabaseStorage implements IStorage {
     }
 
     return results;
+  }
+
+  // Job category operations
+  async getAllJobCategories(): Promise<JobCategory[]> {
+    const categories = await db
+      .select()
+      .from(jobCategories)
+      .orderBy(jobCategories.displayName);
+    return categories;
+  }
+
+  async getUserJobCategories(userId: string): Promise<JobCategory[]> {
+    const userCategoriesData = await db
+      .select({
+        id: jobCategories.id,
+        name: jobCategories.name,
+        displayName: jobCategories.displayName,
+        description: jobCategories.description,
+        createdAt: jobCategories.createdAt,
+      })
+      .from(userJobCategories)
+      .innerJoin(jobCategories, eq(userJobCategories.categoryId, jobCategories.id))
+      .where(eq(userJobCategories.userId, userId));
+    
+    return userCategoriesData;
+  }
+
+  async saveUserJobCategories(userId: string, categoryIds: string[]): Promise<void> {
+    // First, delete existing selections
+    await db
+      .delete(userJobCategories)
+      .where(eq(userJobCategories.userId, userId));
+
+    // Then insert new selections
+    if (categoryIds.length > 0) {
+      const insertData: InsertUserJobCategory[] = categoryIds.map(categoryId => ({
+        userId,
+        categoryId,
+      }));
+
+      await db
+        .insert(userJobCategories)
+        .values(insertData);
+    }
+  }
+
+  // Company operations
+  async getCompaniesByCategories(categories: string[]): Promise<Company[]> {
+    if (categories.length === 0) return [];
+
+    const companiesData = await db
+      .select()
+      .from(companies)
+      .where(
+        or(
+          ...categories.map(category => eq(companies.category, category))
+        )!
+      )
+      .orderBy(companies.companyName);
+
+    return companiesData;
   }
 }
 

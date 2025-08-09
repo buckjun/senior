@@ -778,6 +778,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Job categories endpoints
+  app.get("/api/job-categories", isAuthenticated, async (req, res) => {
+    try {
+      const categories = await storage.getAllJobCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching job categories:", error);
+      res.status(500).json({ error: "Failed to fetch job categories" });
+    }
+  });
+
+  app.get("/api/user/job-categories", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const categories = await storage.getUserJobCategories(userId);
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching user job categories:", error);
+      res.status(500).json({ error: "Failed to fetch user job categories" });
+    }
+  });
+
+  app.post("/api/user/job-categories", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { categoryIds } = req.body;
+      
+      if (!Array.isArray(categoryIds) || categoryIds.length === 0 || categoryIds.length > 2) {
+        return res.status(400).json({ error: "Must select 1-2 categories" });
+      }
+
+      await storage.saveUserJobCategories(userId, categoryIds);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error saving user job categories:", error);
+      res.status(500).json({ error: "Failed to save job categories" });
+    }
+  });
+
+  // Company recommendations endpoint
+  app.get("/api/recommendations", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      // Get user's selected categories
+      const userCategories = await storage.getUserJobCategories(userId);
+      if (userCategories.length === 0) {
+        return res.status(400).json({ error: "No job categories selected" });
+      }
+
+      // Get user's individual profile
+      const userProfile = await storage.getIndividualProfile(userId);
+      if (!userProfile) {
+        return res.status(400).json({ error: "No individual profile found" });
+      }
+
+      // Get companies matching selected categories
+      const categoryNames = userCategories.map(cat => cat.name);
+      const companies = await storage.getCompaniesByCategories(categoryNames);
+      
+      // Apply matching algorithm
+      const { matchUserToCompanies } = await import('./matchingAlgorithm');
+      const matchedCompanies = matchUserToCompanies(userProfile, userCategories, companies);
+
+      res.json({ 
+        recommendations: matchedCompanies,
+        userCategories,
+        totalCompanies: companies.length
+      });
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+      res.status(500).json({ error: "Failed to generate recommendations" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
