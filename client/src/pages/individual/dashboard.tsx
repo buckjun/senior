@@ -322,26 +322,40 @@ export default function IndividualDashboard() {
                 <div>
                   <label className="text-sm font-medium text-gray-600">보유 스킬</label>
                   <div className="mt-1 flex flex-wrap gap-2">
-                    {(profile as any)?.skills ? JSON.parse((profile as any).skills).map((skill: string, index: number) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {skill}
-                      </Badge>
-                    )) : (
-                      <span className="text-sm text-gray-500">등록된 스킬이 없습니다.</span>
-                    )}
+                    {(() => {
+                      try {
+                        const skills = (profile as any)?.skills ? JSON.parse((profile as any).skills) : [];
+                        return Array.isArray(skills) && skills.length > 0 ? skills.map((skill: string, index: number) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {skill}
+                          </Badge>
+                        )) : (
+                          <span className="text-sm text-gray-500">등록된 스킬이 없습니다.</span>
+                        );
+                      } catch {
+                        return <span className="text-sm text-gray-500">등록된 스킬이 없습니다.</span>;
+                      }
+                    })()}
                   </div>
                 </div>
 
                 <div>
                   <label className="text-sm font-medium text-gray-600">선호 직종</label>
                   <div className="mt-1 flex flex-wrap gap-2">
-                    {(profile as any)?.preferredJobTypes ? JSON.parse((profile as any).preferredJobTypes).map((job: string, index: number) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {job}
-                      </Badge>
-                    )) : (
-                      <span className="text-sm text-gray-500">선호 직종을 설정해주세요.</span>
-                    )}
+                    {(() => {
+                      try {
+                        const jobTypes = (profile as any)?.preferredJobTypes ? JSON.parse((profile as any).preferredJobTypes) : [];
+                        return Array.isArray(jobTypes) && jobTypes.length > 0 ? jobTypes.map((job: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {job}
+                          </Badge>
+                        )) : (
+                          <span className="text-sm text-gray-500">선호 직종을 설정해주세요.</span>
+                        );
+                      } catch {
+                        return <span className="text-sm text-gray-500">선호 직종을 설정해주세요.</span>;
+                      }
+                    })()}
                   </div>
                 </div>
 
