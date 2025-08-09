@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLocation } from "wouter";
 
 interface LoginFormProps {
   isIndividual: boolean;
 }
 
 export function LoginForm({ isIndividual }: LoginFormProps) {
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     id: "",
     password: ""
@@ -21,6 +23,14 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
   const handleNaverLogin = () => {
     // 네이버 로그인은 현재 Replit Auth로 처리
     window.location.href = "/api/login";
+  };
+
+  const handleSignup = () => {
+    if (isIndividual) {
+      setLocation('/individual/signup');
+    } else {
+      setLocation('/company/signup');
+    }
   };
 
   return (
@@ -65,7 +75,7 @@ export function LoginForm({ isIndividual }: LoginFormProps) {
         <button 
           className="hover:text-gray-800 transition-colors"
           data-testid="link-signup"
-          onClick={() => window.location.href = "/api/login"}
+          onClick={handleSignup}
         >
           회원가입
         </button>
