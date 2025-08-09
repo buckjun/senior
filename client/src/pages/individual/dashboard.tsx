@@ -191,6 +191,17 @@ export default function IndividualDashboard() {
                   <div className="text-caption text-gray-500">개인회원</div>
                 </div>
               </div>
+              {/* Logout Button */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => window.location.href = '/api/logout'}
+                className="text-gray-600 hover:text-red-600"
+                data-testid="button-logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden md:inline-block ml-2">로그아웃</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -221,6 +232,20 @@ export default function IndividualDashboard() {
                       내 정보
                     </Button>
                   </Link>
+                  <Button variant="ghost" size="sm" className="w-full justify-start text-body">
+                    <Briefcase className="w-4 h-4 mr-2" />
+                    지원 현황
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-body text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => window.location.href = '/api/logout'}
+                    data-testid="button-logout-sidebar"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    로그아웃
+                  </Button>
                   <Button variant="ghost" size="sm" className="w-full justify-start text-body">
                     <Briefcase className="w-4 h-4 mr-2" />
                     지원 현황
