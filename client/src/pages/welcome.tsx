@@ -1,9 +1,9 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'wouter';
-import { Building2, User } from 'lucide-react';
+import React, { useState } from 'react';
+import { LoginForm } from '@/components/LoginForm';
 
 export default function Welcome() {
+  const [isIndividual, setIsIndividual] = useState(true);
+
   return (
     <div 
       className="min-h-screen flex flex-col"
@@ -17,61 +17,34 @@ export default function Welcome() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col justify-center px-6 py-8">
         
-        {/* Logo/Title */}
-        <div className="text-center mb-12">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            AI 커리어 매칭 플랫폼
-          </h1>
-          <p className="text-gray-600">
-            기업과 인재를 위한 스마트 매칭 서비스
-          </p>
-        </div>
-
-        {/* Login Section */}
-        <div className="max-w-sm mx-auto w-full space-y-4 mb-8">
-          <Button
-            asChild
-            className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700"
-            data-testid="button-login"
+        {/* Tab Selection */}
+        <div className="flex mb-8 max-w-sm mx-auto w-full">
+          <button
+            onClick={() => setIsIndividual(true)}
+            className={`flex-1 py-3 text-lg font-medium border-b-2 transition-colors ${
+              isIndividual 
+                ? 'text-gray-800 border-blue-500' 
+                : 'text-gray-500 border-transparent'
+            }`}
+            data-testid="tab-individual"
           >
-            <a href="/api/login">로그인</a>
-          </Button>
+            개인회원
+          </button>
+          <button
+            onClick={() => setIsIndividual(false)}
+            className={`flex-1 py-3 text-lg font-medium border-b-2 transition-colors ${
+              !isIndividual 
+                ? 'text-gray-800 border-blue-500' 
+                : 'text-gray-500 border-transparent'
+            }`}
+            data-testid="tab-company"
+          >
+            기업회원
+          </button>
         </div>
 
-        {/* Signup Section */}
-        <div className="max-w-sm mx-auto w-full">
-          <div className="bg-orange-50/50 rounded-xl p-4 text-center">
-            <Building2 className="w-6 h-6 text-orange-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 mb-2">
-              우수한 인재를 찾는 기업을 위한 서비스
-            </p>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full h-10 bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
-              data-testid="button-company-signup"
-            >
-              <Link href="/company/signup">기업 회원가입</Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Individual Signup */}
-        <div className="max-w-sm mx-auto w-full mt-6">
-          <div className="bg-blue-50/50 rounded-xl p-4 text-center">
-            <p className="text-sm text-gray-600 mb-2">
-              50-60세 구직자를 위한 맞춤형 일자리를 찾아보세요
-            </p>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full h-10 bg-blue-600 text-white border-blue-600 hover:bg-blue-700"
-              data-testid="button-individual-signup"
-            >
-              <Link href="/individual/signup">개인 회원가입</Link>
-            </Button>
-          </div>
-        </div>
+        {/* Login Form */}
+        <LoginForm isIndividual={isIndividual} />
         
       </div>
     </div>

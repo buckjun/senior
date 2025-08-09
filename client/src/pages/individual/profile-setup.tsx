@@ -1,256 +1,333 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import React, { useState, useRef } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, User, Briefcase } from 'lucide-react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { ArrowLeft, Mic, Upload, Camera, Edit } from 'lucide-react';
+import { Link } from 'wouter';
+import { VoiceInput } from '@/components/ui/voice-input';
+import { ObjectUploader } from '@/components/ObjectUploader';
+import { AIResumeWriter } from '@/components/AIResumeWriter';
+import { useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import type { UploadResult } from '@uppy/core';
 
 export default function IndividualProfileSetup() {
-  const [, setLocation] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
-  const [formData, setFormData] = useState({
-    birthYear: '',
-    summary: '',
-    experience: '',
-    skills: '',
-    preferredJobTypes: '',
-    preferredLocations: '',
-    workTimeFlexibility: true,
+  const [location, setLocation] = useLocation();
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isAIResumeModalOpen, setIsAIResumeModalOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    careerText: '',
+    resumeFileUrl: ''
   });
-
   const { toast } = useToast();
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if user already has a profile
-  const { data: existingProfile } = useQuery({
-    queryKey: ['/api/individual-profiles/me'],
-    enabled: isAuthenticated,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center px-6 py-8 bg-white">
-        <div className="max-w-sm mx-auto w-full text-center">
-          <h1 className="text-xl font-bold text-gray-800 mb-4">
-            개인 프로필 작성
-          </h1>
-          <p className="text-gray-600 mb-6">
-            개인 프로필을 작성하기 위해 먼저 로그인해주세요
-          </p>
-          <Button
-            asChild
-            className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 mb-4"
-          >
-            <a href="/api/login">로그인</a>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="w-full h-12"
-          >
-            <Link href="/">메인으로 돌아가기</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // If profile exists, redirect to dashboard
-  if (existingProfile) {
-    setLocation('/individual/dashboard');
-    return null;
-  }
-
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const createProfileMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/individual-profiles', data);
-      return response.json();
+  const analyzeCareerMutation = useMutation({
+    mutationFn: async (data: { careerText?: string; resumeText?: string }) => {
+      return apiRequest('POST', '/api/ai/analyze-career', data);
     },
-    onSuccess: () => {
-      toast({
-        title: "프로필 생성 완료",
-        description: "개인 프로필이 성공적으로 생성되었습니다.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
-      setLocation('/individual/dashboard');
+    onSuccess: (response) => {
+      // Store AI analysis results
+      localStorage.setItem('aiAnalysis', JSON.stringify(response));
+      setLocation('/individual/recommendations');
     },
     onError: () => {
       toast({
-        title: "프로필 생성 실패",
-        description: "개인 프로필 생성 중 오류가 발생했습니다.",
+        title: "분석 실패",
+        description: "프로필 분석 중 오류가 발생했습니다.",
         variant: "destructive",
       });
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const analyzeImageMutation = useMutation({
+    mutationFn: async (base64Image: string) => {
+      const response = await apiRequest('POST', '/api/ai/analyze-resume-image', { base64Image });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      localStorage.setItem('aiAnalysis', JSON.stringify(data.analysis));
+      toast({
+        title: "분석 완료",
+        description: "이력서 이미지가 성공적으로 분석되었습니다.",
+      });
+      setLocation('/individual/recommendations');
+    },
+    onError: () => {
+      toast({
+        title: "분석 실패",
+        description: "이미지 분석 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  });
 
-    const profileData = {
-      ...formData,
-      birthYear: formData.birthYear ? parseInt(formData.birthYear) : null,
-      experience: formData.experience ? [formData.experience] : [],
-      skills: formData.skills ? formData.skills.split(',').map(s => s.trim()) : [],
-      preferredJobTypes: formData.preferredJobTypes ? formData.preferredJobTypes.split(',').map(s => s.trim()) : [],
-      preferredLocations: formData.preferredLocations ? formData.preferredLocations.split(',').map(s => s.trim()) : [],
+  const processVoiceMutation = useMutation({
+    mutationFn: async (transcript: string) => {
+      const response = await apiRequest('POST', '/api/ai/process-voice', { transcript });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      localStorage.setItem('aiAnalysis', JSON.stringify(data.analysis));
+      toast({
+        title: "분석 완료",
+        description: "음성 입력이 성공적으로 분석되었습니다.",
+      });
+      setLocation('/individual/recommendations');
+    },
+    onError: () => {
+      toast({
+        title: "분석 실패",
+        description: "음성 분석 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleVoiceTranscript = (transcript: string) => {
+    processVoiceMutation.mutate(transcript);
+  };
+
+  const handleFileUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadedFile = result.successful[0];
+      const fileUrl = uploadedFile.uploadURL;
+      
+      // Set ACL policy for the uploaded file
+      apiRequest('PUT', '/api/resume-files', { resumeFileURL: fileUrl })
+        .then(() => {
+          toast({
+            title: "업로드 완료",
+            description: "이력서 파일이 성공적으로 업로드되었습니다.",
+          });
+          // Trigger AI analysis of the uploaded file
+          // In a real implementation, this would extract text from the file
+          analyzeCareerMutation.mutate({ resumeText: "업로드된 파일에서 추출된 텍스트" });
+        })
+        .catch(() => {
+          toast({
+            title: "업로드 실패",
+            description: "파일 업로드 중 오류가 발생했습니다.",
+            variant: "destructive",
+          });
+        });
+    }
+  };
+
+  const handleGetUploadParameters = async () => {
+    const response = await apiRequest('POST', '/api/objects/upload', {});
+    const data = await response.json();
+    return {
+      method: 'PUT' as const,
+      url: data.uploadURL,
     };
+  };
 
-    createProfileMutation.mutate(profileData);
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        const base64Data = base64.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+        analyzeImageMutation.mutate(base64Data);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSkip = () => {
+    setLocation('/individual/dashboard');
+  };
+
+  const handleBackButton = () => {
+    // Navigate back to dashboard instead of previous page to avoid auth issues
+    setLocation('/individual/dashboard');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="mr-3"
-            >
-              <Link href="/">
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
-            </Button>
-            <h1 className="text-lg font-semibold">개인 프로필 작성</h1>
-          </div>
+      <div className="bg-white px-4 py-4 border-b border-border sticky top-0 z-10 safe-area-top">
+        <div className="flex items-center">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-10 h-10 p-0" 
+            onClick={handleBackButton}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h2 className="flex-1 text-heading font-bold text-center">프로필 생성</h2>
+          <div className="w-10"></div>
         </div>
       </div>
-
-      {/* Form */}
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 기본 정보 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
+      
+      <div className="p-6 pb-8">
+        {/* Profile Setup Options */}
+        <div className="space-y-6">
+          {/* AI Voice Input */}
+          <div className="border-2 border-primary rounded-2xl p-6">
             <div className="flex items-center mb-4">
-              <User className="w-5 h-5 text-blue-600 mr-2" />
-              <h2 className="text-lg font-medium">기본 정보</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="birthYear">출생년도</Label>
-                <Input
-                  id="birthYear"
-                  type="number"
-                  value={formData.birthYear}
-                  onChange={(e) => handleInputChange('birthYear', e.target.value)}
-                  placeholder="1965"
-                  min="1950"
-                  max="1975"
-                />
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mr-4">
+                <Mic className="text-primary text-xl" />
               </div>
-
               <div>
-                <Label htmlFor="summary">자기소개</Label>
-                <Textarea
-                  id="summary"
-                  value={formData.summary}
-                  onChange={(e) => handleInputChange('summary', e.target.value)}
-                  placeholder="간단한 자기소개를 작성해주세요"
-                  rows={3}
-                />
+                <h3 className="text-body font-bold">음성 녹음</h3>
+                <p className="text-gray-600">가장 쉬운 방법이에요</p>
               </div>
             </div>
+            <Button 
+              onClick={() => setIsVoiceModalOpen(true)}
+              className="w-full btn-primary"
+              disabled={processVoiceMutation.isPending}
+              data-testid="button-voice-input"
+            >
+              <Mic className="mr-2 h-5 w-5" />
+              {processVoiceMutation.isPending ? '분석 중...' : '음성 녹음 시작'}
+            </Button>
+            <p className="text-sm text-gray-500 mt-2 text-center">
+              "10년간 전자제품 매장에서 매니저로 일했습니다"
+            </p>
           </div>
-
-          {/* 경력 정보 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
+          
+          {/* File Upload */}
+          <div className="border-2 border-gray-200 rounded-2xl p-6">
             <div className="flex items-center mb-4">
-              <Briefcase className="w-5 h-5 text-blue-600 mr-2" />
-              <h2 className="text-lg font-medium">경력 정보</h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="experience">주요 경력</Label>
-                <Textarea
-                  id="experience"
-                  value={formData.experience}
-                  onChange={(e) => handleInputChange('experience', e.target.value)}
-                  placeholder="주요 경력사항을 작성해주세요"
-                  rows={4}
-                />
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                <Upload className="text-gray-600 text-xl" />
               </div>
-
               <div>
-                <Label htmlFor="skills">보유 기술/자격증</Label>
-                <Input
-                  id="skills"
-                  value={formData.skills}
-                  onChange={(e) => handleInputChange('skills', e.target.value)}
-                  placeholder="컴퓨터 활용, 운전면허, 요리 등 (쉼표로 구분)"
-                />
+                <h3 className="text-body font-bold">이력서 파일 업로드</h3>
+                <p className="text-gray-600">기존 이력서가 있다면</p>
               </div>
             </div>
+            <ObjectUploader
+              maxNumberOfFiles={1}
+              maxFileSize={10485760} // 10MB
+              onGetUploadParameters={handleGetUploadParameters}
+              onComplete={handleFileUploadComplete}
+              buttonClassName="w-full btn-ghost"
+            >
+              <Upload className="mr-2 h-5 w-5" />
+              파일 선택 (PDF, DOC, HWP)
+            </ObjectUploader>
+          </div>
+          
+          {/* Camera Scan */}
+          <div className="border-2 border-gray-200 rounded-2xl p-6">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                <Camera className="text-gray-600 text-xl" />
+              </div>
+              <div>
+                <h3 className="text-body font-bold">사진 스캔</h3>
+                <p className="text-gray-600">종이 이력서를 촬영</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => cameraInputRef.current?.click()}
+              className="w-full btn-ghost"
+              disabled={analyzeImageMutation.isPending}
+              data-testid="button-camera-scan"
+            >
+              <Camera className="mr-2 h-5 w-5" />
+              {analyzeImageMutation.isPending ? '분석 중...' : '사진 스캔하기'}
+            </Button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleCameraCapture}
+              className="hidden"
+            />
+          </div>
+          
+          {/* Natural Language AI Conversion */}
+          <div className="border-2 border-blue-200 rounded-2xl p-6 bg-blue-50/50">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                <Edit className="text-blue-600 text-xl" />
+              </div>
+              <div>
+                <h3 className="text-body font-bold">텍스트 변환</h3>
+                <p className="text-gray-600">평소 말하듯이 작성하면 AI가 변환</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setIsAIResumeModalOpen(true)}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              data-testid="button-ai-resume-writer"
+            >
+              <Edit className="mr-2 h-5 w-5" />
+              텍스트 변환 시작
+            </Button>
+            <p className="text-sm text-gray-500 mt-2 text-center">
+              "저는 25년간 제조업에서 생산관리를..."
+            </p>
           </div>
 
-          {/* 구직 희망 사항 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">구직 희망 사항</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="preferredJobTypes">희망 직종</Label>
-                <Input
-                  id="preferredJobTypes"
-                  value={formData.preferredJobTypes}
-                  onChange={(e) => handleInputChange('preferredJobTypes', e.target.value)}
-                  placeholder="사무직, 서비스업, 제조업 등 (쉼표로 구분)"
-                />
+          {/* Manual Input */}
+          <div className="border-2 border-gray-200 rounded-2xl p-6">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                <Edit className="text-gray-600 text-xl" />
               </div>
-
               <div>
-                <Label htmlFor="preferredLocations">희망 근무지역</Label>
-                <Input
-                  id="preferredLocations"
-                  value={formData.preferredLocations}
-                  onChange={(e) => handleInputChange('preferredLocations', e.target.value)}
-                  placeholder="서울, 경기, 인천 등 (쉼표로 구분)"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="workTimeFlexibility"
-                  checked={formData.workTimeFlexibility}
-                  onChange={(e) => handleInputChange('workTimeFlexibility', e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <Label htmlFor="workTimeFlexibility">근무시간 조정 가능</Label>
+                <h3 className="text-body font-bold">직접 입력하기</h3>
+                <p className="text-gray-600">양식에 맞춰 작성</p>
               </div>
             </div>
+            <Link href="/individual/manual-input">
+              <Button className="w-full btn-ghost" data-testid="button-manual-input">
+                <Edit className="mr-2 h-5 w-5" />
+                양식 작성하기
+              </Button>
+            </Link>
           </div>
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700"
-            disabled={createProfileMutation.isPending}
-          >
-            {createProfileMutation.isPending ? "프로필 생성 중..." : "프로필 생성"}
-          </Button>
-        </form>
+        </div>
+        
+        {/* Skip Option */}
+        <Button
+          variant="ghost"
+          onClick={handleSkip}
+          className="w-full mt-8 text-gray-500 py-4 text-body underline"
+          data-testid="button-skip-profile"
+        >
+          나중에 입력하기
+        </Button>
       </div>
+
+      {/* Voice Input Modal */}
+      <VoiceInput
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        onTranscript={handleVoiceTranscript}
+        placeholder="경력에 대해 자유롭게 말씀해주세요"
+      />
+
+      {/* AI Resume Writer Modal */}
+      {isAIResumeModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
+              <h2 className="text-xl font-semibold">AI 이력서 작성</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsAIResumeModalOpen(false)}
+              >
+                닫기
+              </Button>
+            </div>
+            <div className="p-6">
+              <AIResumeWriter />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

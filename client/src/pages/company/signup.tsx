@@ -3,13 +3,10 @@ import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Shield, Check } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
 
 const businessTypes = [
   '도소매업', '제조업', '서비스업', '건설업', 
@@ -18,72 +15,36 @@ const businessTypes = [
 
 export default function CompanySignup() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
+  const [currentStep, setCurrentStep] = useState(1);
   const [isBusinessVerified, setIsBusinessVerified] = useState(false);
   const [formData, setFormData] = useState({
+    // Step 1: Business Info
     companyName: '',
     businessNumber: '',
     ceoName: '',
     address: '',
+    detailAddress: '',
     businessType: '',
+    
+    // Step 2: Contact Info
     contactPerson: '',
     contactPhone: '',
     contactEmail: '',
+    
+    // Step 3: Additional Info (Optional)
     website: '',
     employeeCount: '',
     description: '',
   });
-
   const { toast } = useToast();
 
-  // Replit Auth 사용: 로그인하지 않은 경우 로그인 페이지로 이동
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center px-6 py-8 bg-white">
-        <div className="max-w-sm mx-auto w-full text-center">
-          <h1 className="text-xl font-bold text-gray-800 mb-4">
-            기업 회원가입
-          </h1>
-          <p className="text-gray-600 mb-6">
-            기업 프로필을 작성하기 위해 먼저 로그인해주세요
-          </p>
-          <Button
-            asChild
-            className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 mb-4"
-          >
-            <a href="/api/login">로그인</a>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="w-full h-12"
-          >
-            <Link href="/">메인으로 돌아가기</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   const verifyBusinessMutation = useMutation({
-    mutationFn: async (data: { businessNumber: string; ceoName: string; companyName: string }) => {
-      const response = await apiRequest('POST', '/api/verify-business', data);
+    mutationFn: async (businessNumber: string) => {
+      const response = await apiRequest('POST', '/api/verify-business', { businessNumber });
       return response.json();
     },
     onSuccess: (data) => {
-      if (data.isValid) {
+      if (data.isVerified) {
         setIsBusinessVerified(true);
         toast({
           title: "사업자 인증 완료",
@@ -91,8 +52,8 @@ export default function CompanySignup() {
         });
       } else {
         toast({
-          title: "사업자 인증 실패",
-          description: data.message || "사업자등록번호를 확인해주세요.",
+          title: "인증 실패",
+          description: "유효하지 않은 사업자등록번호입니다.",
           variant: "destructive",
         });
       }
@@ -106,263 +67,394 @@ export default function CompanySignup() {
     }
   });
 
-  const createProfileMutation = useMutation({
+  const createCompanyProfileMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest('POST', '/api/company-profiles', data);
-      return response.json();
+      return apiRequest('POST', '/api/company-profiles', data);
     },
     onSuccess: () => {
       toast({
-        title: "기업 프로필 생성 완료",
-        description: "기업 프로필이 성공적으로 생성되었습니다.",
+        title: "가입 완료",
+        description: "기업 회원가입이 완료되었습니다.",
       });
       setLocation('/company/dashboard');
     },
     onError: () => {
       toast({
-        title: "프로필 생성 실패",
-        description: "기업 프로필 생성 중 오류가 발생했습니다.",
+        title: "가입 실패",
+        description: "회원가입 중 오류가 발생했습니다.",
         variant: "destructive",
       });
     }
   });
 
-  const handleVerifyBusiness = () => {
-    if (!formData.businessNumber || !formData.ceoName || !formData.companyName) {
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleBusinessVerification = () => {
+    if (formData.businessNumber.length === 12) { // Format: 000-00-00000
+      const cleanNumber = formData.businessNumber.replace(/[^0-9]/g, '');
+      if (cleanNumber.length === 10) {
+        verifyBusinessMutation.mutate(cleanNumber);
+      } else {
+        toast({
+          title: "잘못된 형식",
+          description: "사업자등록번호는 10자리 숫자여야 합니다.",
+          variant: "destructive",
+        });
+      }
+    } else {
       toast({
-        title: "입력 오류",
-        description: "회사명, 사업자등록번호, 대표자명을 모두 입력해주세요.",
+        title: "잘못된 형식",
+        description: "사업자등록번호 형식을 확인해주세요. (000-00-00000)",
         variant: "destructive",
       });
-      return;
     }
+  };
 
-    verifyBusinessMutation.mutate({
-      businessNumber: formData.businessNumber,
-      ceoName: formData.ceoName,
-      companyName: formData.companyName,
-    });
+  const formatBusinessNumber = (value: string) => {
+    const numbers = value.replace(/[^0-9]/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 5) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    return `${numbers.slice(0, 3)}-${numbers.slice(3, 5)}-${numbers.slice(5, 10)}`;
+  };
+
+  const handleBusinessNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatBusinessNumber(e.target.value);
+    handleInputChange('businessNumber', formatted);
+    setIsBusinessVerified(false);
+  };
+
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      // Validate required fields for step 1
+      if (!formData.companyName || !formData.businessNumber || !formData.ceoName || 
+          !formData.address || !formData.businessType || !isBusinessVerified) {
+        toast({
+          title: "입력 오류",
+          description: "모든 필수 항목을 입력하고 사업자 인증을 완료해주세요.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      // Validate required fields for step 2
+      if (!formData.contactPerson || !formData.contactPhone || !formData.contactEmail) {
+        toast({
+          title: "입력 오류",
+          description: "모든 담당자 정보를 입력해주세요.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setCurrentStep(3);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    createCompanyProfileMutation.mutate({
+      companyName: formData.companyName,
+      businessNumber: formData.businessNumber.replace(/[^0-9]/g, ''),
+      ceoName: formData.ceoName,
+      address: `${formData.address} ${formData.detailAddress}`.trim(),
+      businessType: formData.businessType,
+      contactPerson: formData.contactPerson,
+      contactPhone: formData.contactPhone,
+      contactEmail: formData.contactEmail,
+      website: formData.website || undefined,
+      employeeCount: formData.employeeCount ? parseInt(formData.employeeCount) : undefined,
+      description: formData.description || undefined,
+    });
+  };
 
-    if (!isBusinessVerified) {
-      toast({
-        title: "사업자 인증 필요",
-        description: "사업자등록번호 인증을 먼저 완료해주세요.",
-        variant: "destructive",
-      });
-      return;
+  const getStepTitle = () => {
+    switch (currentStep) {
+      case 1: return '사업자 정보 입력';
+      case 2: return '담당자 정보 입력';
+      case 3: return '추가 정보 입력';
+      default: return '';
     }
-
-    createProfileMutation.mutate(formData);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="mr-3"
-            >
-              <Link href="/">
-                <ArrowLeft className="w-4 h-4" />
-              </Link>
+      <div className="bg-white px-4 py-4 border-b border-border sticky top-0 z-10 safe-area-top">
+        <div className="flex items-center">
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="w-10 h-10 p-0" data-testid="button-back">
+              <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-lg font-semibold">기업 프로필 작성</h1>
-          </div>
+          </Link>
+          <h2 className="flex-1 text-heading font-bold text-center">기업 회원가입</h2>
+          <div className="w-10"></div>
         </div>
       </div>
-
-      {/* Form */}
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 기본 정보 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">기본 정보</h2>
-            
-            <div className="space-y-4">
+      
+      <div className="p-6 pb-8">
+        {/* Progress Indicator */}
+        <div className="flex items-center mb-8">
+          {[1, 2, 3].map((step) => (
+            <div
+              key={step}
+              className={`flex-1 h-2 rounded-full mr-2 last:mr-0 ${
+                step <= currentStep ? 'bg-primary' : 'bg-gray-200'
+              }`}
+            />
+          ))}
+        </div>
+        
+        <h3 className="text-body font-bold mb-6">{getStepTitle()}</h3>
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Step 1: Business Information */}
+          {currentStep === 1 && (
+            <>
               <div>
-                <Label htmlFor="companyName">회사명 *</Label>
+                <Label htmlFor="companyName" className="block text-body font-semibold mb-2">
+                  회사명 <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="companyName"
+                  type="text"
+                  placeholder="(주)회사명을 입력해주세요"
                   value={formData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  placeholder="회사명을 입력하세요"
                   required
+                  data-testid="input-company-name"
                 />
               </div>
-
+              
               <div>
-                <Label htmlFor="businessNumber">사업자등록번호 *</Label>
-                <div className="flex gap-2">
+                <Label htmlFor="businessNumber" className="block text-body font-semibold mb-2">
+                  사업자등록번호 <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
                   <Input
                     id="businessNumber"
-                    value={formData.businessNumber}
-                    onChange={(e) => handleInputChange('businessNumber', e.target.value)}
+                    type="text"
                     placeholder="000-00-00000"
+                    value={formData.businessNumber}
+                    onChange={handleBusinessNumberChange}
+                    className="pr-20"
+                    maxLength={12}
                     required
+                    data-testid="input-business-number"
                   />
                   <Button
                     type="button"
-                    onClick={handleVerifyBusiness}
+                    onClick={handleBusinessVerification}
                     disabled={verifyBusinessMutation.isPending || isBusinessVerified}
-                    className="shrink-0"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 px-4 py-1 text-sm"
+                    data-testid="button-verify-business"
                   >
-                    {verifyBusinessMutation.isPending ? (
-                      "인증중..."
-                    ) : isBusinessVerified ? (
-                      <>
-                        <Check className="w-4 h-4 mr-1" />
-                        인증완료
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="w-4 h-4 mr-1" />
-                        인증하기
-                      </>
-                    )}
+                    {isBusinessVerified ? <Check className="w-4 h-4" /> : '확인'}
                   </Button>
                 </div>
+                <div className="flex items-center text-sm text-secondary mt-2">
+                  <Shield className="w-4 h-4 mr-1" />
+                  <span>국세청 사업자정보로 실시간 인증됩니다</span>
+                  {isBusinessVerified && (
+                    <Check className="w-4 h-4 ml-2 text-secondary" />
+                  )}
+                </div>
               </div>
-
+              
               <div>
-                <Label htmlFor="ceoName">대표자명 *</Label>
+                <Label htmlFor="ceoName" className="block text-body font-semibold mb-2">
+                  대표자명 <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="ceoName"
+                  type="text"
+                  placeholder="대표자 성명을 입력해주세요"
                   value={formData.ceoName}
                   onChange={(e) => handleInputChange('ceoName', e.target.value)}
-                  placeholder="대표자명을 입력하세요"
                   required
+                  data-testid="input-ceo-name"
                 />
               </div>
-
+              
               <div>
-                <Label htmlFor="address">주소 *</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  placeholder="회사 주소를 입력하세요"
-                  required
-                />
+                <Label htmlFor="address" className="block text-body font-semibold mb-2">
+                  사업장 주소 <span className="text-destructive">*</span>
+                </Label>
+                <div className="space-y-3">
+                  <Input
+                    id="address"
+                    type="text"
+                    placeholder="기본 주소를 입력해주세요"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    required
+                    data-testid="input-address"
+                  />
+                  <Input
+                    id="detailAddress"
+                    type="text"
+                    placeholder="상세 주소를 입력해주세요"
+                    value={formData.detailAddress}
+                    onChange={(e) => handleInputChange('detailAddress', e.target.value)}
+                    data-testid="input-detail-address"
+                  />
+                </div>
               </div>
-
+              
               <div>
-                <Label htmlFor="businessType">업종 *</Label>
-                <Select
+                <Label htmlFor="businessType" className="block text-body font-semibold mb-2">
+                  업종/업태 <span className="text-destructive">*</span>
+                </Label>
+                <select
+                  id="businessType"
                   value={formData.businessType}
-                  onValueChange={(value) => handleInputChange('businessType', value)}
+                  onChange={(e) => handleInputChange('businessType', e.target.value)}
+                  className="w-full p-4 border-2 border-border rounded-2xl text-body focus:border-primary outline-none appearance-none bg-white"
+                  required
+                  data-testid="select-business-type"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="업종을 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {businessTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="">업종을 선택해주세요</option>
+                  {businessTypes.map((type) => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
-          {/* 연락처 정보 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">연락처 정보</h2>
-            
-            <div className="space-y-4">
+          {/* Step 2: Contact Information */}
+          {currentStep === 2 && (
+            <>
               <div>
-                <Label htmlFor="contactPerson">담당자명 *</Label>
+                <Label htmlFor="contactPerson" className="block text-body font-semibold mb-2">
+                  담당자 이름 <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="contactPerson"
+                  type="text"
+                  placeholder="담당자 성명을 입력해주세요"
                   value={formData.contactPerson}
                   onChange={(e) => handleInputChange('contactPerson', e.target.value)}
-                  placeholder="담당자명을 입력하세요"
                   required
+                  data-testid="input-contact-person"
                 />
               </div>
-
+              
               <div>
-                <Label htmlFor="contactPhone">담당자 연락처 *</Label>
+                <Label htmlFor="contactPhone" className="block text-body font-semibold mb-2">
+                  담당자 연락처 <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="contactPhone"
+                  type="tel"
+                  placeholder="연락처를 입력해주세요"
                   value={formData.contactPhone}
                   onChange={(e) => handleInputChange('contactPhone', e.target.value)}
-                  placeholder="010-0000-0000"
                   required
+                  data-testid="input-contact-phone"
                 />
               </div>
-
+              
               <div>
-                <Label htmlFor="contactEmail">담당자 이메일 *</Label>
+                <Label htmlFor="contactEmail" className="block text-body font-semibold mb-2">
+                  담당자 이메일 <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="contactEmail"
                   type="email"
+                  placeholder="이메일을 입력해주세요 (로그인 ID로 사용)"
                   value={formData.contactEmail}
                   onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                  placeholder="contact@company.com"
                   required
+                  data-testid="input-contact-email"
                 />
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
-          {/* 추가 정보 */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-medium mb-4">추가 정보 (선택사항)</h2>
-            
-            <div className="space-y-4">
+          {/* Step 3: Additional Information */}
+          {currentStep === 3 && (
+            <>
               <div>
-                <Label htmlFor="website">회사 웹사이트</Label>
+                <Label htmlFor="website" className="block text-body font-semibold mb-2">
+                  회사 홈페이지 (선택)
+                </Label>
                 <Input
                   id="website"
+                  type="url"
+                  placeholder="https://www.company.com"
                   value={formData.website}
                   onChange={(e) => handleInputChange('website', e.target.value)}
-                  placeholder="https://company.com"
+                  data-testid="input-website"
                 />
               </div>
-
+              
               <div>
-                <Label htmlFor="employeeCount">직원 수</Label>
+                <Label htmlFor="employeeCount" className="block text-body font-semibold mb-2">
+                  직원 수 (선택)
+                </Label>
                 <Input
                   id="employeeCount"
                   type="number"
+                  placeholder="직원 수를 입력해주세요"
                   value={formData.employeeCount}
                   onChange={(e) => handleInputChange('employeeCount', e.target.value)}
-                  placeholder="50"
+                  data-testid="input-employee-count"
                 />
               </div>
-
+              
               <div>
-                <Label htmlFor="description">회사 소개</Label>
-                <Textarea
+                <Label htmlFor="description" className="block text-body font-semibold mb-2">
+                  회사 소개 (선택)
+                </Label>
+                <textarea
                   id="description"
+                  rows={4}
+                  placeholder="회사의 핵심 가치, 비전 등을 입력해주세요"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="회사 소개를 입력하세요"
-                  rows={4}
+                  className="w-full p-4 border-2 border-border rounded-2xl text-body focus:border-primary outline-none resize-none"
+                  data-testid="textarea-description"
                 />
               </div>
-            </div>
+            </>
+          )}
+          
+          <div className="flex space-x-4 mt-8">
+            {currentStep > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCurrentStep(currentStep - 1)}
+                className="flex-1 py-4 text-body"
+                data-testid="button-prev-step"
+              >
+                이전
+              </Button>
+            )}
+            
+            {currentStep < 3 ? (
+              <Button
+                type="button"
+                onClick={handleNextStep}
+                className="flex-1 btn-primary"
+                data-testid="button-next-step"
+              >
+                다음 단계
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                className="flex-1 btn-primary"
+                disabled={createCompanyProfileMutation.isPending}
+                data-testid="button-complete-signup"
+              >
+                {createCompanyProfileMutation.isPending ? '가입 중...' : '가입 완료'}
+              </Button>
+            )}
           </div>
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full h-12 bg-orange-600 text-white hover:bg-orange-700"
-            disabled={createProfileMutation.isPending || !isBusinessVerified}
-          >
-            {createProfileMutation.isPending ? "프로필 생성 중..." : "기업 프로필 생성"}
-          </Button>
         </form>
       </div>
     </div>
