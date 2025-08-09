@@ -1,11 +1,11 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { SplashScreen } from "@/components/SplashScreen";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import Welcome from "@/pages/welcome";
 import IndividualSignup from "@/pages/individual/signup";
@@ -25,11 +25,30 @@ import ExcelUploadPage from "@/pages/admin/excel-upload";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const [showSplash, setShowSplash] = useState(true);
+  const [location] = useLocation();
+  const [showSplash, setShowSplash] = useState(() => {
+    // 세션에서 스플래시 표시 여부 확인
+    const hasShownSplash = sessionStorage.getItem('hasShownSplash');
+    return !hasShownSplash;
+  });
+
+  // 스플래시 완료 핸들러
+  const handleSplashComplete = () => {
+    sessionStorage.setItem('hasShownSplash', 'true');
+    setShowSplash(false);
+  };
+
+  // URL이 /dashboard인 경우 스플래시 스킵 (로그인 후 리다이렉트)
+  useEffect(() => {
+    if (location === '/dashboard') {
+      sessionStorage.setItem('hasShownSplash', 'true');
+      setShowSplash(false);
+    }
+  }, [location]);
 
   // 스플래시 화면 표시 중이면 스플래시 화면만 보여주기
   if (showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   // 스플래시 화면이 끝난 후 인증 로딩 중이면 간단한 로딩만 표시

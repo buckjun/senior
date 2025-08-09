@@ -8,7 +8,7 @@ export default function Welcome() {
     <div 
       className="min-h-screen flex flex-col"
       style={{
-        background: 'linear-gradient(180deg, #F5F5F5 0%, #E8E8E8 50%, #F5F5F5 100%)'
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #FFFEF0 49.04%, #FFFFFF 100%)'
       }}
     >
       {/* Status Bar Space */}
