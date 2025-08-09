@@ -8,35 +8,7 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## PNG Frame Component System Implementation
-- **Date**: August 10, 2025 - 7:30 PM  
-- **Changes**: Implemented proper PNG frame component system based on HTML PAGED_FRAMES data
-  - **Correct Understanding**: PNG files are individual UI components/buttons within screens, not sequential full-screen pages
-  - **HTML Analysis**: Extracted 20 distinct frames from PAGED_FRAMES data with proper IDs and names
-  - **Component Grid**: Created 4-column grid layout showing all available PNG frames as clickable buttons
-  - **Frame Viewer**: Individual PNG image display when frame is selected
-  - **Interactive System**: Each frame button shows frame name, ID, and loads corresponding PNG file
-  - **Proper File Naming**: Converts frame IDs (83:1956) to file names (83-1956.png) 
-  - **Error Handling**: Graceful fallback for missing PNG files
-  - **Key Learning**: PNG files are separate clickable UI elements, not sequential navigation screens
-
-## Mobile-First Design System Implementation
-- **Date**: August 10, 2025 - 6:00 PM
-- **Changes**: Complete mobile design system overhaul using original bright theme design
-  - **New Design System**: Implemented light theme color palette with warm cream background (#fef7e6) and orange accents (#ff6b35)
-  - **Mobile Layout Components**: Created MobileLayout.tsx with header, bottom navigation, and responsive structure
-  - **Mobile UI Components**: Built MobileCard, MobileButton, MobileInput components optimized for touch
-  - **Mobile Dashboard**: Implemented mobile-optimized dashboard with card-based layout and AI resume integration
-  - **Landing Page**: Created new mobile-first landing page with warm colors matching original "일있슈" design
-  - **Navigation System**: Unified navigation using wouter routing with mobile-optimized touch targets
-  - **Typography**: Changed to Noto Sans KR font for better Korean text rendering at 14px base size
-  - **Light Theme**: Applied consistent bright theme across all components matching original design files
-  - **Responsive Design**: 393x852px mobile-first approach with touch-friendly interactions
-  - **Authentication Integration**: Maintained all existing authentication flows and session management
-
-## Previous Updates
-
-## Navigation and Data Synchronization Fixes  
+## Navigation and Data Synchronization Fixes
 - **Date**: August 10, 2025
 - **Changes**: Unified "내정보" button navigation and improved data synchronization
   - Fixed all "내정보" buttons to navigate to `/individual/profile-view` consistently
@@ -96,14 +68,11 @@ Preferred communication style: Simple, everyday language.
 
 ## Frontend Architecture
 - **Framework**: React with TypeScript using Vite as the build tool
-- **UI Components**: shadcn/ui component library with custom mobile-optimized components
-- **Mobile Design System**: Custom MobileLayout, MobileCard, MobileButton components
-- **Styling**: Tailwind CSS with Pixso-based dark theme design tokens
-- **Typography**: Noto Sans KR at 14px base size for Korean text optimization
-- **Color Palette**: Light theme with warm cream background (#fef7e6) and orange primary accent (#ff6b35)
-- **Routing**: Wouter for lightweight client-side routing with mobile navigation
+- **UI Components**: shadcn/ui component library built on Radix UI primitives
+- **Styling**: Tailwind CSS with custom Korean color schemes and typography (Noto Sans KR)
+- **Routing**: Wouter for lightweight client-side routing
 - **State Management**: TanStack Query for server state management
-- **Mobile-First Design**: 393x852px mobile viewport with touch-optimized interactions
+- **Mobile-First Design**: Responsive layout with dedicated mobile navigation components
 
 ## Backend Architecture
 - **Runtime**: Node.js with Express.js framework
