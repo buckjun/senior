@@ -174,7 +174,7 @@ export default function IndividualProfileSetup() {
                 <Mic className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="text-body font-bold">음성으로 경력 입력</h3>
+                <h3 className="text-body font-bold">음성 녹음</h3>
                 <p className="text-gray-600">가장 쉬운 방법이에요</p>
               </div>
             </div>
@@ -222,7 +222,7 @@ export default function IndividualProfileSetup() {
                 <Camera className="text-gray-600 text-xl" />
               </div>
               <div>
-                <h3 className="text-body font-bold">카메라로 이력서 스캔</h3>
+                <h3 className="text-body font-bold">사진 스캔</h3>
                 <p className="text-gray-600">종이 이력서를 촬영</p>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function IndividualProfileSetup() {
               data-testid="button-camera-scan"
             >
               <Camera className="mr-2 h-5 w-5" />
-              {analyzeImageMutation.isPending ? '분석 중...' : '카메라 열기'}
+              {analyzeImageMutation.isPending ? '분석 중...' : '사진 스캔하기'}
             </Button>
             <input
               ref={cameraInputRef}
@@ -252,7 +252,7 @@ export default function IndividualProfileSetup() {
                 <Edit className="text-blue-600 text-xl" />
               </div>
               <div>
-                <h3 className="text-body font-bold">자연어로 AI 이력서 작성</h3>
+                <h3 className="text-body font-bold">텍스트 변환</h3>
                 <p className="text-gray-600">평소 말하듯이 작성하면 AI가 변환</p>
               </div>
             </div>
@@ -262,7 +262,7 @@ export default function IndividualProfileSetup() {
               data-testid="button-ai-resume-writer"
             >
               <Edit className="mr-2 h-5 w-5" />
-              AI 이력서 작성 시작
+              텍스트 변환 시작
             </Button>
             <p className="text-sm text-gray-500 mt-2 text-center">
               "저는 25년간 제조업에서 생산관리를..."
