@@ -8,13 +8,13 @@ import { apiRequest } from "@/lib/queryClient";
 import { Wand2, FileText, Sparkles, User, MapPin, Briefcase, BookOpen } from "lucide-react";
 
 interface ParsedResumeData {
-  name: string;
-  title: string;
-  location: string;
-  phone: string;
-  email: string;
-  summary: string;
-  skills: string[];
+  name?: string;
+  title?: string;
+  location?: string;
+  phone?: string;
+  email?: string;
+  summary?: string;
+  skills?: string[];
 }
 
 interface AIResumeWriterProps {
@@ -43,7 +43,7 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
     try {
       const data = await apiRequest("POST", "/api/parse-resume", {
         text: inputText
-      });
+      }) as ParsedResumeData;
 
       setParsedData(data);
       onResumeGenerated?.(data);
@@ -69,19 +69,26 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
 
     setIsUpdating(true);
     try {
-      await apiRequest("POST", "/api/individual-profiles/ai-resume", {
-        summary: parsedData.summary,
-        skills: parsedData.skills,
-        title: parsedData.title,
-        location: parsedData.location,
-        experience: [
-          {
-            title: parsedData.title,
-            description: parsedData.summary,
-            location: parsedData.location
-          }
-        ]
-      });
+      // Only send non-empty values to the server
+      const updateData: Record<string, any> = {};
+      
+      if (parsedData.summary && parsedData.summary.trim()) {
+        updateData.summary = parsedData.summary.trim();
+      }
+      
+      if (parsedData.skills && parsedData.skills.length > 0) {
+        updateData.skills = parsedData.skills.filter(skill => skill.trim());
+      }
+      
+      if (parsedData.title && parsedData.title.trim()) {
+        updateData.title = parsedData.title.trim();
+      }
+      
+      if (parsedData.location && parsedData.location.trim()) {
+        updateData.location = parsedData.location.trim();
+      }
+
+      await apiRequest("POST", "/api/individual-profiles/ai-resume", updateData);
 
       onProfileUpdated?.();
       
@@ -211,14 +218,14 @@ export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResume
             )}
 
             {/* Skills */}
-            {parsedData.skills.length > 0 && (
+            {parsedData.skills && parsedData.skills.length > 0 && (
               <div className="space-y-2">
                 <h3 className="font-semibold flex items-center gap-2">
                   <BookOpen className="h-4 w-4" />
                   추출된 기술/역량
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {parsedData.skills.map((skill, index) => (
+                  {parsedData.skills!.map((skill, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       {skill}
                     </Badge>

@@ -716,22 +716,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "프로필을 찾을 수 없습니다." });
       }
 
-      // Update profile with AI-generated data
-      const updatedProfile = await storage.updateIndividualProfile(existingProfile.id, {
-        summary: (summary as string) || existingProfile.summary,
-        skills: skills ? JSON.stringify(skills) as any : existingProfile.skills,
-        experience: experience ? JSON.stringify(experience) as any : existingProfile.experience,
-        preferredJobTypes: title ? JSON.stringify([title]) as any : existingProfile.preferredJobTypes,
-        preferredLocations: location ? JSON.stringify([location]) as any : existingProfile.preferredLocations,
-        aiAnalysis: JSON.stringify({
-          lastGenerated: new Date().toISOString(),
-          source: 'natural_language_input',
-          extractedSkills: skills || [],
-          generatedSummary: summary || ''
-        }) as any
-      });
+      // Prepare update data - only update fields that have values
+      const updateData: any = {};
+      
+      if (summary && typeof summary === 'string' && summary.trim()) {
+        updateData.summary = summary.trim();
+      }
+      
+      if (skills && Array.isArray(skills) && skills.length > 0) {
+        const validSkills = skills.filter(skill => skill && typeof skill === 'string' && skill.trim());
+        if (validSkills.length > 0) {
+          updateData.skills = JSON.stringify(validSkills) as any;
+        }
+      }
+      
+      if (experience && Array.isArray(experience) && experience.length > 0) {
+        updateData.experience = JSON.stringify(experience) as any;
+      }
+      
+      if (title && typeof title === 'string' && title.trim()) {
+        updateData.preferredJobTypes = JSON.stringify([title.trim()]) as any;
+      }
+      
+      if (location && typeof location === 'string' && location.trim()) {
+        updateData.preferredLocations = JSON.stringify([location.trim()]) as any;
+      }
 
-      res.json({ profile: updatedProfile });
+      // Always update AI analysis with what was processed
+      updateData.aiAnalysis = JSON.stringify({
+        lastGenerated: new Date().toISOString(),
+        source: 'natural_language_input',
+        extractedSkills: skills || [],
+        generatedSummary: summary || '',
+        processedFields: Object.keys(updateData).filter(key => key !== 'aiAnalysis')
+      }) as any;
+
+      // Only update if there's at least one field to update
+      if (Object.keys(updateData).length === 1) { // Only aiAnalysis
+        return res.json({ 
+          message: "유효한 업데이트 데이터가 없습니다.",
+          profile: existingProfile 
+        });
+      }
+
+      const updatedProfile = await storage.updateIndividualProfile(existingProfile.id, updateData);
+
+      res.json({ 
+        profile: updatedProfile,
+        updatedFields: Object.keys(updateData).filter(key => key !== 'aiAnalysis')
+      });
     } catch (error) {
       console.error('AI 이력서 업데이트 오류:', error);
       res.status(500).json({ 
