@@ -39,22 +39,11 @@ export default function LoginSelection() {
         onClick={handleClick}
       >
         {/* 키보드 없는 상태에서는 원본 이미지를 키보드 부분만 잘라서 표시 */}
-        <div 
-          className="w-full"
-          style={{ 
-            height: showKeyboard ? '602px' : '852px',
-            transition: 'height 0.3s ease-out'
-          }}
-        >
-          <img 
-            src="/83-1531.png" 
-            alt="로그인 선택 화면"
-            className="w-full h-full object-cover object-top"
-            style={{ 
-              clipPath: showKeyboard ? 'inset(0 0 29.3% 0)' : 'inset(0 0 29.3% 0)'
-            }}
-          />
-        </div>
+        <img 
+          src="/83-1531-clean.png" 
+          alt="로그인 선택 화면"
+          className="w-full h-full object-cover"
+        />
         
         {/* 키보드 오버레이 - 입력 필드 클릭 시에만 표시 */}
         {showKeyboard && (

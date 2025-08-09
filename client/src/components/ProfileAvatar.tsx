@@ -5,54 +5,26 @@ interface ProfileAvatarProps {
 }
 
 export default function ProfileAvatar({ gender, ageGroup, className = "" }: ProfileAvatarProps) {
-  // 성별과 연령대에 따른 아바타 선택
-  const getAvatarStyle = () => {
+  // 성별과 연령대에 따른 간단한 아바타 이미지 선택
+  const getAvatarImage = () => {
     if (gender === 'female') {
-      if (ageGroup === 'young' || ageGroup === 'middle') {
-        // 우상단 - 젊은 여성 (노란 옷)
-        return {
-          backgroundImage: 'url(/profile-avatars.png)',
-          backgroundPosition: '50% 0%',
-          backgroundSize: '200% 200%'
-        };
-      } else {
-        // 중년 여성 스타일로 수정 필요 시
-        return {
-          backgroundImage: 'url(/profile-avatars.png)',
-          backgroundPosition: '50% 0%',
-          backgroundSize: '200% 200%'
-        };
-      }
+      return '/profile2.png'; // 여성 프로필
     } else {
-      if (ageGroup === 'young') {
-        // 좌상단 - 젊은 남성 (안경, 정장)
-        return {
-          backgroundImage: 'url(/profile-avatars.png)',
-          backgroundPosition: '0% 0%',
-          backgroundSize: '200% 200%'
-        };
-      } else if (ageGroup === 'middle') {
-        // 우하단 - 중년 남성 (선글라스, 오렌지 옷)
-        return {
-          backgroundImage: 'url(/profile-avatars.png)',
-          backgroundPosition: '50% 50%',
-          backgroundSize: '200% 200%'
-        };
-      } else {
-        // 좌하단 - 시니어 남성 (모자, 수염)
-        return {
-          backgroundImage: 'url(/profile-avatars.png)',
-          backgroundPosition: '0% 50%',
-          backgroundSize: '200% 200%'
-        };
+      if (ageGroup === 'senior') {
+        return '/profile1.png'; // 시니어 남성
       }
+      return '/profile1.png'; // 기본 남성
     }
   };
 
   return (
-    <div 
-      className={`w-32 h-32 rounded-full ${className}`}
-      style={getAvatarStyle()}
-    />
+    <div className={`rounded-full overflow-hidden ${className}`}>
+      <img 
+        src={getAvatarImage()}
+        alt="프로필 아바타"
+        className="w-full h-full object-cover"
+        style={{ width: '48px', height: '48px' }}
+      />
+    </div>
   );
 }
