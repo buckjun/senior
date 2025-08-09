@@ -1,0 +1,2244 @@
+/* Right Area */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 18px 0px 13px;
+
+position: absolute;
+width: 142px;
+height: 54px;
+left: 252px;
+top: 0px;
+
+
+
+/* Icons */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px;
+gap: 3px;
+
+width: 92px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* 🧩 Status Bar › Cellular Icon */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+
+width: 27px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Icon */
+
+width: 27px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* cellularbars F17 */
+
+position: absolute;
+left: 7.41%;
+right: 9.65%;
+top: 13.04%;
+bottom: 24.27%;
+
+
+
+/* Original */
+
+position: absolute;
+visibility: hidden;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0.06%;
+
+/* 🗑️ DEPRECATED/🌈/black */
+background: url(Deprecated Pattern.png), #000000;
+
+
+/* Bar Empty */
+
+position: absolute;
+left: 83.23%;
+right: 0.05%;
+top: 75.47%;
+bottom: 0.06%;
+
+background: #000000;
+opacity: 0.2;
+
+
+/* Bar #4 Full */
+
+position: absolute;
+left: 83.25%;
+right: 0%;
+top: 0%;
+bottom: 0.06%;
+
+background: #000000;
+
+
+/* Bar Empty */
+
+position: absolute;
+left: 55.5%;
+right: 27.78%;
+top: 75.47%;
+bottom: 0.06%;
+
+background: #000000;
+opacity: 0.2;
+
+
+/* Bar #3 Full */
+
+position: absolute;
+left: 55.52%;
+right: 27.76%;
+top: 22.74%;
+bottom: 0.06%;
+
+background: #000000;
+
+
+/* Bar Empty */
+
+position: absolute;
+left: 27.77%;
+right: 55.51%;
+top: 75.47%;
+bottom: 0.06%;
+
+background: #000000;
+opacity: 0.2;
+
+
+/* Bar #2 Full */
+
+position: absolute;
+left: 27.76%;
+right: 55.52%;
+top: 43.58%;
+bottom: 0.06%;
+
+background: #000000;
+
+
+/* Bar Empty */
+
+position: absolute;
+left: 0%;
+right: 83.28%;
+top: 75.47%;
+bottom: 0.06%;
+
+background: #000000;
+opacity: 0.2;
+
+
+/* Bar #1 Full */
+
+position: absolute;
+left: 0%;
+right: 83.28%;
+top: 61.6%;
+bottom: 0.06%;
+
+background: #000000;
+
+
+/* 🧩 Status Bar › Wi-Fi Icon */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+
+width: 23px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Icon */
+
+width: 23px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* wifi F17 */
+
+position: absolute;
+width: 19.11px;
+height: 13.8px;
+left: 2px;
+top: 4px;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0.06%;
+bottom: 0%;
+
+background: #000000;
+
+
+/* 🧩 Status Bar › Battery Icon */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+
+width: 36px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Icon */
+
+width: 36px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* battery.100 F22 Fina */
+
+position: absolute;
+width: 30.85px;
+height: 13.95px;
+left: 3px;
+top: 4px;
+
+
+
+/* Outside */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0.12%;
+bottom: 0%;
+
+background: #000000;
+opacity: 0.4;
+
+
+/* Inside */
+
+position: absolute;
+left: 7.91%;
+right: 17.97%;
+top: 17.53%;
+bottom: 17.43%;
+
+background: #000000;
+
+
+/* 🧩 Status Bar › Time */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+
+width: 37px;
+height: 23px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* 1:47 */
+
+width: 37px;
+height: 23px;
+
+font-family: 'SF Pro';
+font-style: normal;
+font-weight: 590;
+font-size: 18px;
+line-height: 23px;
+/* 상자 높이와 동일 또는 128% */
+text-align: center;
+letter-spacing: -0.44px;
+
+color: #000000;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Text */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 45px;
+left: 25px;
+top: 68px;
+
+
+
+/* 회원가입 */
+
+width: 327px;
+height: 39px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 800;
+font-size: 32px;
+line-height: 39px;
+/* 상자 높이와 동일 */
+letter-spacing: 0.005em;
+
+/* Neutral/Dark/Darkest */
+color: #1F2024;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 93 */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 12px;
+
+position: absolute;
+width: 343px;
+height: 33px;
+left: 25px;
+top: 717px;
+
+
+
+/* Checkbox
+
+Allows the user to select items in a list of options.
+*/
+
+box-sizing: border-box;
+
+width: 24px;
+height: 24px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1.5px solid #C5C6CC;
+border-radius: 6px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* 저는 이용약관과 개인정보 처리방침을 읽었으며, 이에 동의합니다. */
+
+width: 307px;
+height: 32px;
+
+/* Body/Body S */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 16px;
+/* 또는 133% */
+letter-spacing: 0.01em;
+
+/* Neutral/Dark/Light */
+color: #71727A;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 80px;
+left: 25px;
+top: 216px;
+
+
+
+/* Title */
+
+width: 343px;
+height: 24px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+width: 343px;
+height: 48px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+border: 1.5px solid #006FFD;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Content */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 6px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Unit */
+
+display: none;
+width: 10px;
+height: 18px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 18px;
+/* 상자 높이와 동일 또는 129% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Text */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Text */
+
+width: 26px;
+height: 20px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 20px;
+/* 상자 높이와 동일 또는 143% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Darkest */
+color: #1F2024;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Cursor */
+
+width: 0px;
+height: 16px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+border: 1.5px solid #006FFD;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Icon */
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 75px;
+left: 25px;
+top: 312px;
+
+
+
+/* Title */
+
+width: 343px;
+height: 24px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+width: 343px;
+height: 48px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1px solid #C5C6CC;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Content */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 6px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Unit */
+
+display: none;
+width: 10px;
+height: 18px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 18px;
+/* 상자 높이와 동일 또는 129% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Text */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Placeholder */
+
+width: 72px;
+height: 20px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 20px;
+/* 상자 높이와 동일 또는 143% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Cursor */
+
+display: none;
+width: 0px;
+height: 16px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+border: 1.5px solid #006FFD;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Icon */
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 75px;
+left: 25px;
+top: 457px;
+
+
+
+/* Title */
+
+width: 343px;
+height: 24px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+width: 343px;
+height: 48px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1px solid #C5C6CC;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Content */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 6px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Unit */
+
+display: none;
+width: 10px;
+height: 18px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 18px;
+/* 상자 높이와 동일 또는 129% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Text */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Placeholder */
+
+width: 103px;
+height: 20px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 20px;
+/* 상자 높이와 동일 또는 143% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Cursor */
+
+display: none;
+width: 0px;
+height: 16px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+border: 1.5px solid #006FFD;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Icon */
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 75px;
+left: 25px;
+top: 552px;
+
+
+
+/* Title */
+
+width: 343px;
+height: 24px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+display: none;
+width: 295px;
+height: 48px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1px solid #C5C6CC;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* 여성 */
+
+position: absolute;
+width: 343px;
+height: 24px;
+left: 121px;
+top: 411px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+
+/* 남성 */
+
+position: absolute;
+width: 343px;
+height: 24px;
+left: 256px;
+top: 411px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 46px;
+height: 27px;
+left: 25px;
+top: 411px;
+
+
+
+/* Title */
+
+width: 46px;
+height: 24px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+display: none;
+width: 295px;
+height: 48px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1px solid #C5C6CC;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* radio_button_checked */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 90px;
+top: 411px;
+
+
+
+/* icon */
+
+position: absolute;
+left: 8.33%;
+right: 8.33%;
+top: 8.33%;
+bottom: 8.33%;
+
+/* M3/sys/light/on-surface */
+background: #1D1B20;
+
+
+/* radio_button_unchecked */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 226px;
+top: 411px;
+
+
+
+/* icon */
+
+position: absolute;
+left: 8.33%;
+right: 8.33%;
+top: 8.33%;
+bottom: 8.33%;
+
+/* M3/sys/light/on-surface */
+background: #1D1B20;
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 75px;
+left: 25px;
+top: 564px;
+
+
+
+/* Title */
+
+width: 343px;
+height: 15px;
+
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+width: 343px;
+height: 48px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1px solid #C5C6CC;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Content */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 6px;
+
+width: 287px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Unit */
+
+display: none;
+width: 10px;
+height: 18px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 18px;
+/* 상자 높이와 동일 또는 129% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Text */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 287px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Placeholder */
+
+width: 82px;
+height: 20px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 20px;
+/* 상자 높이와 동일 또는 143% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Cursor */
+
+display: none;
+width: 0px;
+height: 16px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+border: 1.5px solid #006FFD;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Icon */
+
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Union */
+
+position: absolute;
+width: 16px;
+height: 13.67px;
+left: 0px;
+top: 1.17px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+background: #006FFD;
+
+
+/* Vector 95 (Stroke) */
+
+position: absolute;
+left: 10.77%;
+right: 3.81%;
+top: 7.28%;
+bottom: 7.3%;
+
+background: #006FFD;
+
+
+/* Subtract */
+
+position: absolute;
+width: 16px;
+height: 10.9px;
+left: 0px;
+top: 2.55px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+background: #006FFD;
+
+
+/* Shape */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 15.91%;
+bottom: 15.93%;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+background: #006FFD;
+
+
+/* Vector 96 (Stroke) */
+
+position: absolute;
+left: 7.29%;
+right: 7.29%;
+top: 0%;
+bottom: 14.58%;
+
+background: #006FFD;
+
+
+/* Fill */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Neutral/Dark/Lightest
+
+8F9098
+*/
+background: #8F9098;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 50px;
+left: 25px;
+top: 647px;
+
+
+
+/* Title */
+
+display: none;
+width: 295px;
+height: 15px;
+
+/* Heading/H5 */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 12px;
+line-height: 15px;
+/* 상자 높이와 동일 */
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+width: 343px;
+height: 48px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1px solid #C5C6CC;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Content */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 6px;
+
+width: 287px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Unit */
+
+display: none;
+width: 10px;
+height: 18px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 18px;
+/* 상자 높이와 동일 또는 129% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Text */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 287px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Placeholder */
+
+width: 95px;
+height: 20px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 20px;
+/* 상자 높이와 동일 또는 143% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Cursor */
+
+display: none;
+width: 0px;
+height: 16px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+border: 1.5px solid #006FFD;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Icon */
+
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Union */
+
+position: absolute;
+width: 16px;
+height: 13.67px;
+left: 0px;
+top: 1.17px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+background: #006FFD;
+
+
+/* Vector 95 (Stroke) */
+
+position: absolute;
+left: 10.77%;
+right: 3.81%;
+top: 7.28%;
+bottom: 7.3%;
+
+background: #006FFD;
+
+
+/* Subtract */
+
+position: absolute;
+width: 16px;
+height: 10.9px;
+left: 0px;
+top: 2.55px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+background: #006FFD;
+
+
+/* Shape */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 15.91%;
+bottom: 15.93%;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+background: #006FFD;
+
+
+/* Vector 96 (Stroke) */
+
+position: absolute;
+left: 7.29%;
+right: 7.29%;
+top: 0%;
+bottom: 14.58%;
+
+background: #006FFD;
+
+
+/* Fill */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Neutral/Dark/Lightest
+
+8F9098
+*/
+background: #8F9098;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Button */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 12px;
+gap: 8px;
+
+position: absolute;
+width: 326px;
+height: 52px;
+left: 34px;
+top: 771px;
+
+background: #2C2C2C;
+border: 1px solid #2C2C2C;
+border-radius: 8px;
+
+
+/* Star
+
+Keywords: bookmark, favorite, like
+*/
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Button */
+
+width: 81px;
+height: 28px;
+
+/* M3/title/large */
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 400;
+font-size: 22px;
+line-height: 28px;
+/* 상자 높이와 동일 또는 127% */
+
+color: #F5F5F5;
+
+border: 0.2px solid #FFFFFF;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* X
+
+Keywords: cancel, close, delete, remove, times, clear
+*/
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+flex-grow: 0;
+
+
+/* Text Field
+
+Allow the input of short text
+*/
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+position: absolute;
+width: 343px;
+height: 75px;
+left: 24px;
+top: 124px;
+
+
+
+/* Title */
+
+width: 343px;
+height: 24px;
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 700;
+font-size: 20px;
+line-height: 24px;
+
+/* Neutral/Dark/Dark */
+color: #2F3036;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Field */
+
+box-sizing: border-box;
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 12px 16px;
+gap: 8px;
+
+width: 343px;
+height: 48px;
+
+/* Neutral/Light/Darkest
+
+C5C6CC
+*/
+border: 1px solid #C5C6CC;
+border-radius: 12px;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Content */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 6px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Unit */
+
+display: none;
+width: 10px;
+height: 18px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 18px;
+/* 상자 높이와 동일 또는 129% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Text */
+
+/* 오토레이아웃 */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 311px;
+height: 20px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Placeholder */
+
+width: 66px;
+height: 20px;
+
+/* Body/Body M */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 20px;
+/* 상자 높이와 동일 또는 143% */
+display: flex;
+align-items: center;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Cursor */
+
+display: none;
+width: 0px;
+height: 16px;
+
+/* Highlight/Darkest
+
+006FFD
+*/
+border: 1.5px solid #006FFD;
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Icon */
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Support text */
+
+display: none;
+width: 295px;
+height: 14px;
+
+/* Body/Body XS */
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 10px;
+line-height: 14px;
+/* 상자 높이와 동일 또는 140% */
+letter-spacing: 0.015em;
+
+/* Neutral/Dark/Lightest */
+color: #8F9098;
+
+
+/* 내부 오토레이아웃 */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
