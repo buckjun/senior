@@ -4,6 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { SplashScreen } from "@/components/SplashScreen";
+import { useState } from "react";
 import NotFound from "@/pages/not-found";
 import Welcome from "@/pages/welcome";
 import IndividualSignup from "@/pages/individual/signup";
@@ -23,14 +25,18 @@ import ExcelUploadPage from "@/pages/admin/excel-upload";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const [showSplash, setShowSplash] = useState(true);
 
+  // 스플래시 화면 표시 중이면 스플래시 화면만 보여주기
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
+
+  // 스플래시 화면이 끝난 후 인증 로딩 중이면 간단한 로딩만 표시
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg">로딩 중...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
