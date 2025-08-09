@@ -4,14 +4,8 @@ export default function Landing() {
   const [, setLocation] = useLocation();
 
   const handleClick = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    
-    // 시작하기 버튼 영역 (하단 버튼)
-    if (y > 700 && y < 800) {
-      setLocation('/login');
-      return;
-    }
+    console.log('Landing 페이지 클릭됨');
+    setLocation('/login');
   };
 
   return (
