@@ -44,35 +44,35 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
     };
 
     recognition.current.onresult = (event: any) => {
-      let currentFinal = '';
-      let currentInterim = '';
+      let finalTranscriptPart = '';
+      let interimTranscriptPart = '';
 
+      // Process all results from the event
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcriptPart = event.results[i][0].transcript;
+        const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          currentFinal += transcriptPart;
+          finalTranscriptPart += transcript;
         } else {
-          currentInterim += transcriptPart;
+          interimTranscriptPart += transcript;
         }
       }
 
-      // Update final transcript (accumulate only final results)
-      if (currentFinal) {
-        setFinalTranscript(prev => prev + currentFinal);
+      // Update final transcript only when we get final results
+      if (finalTranscriptPart) {
+        setFinalTranscript(prev => prev + finalTranscriptPart);
+        setInterimTranscript(''); // Clear interim when we get final
       }
       
-      // Update interim transcript (replace, don't accumulate)
-      setInterimTranscript(currentInterim);
-      
-      // Update display transcript (final + current interim, no accumulation)
-      if (currentFinal) {
-        // Only use the final result, clear interim
-        setTranscript(prevFinal => prevFinal + currentFinal);
-        setInterimTranscript('');
-      } else if (currentInterim) {
-        // Show interim results without accumulating
-        setTranscript(prevFinal => prevFinal + currentInterim);
+      // Update interim transcript (replace completely, don't accumulate)
+      if (interimTranscriptPart) {
+        setInterimTranscript(interimTranscriptPart);
       }
+      
+      // Update display transcript: finalTranscript + current interim
+      setTranscript(prevFinal => {
+        const currentFinal = prevFinal + (finalTranscriptPart || '');
+        return currentFinal + (interimTranscriptPart || '');
+      });
     };
 
     recognition.current.onerror = (event: any) => {
@@ -120,13 +120,11 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
     };
 
     recognition.current.onend = () => {
+      console.log('Speech recognition ended');
       setIsListening(false);
+      setIsRecording(false);
       // Clear interim results on end
       setInterimTranscript('');
-      // If recording is still active, allow user to start again
-      if (isRecording) {
-        setIsRecording(false);
-      }
     };
 
     return () => {
@@ -160,8 +158,13 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
   };
 
   const stopRecording = () => {
-    if (recognition.current && isListening) {
-      recognition.current.stop();
+    if (recognition.current) {
+      // Force stop recognition regardless of state
+      try {
+        recognition.current.stop();
+      } catch (error) {
+        console.log('Recognition already stopped');
+      }
     }
     setIsRecording(false);
     setIsListening(false);

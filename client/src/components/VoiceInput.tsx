@@ -68,33 +68,31 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
       };
 
       recognition.onresult = (event) => {
-        let currentFinal = '';
-        let currentInterim = '';
+        let finalTranscriptPart = '';
+        let interimTranscriptPart = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcriptPart = event.results[i][0].transcript;
+          const transcript = event.results[i][0].transcript;
           
           if (event.results[i].isFinal) {
-            currentFinal += transcriptPart;
+            finalTranscriptPart += transcript;
           } else {
-            currentInterim += transcriptPart;
+            interimTranscriptPart += transcript;
           }
         }
 
-        // Only update transcript with current results, don't accumulate interim
-        const displayText = currentFinal || currentInterim;
-        if (displayText.trim()) {
-          setTranscript(displayText);
-          
-          if (currentFinal) {
-            onTranscript(currentFinal);
-            const confidence = event.results[event.results.length - 1][0].confidence || 0;
-            setStatus(`음성 인식 완료 (신뢰도: ${Math.round(confidence * 100)}%)`);
-            onStatusChange?.(`음성 인식 완료 (신뢰도: ${Math.round(confidence * 100)}%)`);
-          } else {
-            setStatus('음성 인식 중...');
-            onStatusChange?.('음성 인식 중...');
-          }
+        // Handle final results - these are definitive
+        if (finalTranscriptPart) {
+          setTranscript(finalTranscriptPart); // Set to final result only
+          onTranscript(finalTranscriptPart); // Send final result to parent
+          const confidence = event.results[event.results.length - 1][0].confidence || 0;
+          setStatus(`음성 인식 완료 (신뢰도: ${Math.round(confidence * 100)}%)`);
+          onStatusChange?.(`음성 인식 완료 (신뢰도: ${Math.round(confidence * 100)}%)`);
+        } else if (interimTranscriptPart) {
+          // Handle interim results - these are temporary
+          setTranscript(interimTranscriptPart); // Show interim result
+          setStatus('음성 인식 중...');
+          onStatusChange?.('음성 인식 중...');
         }
       };
 
@@ -103,6 +101,7 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
       };
 
       recognition.onend = () => {
+        console.log('Speech recognition ended');
         setIsListening(false);
         setStatus('음성 인식 종료');
         onStatusChange?.('음성 인식 종료');
@@ -177,9 +176,16 @@ export function VoiceInput({ onTranscript, onStatusChange, disabled = false }: V
   };
 
   const stopListening = () => {
-    if (!recognitionRef.current || !isListening) return;
+    if (!recognitionRef.current) return;
     
-    recognitionRef.current.stop();
+    try {
+      // Force stop recognition
+      recognitionRef.current.stop();
+    } catch (error) {
+      console.log('Recognition already stopped or error stopping:', error);
+    }
+    
+    // Immediately update state
     setIsListening(false);
   };
 
