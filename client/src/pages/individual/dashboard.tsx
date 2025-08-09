@@ -6,7 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { MobileNav } from '@/components/ui/mobile-nav';
 import { JobCard } from '@/components/ui/job-card';
 import { VoiceInput } from '@/components/ui/voice-input';
-import { Bell, Mic, GraduationCap, FileText, Clock, MapPin } from 'lucide-react';
+import { AIResumeWriter } from '@/components/AIResumeWriter';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Bell, Mic, GraduationCap, FileText, Clock, MapPin, Wand2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
@@ -173,16 +175,35 @@ export default function IndividualDashboard() {
       </div>
       
       <div className="p-4">
-        {/* AI Recommendations */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-body font-bold" data-testid="text-recommendations-title">
-              AI 맞춤 추천
-            </h3>
-            <Badge className="status-badge status-info">
-              새로 업데이트됨
-            </Badge>
-          </div>
+        {/* Dashboard Tabs */}
+        <Tabs defaultValue="jobs" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="jobs" data-testid="tab-jobs">
+              <Briefcase className="w-4 h-4 mr-2" />
+              채용정보
+            </TabsTrigger>
+            <TabsTrigger value="ai-resume" data-testid="tab-ai-resume">
+              <Wand2 className="w-4 h-4 mr-2" />
+              AI 이력서
+            </TabsTrigger>
+            <TabsTrigger value="profile" data-testid="tab-profile">
+              <GraduationCap className="w-4 h-4 mr-2" />
+              내 정보
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Jobs Tab */}
+          <TabsContent value="jobs" className="mt-6">
+            {/* AI Recommendations */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-body font-bold" data-testid="text-recommendations-title">
+                  AI 맞춤 추천
+                </h3>
+                <Badge className="status-badge status-info">
+                  새로 업데이트됨
+                </Badge>
+              </div>
           
           {/* Job Cards */}
           {loadingJobs ? (
@@ -225,27 +246,27 @@ export default function IndividualDashboard() {
               <Link href="/individual/profile-setup">
                 <Button className="btn-primary">프로필 완성하기</Button>
               </Link>
-            </div>
-          )}
-        </div>
-        
-        {/* Quick Actions */}
-        <div className="mb-6">
-          <h3 className="text-body font-bold mb-4">빠른 서비스</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Link href="/education-programs">
-              <div className="card-mobile text-center p-6 hover:shadow-xl transition-shadow" data-testid="button-education-programs">
-                <div className="w-12 h-12 bg-secondary/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                  <GraduationCap className="text-secondary text-xl" />
-                </div>
-                <p className="text-body font-semibold">교육 프로그램</p>
               </div>
-            </Link>
-            
-            <Link href="/resume">
-              <div className="card-mobile text-center p-6 hover:shadow-xl transition-shadow" data-testid="button-my-resume">
-                <div className="w-12 h-12 bg-accent/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                  <FileText className="text-accent text-xl" />
+            )}
+          </div>
+          
+          {/* Quick Actions */}
+          <div className="mb-6">
+            <h3 className="text-body font-bold mb-4">빠른 서비스</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <Link href="/education-programs">
+                <div className="card-mobile text-center p-6 hover:shadow-xl transition-shadow" data-testid="button-education-programs">
+                  <div className="w-12 h-12 bg-secondary/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
+                    <GraduationCap className="text-secondary text-xl" />
+                  </div>
+                  <p className="text-body font-semibold">교육 프로그램</p>
+                </div>
+              </Link>
+              
+              <Link href="/resume">
+                <div className="card-mobile text-center p-6 hover:shadow-xl transition-shadow" data-testid="button-my-resume">
+                  <div className="w-12 h-12 bg-accent/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
+                    <FileText className="text-accent text-xl" />
                 </div>
                 <p className="text-body font-semibold">내 이력서</p>
               </div>
@@ -269,38 +290,77 @@ export default function IndividualDashboard() {
             </Link>
           </div>
         </div>
-        
-        {/* Recent Activity */}
-        <div>
-          <h3 className="text-body font-bold mb-4">최근 활동</h3>
-          <div className="space-y-3">
-            <div className="card-mobile p-4" data-testid="activity-item-1">
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-primary rounded-full mr-3 mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-body">카페 바리스타 교육과정 정보를 확인했어요</p>
-                  <div className="flex items-center text-sm text-gray-500 mt-1">
-                    <Clock className="w-4 h-4 mr-1" />
-                    <span>2시간 전</span>
+      </TabsContent>
+
+      {/* AI Resume Tab */}
+      <TabsContent value="ai-resume" className="mt-6">
+        <AIResumeWriter 
+          onProfileUpdated={() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
+            toast({
+              title: "프로필 업데이트 완료",
+              description: "AI 이력서 정보가 내 프로필에 반영되었습니다.",
+            });
+          }}
+        />
+      </TabsContent>
+
+      {/* Profile Tab */}
+      <TabsContent value="profile" className="mt-6">
+        <div className="space-y-4">
+          <div className="card-mobile p-6">
+            <h3 className="text-lg font-bold mb-4">내 프로필 정보</h3>
+            {profile ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">자기소개</label>
+                  <p className="mt-1 text-sm bg-gray-50 p-3 rounded">
+                    {profile.summary || "자기소개를 작성해주세요."}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">보유 스킬</label>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {profile.skills ? JSON.parse(profile.skills).map((skill: string, index: number) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {skill}
+                      </Badge>
+                    )) : (
+                      <span className="text-sm text-gray-500">등록된 스킬이 없습니다.</span>
+                    )}
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            <div className="card-mobile p-4" data-testid="activity-item-2">
-              <div className="flex items-start">
-                <div className="w-2 h-2 bg-secondary rounded-full mr-3 mt-2"></div>
-                <div className="flex-1">
-                  <p className="text-body">'시설관리자' 채용공고를 찜했어요</p>
-                  <div className="flex items-center text-sm text-gray-500 mt-1">
-                    <Clock className="w-4 h-4 mr-1" />
-                    <span>어제</span>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-600">선호 직종</label>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {profile.preferredJobTypes ? JSON.parse(profile.preferredJobTypes).map((job: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {job}
+                      </Badge>
+                    )) : (
+                      <span className="text-sm text-gray-500">선호 직종을 설정해주세요.</span>
+                    )}
                   </div>
                 </div>
+
+                <div className="pt-4">
+                  <Link href="/individual/profile-setup">
+                    <Button className="w-full">프로필 수정하기</Button>
+                  </Link>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600 mb-4">프로필 정보를 불러오는 중...</p>
+              </div>
+            )}
           </div>
         </div>
+      </TabsContent>
+
+    </Tabs>
       </div>
       
       {/* Voice Search Modal */}

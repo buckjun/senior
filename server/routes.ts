@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { parseNaturalLanguage, extractSkills } from "./naturalLanguageService";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { aiService } from "./aiService";
@@ -668,6 +669,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching statistics:', error);
       res.status(500).json({ error: 'Failed to fetch statistics' });
+    }
+  });
+
+  // Natural language processing for resume generation
+  app.post('/api/parse-resume', isAuthenticated, async (req: any, res) => {
+    try {
+      const { text } = req.body;
+      
+      if (!text || typeof text !== "string") {
+        return res.status(400).json({ error: "텍스트가 필요합니다." });
+      }
+
+      const parsed = parseNaturalLanguage(text);
+      const skills = extractSkills(text);
+      
+      res.json({ 
+        ...parsed,
+        skills: skills
+      });
+    } catch (error) {
+      console.error('자연어 처리 오류:', error);
+      res.status(500).json({ 
+        error: '텍스트 처리 중 오류가 발생했습니다.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Update individual profile with AI-generated resume data
+  app.post('/api/individual-profiles/ai-resume', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { 
+        summary, 
+        skills, 
+        experience, 
+        title, 
+        location 
+      } = req.body;
+
+      // Get existing profile
+      const existingProfile = await storage.getIndividualProfile(userId);
+      
+      if (!existingProfile) {
+        return res.status(404).json({ error: "프로필을 찾을 수 없습니다." });
+      }
+
+      // Update profile with AI-generated data
+      const updatedProfile = await storage.updateIndividualProfile(existingProfile.id, {
+        summary: summary || existingProfile.summary,
+        skills: skills ? JSON.stringify(skills) : existingProfile.skills,
+        experience: experience ? JSON.stringify(experience) : existingProfile.experience,
+        preferredJobTypes: title ? JSON.stringify([title]) : existingProfile.preferredJobTypes,
+        preferredLocations: location ? JSON.stringify([location]) : existingProfile.preferredLocations,
+        aiAnalysis: JSON.stringify({
+          lastGenerated: new Date().toISOString(),
+          source: 'natural_language_input',
+          extractedSkills: skills || [],
+          generatedSummary: summary || ''
+        })
+      });
+
+      res.json({ profile: updatedProfile });
+    } catch (error) {
+      console.error('AI 이력서 업데이트 오류:', error);
+      res.status(500).json({ 
+        error: 'AI 이력서 업데이트 중 오류가 발생했습니다.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
