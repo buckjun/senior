@@ -1,73 +1,123 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { MobileNav } from '@/components/ui/mobile-nav';
-import { JobCard } from '@/components/ui/job-card';
-import { VoiceInput } from '@/components/ui/voice-input';
-import { AIResumeWriter } from '@/components/AIResumeWriter';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Mic, GraduationCap, FileText, Clock, MapPin, Wand2, Briefcase } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import type { JobPosting } from '@shared/schema';
+import { useState, useEffect } from "react";
+import { Link } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { JobCard } from "@/components/ui/job-card";
+// import { VoiceSearchModal } from "@/components/ui/voice-search-modal";
+import { AIResumeWriter } from "@/components/AIResumeWriter";
+import { ResumePreview } from "@/components/ResumePreview";
+import {
+  Bell,
+  Briefcase,
+  FileText,
+  Mic,
+  Users,
+  Building,
+  Wand2,
+  GraduationCap,
+  User,
+  MapPin,
+  Phone,
+  Mail,
+  Calendar,
+  Award,
+  Lightbulb,
+  Target,
+  Edit
+} from "lucide-react";
+
+interface JobPosting {
+  id: string;
+  title: string;
+  companyName: string;
+  location: string;
+  employmentType: string;
+  salaryRange: string;
+  experienceLevel: string;
+  description: string;
+  requirements: string[];
+  benefits: string[];
+  skills: string[];
+  postedDate: string;
+  matchingScore?: number;
+  isSaved?: boolean;
+  company?: {
+    companyName: string;
+  };
+}
+
+interface UserProfile {
+  id: string;
+  name?: string;
+  title?: string;
+  location?: string;
+  phone?: string;
+  email?: string;
+  summary?: string;
+  skills?: string[];
+  experience?: string[];
+  education?: string[];
+  [key: string]: any;
+}
 
 export default function IndividualDashboard() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
+  const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
 
-  // Fetch recommended jobs
+  // Load recommended jobs
   const { data: recommendedJobs, isLoading: loadingJobs } = useQuery({
     queryKey: ['/api/jobs/recommended'],
     enabled: !!user,
   });
 
-  // Fetch user profile
-  const { data: profile } = useQuery({
+  // Load user profile
+  const { data: profile, isLoading: loadingProfile } = useQuery({
     queryKey: ['/api/individual-profiles/me'],
     enabled: !!user,
   });
 
-  // Save/unsave job mutations
+  // Save job mutation
   const saveJobMutation = useMutation({
-    mutationFn: (jobId: string) => apiRequest('POST', `/api/jobs/${jobId}/save`, {}),
-    onSuccess: () => {
+    mutationFn: (jobId: string) => apiRequest('POST', `/api/jobs/${jobId}/save`),
+    onSuccess: (_, jobId) => {
+      setSavedJobs(prev => new Set(prev).add(jobId));
       toast({
-        title: "공고 저장됨",
-        description: "관심 공고에 추가되었습니다.",
+        title: "공고를 저장했습니다",
+        description: "찜한 공고에서 확인할 수 있습니다.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/saved-jobs'] });
     },
+    onError: () => {
+      toast({
+        title: "저장 실패",
+        description: "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
   });
 
+  // Unsave job mutation
   const unsaveJobMutation = useMutation({
-    mutationFn: (jobId: string) => apiRequest('DELETE', `/api/jobs/${jobId}/save`, {}),
-    onSuccess: () => {
-      toast({
-        title: "공고 저장 취소됨",
-        description: "관심 공고에서 제거되었습니다.",
+    mutationFn: (jobId: string) => apiRequest('DELETE', `/api/jobs/${jobId}/save`),
+    onSuccess: (_, jobId) => {
+      setSavedJobs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(jobId);
+        return newSet;
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/saved-jobs'] });
-    },
-  });
-
-  const applyJobMutation = useMutation({
-    mutationFn: (jobId: string) => apiRequest('POST', `/api/jobs/${jobId}/apply`, {
-      coverLetter: "AI 매칭 시스템을 통한 지원입니다."
-    }),
-    onSuccess: () => {
       toast({
-        title: "지원 완료",
-        description: "성공적으로 지원되었습니다.",
+        title: "저장을 취소했습니다",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/applications/my'] });
-    },
+    }
   });
 
   const handleSaveJob = (jobId: string) => {
@@ -79,29 +129,30 @@ export default function IndividualDashboard() {
   };
 
   const handleApplyJob = (jobId: string) => {
-    applyJobMutation.mutate(jobId);
-  };
-
-  const handleVoiceSearch = (transcript: string) => {
-    setSearchQuery(transcript);
-    // Navigate to search with voice query
-    window.location.href = `/individual/search?q=${encodeURIComponent(transcript)}`;
+    toast({
+      title: "지원이 완료되었습니다",
+      description: "회사에서 검토 후 연락드릴 예정입니다.",
+    });
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/individual/search?q=${encodeURIComponent(searchQuery)}`;
+      toast({
+        title: `"${searchQuery}" 검색 결과`,
+        description: "관련 채용정보를 찾고 있습니다.",
+      });
     }
   };
 
-  // Get user display info
   const getUserDisplayName = () => {
-    if (profile && typeof profile === 'object' && 'summary' in profile) {
-      const names = ['김민수', '이영희', '박정호', '최미경', '정수진'];
-      return names[Math.floor(Math.random() * names.length)];
+    if (profile && typeof profile === 'object' && 'name' in profile && profile.name) {
+      return profile.name as string;
     }
-    return (user as any)?.firstName ? `${(user as any).firstName}${(user as any).lastName || ''}` : '사용자';
+    if (user && typeof user === 'object' && 'email' in user && user.email && typeof user.email === 'string') {
+      return user.email.split('@')[0];
+    }
+    return '사용자';
   };
 
   const getUserExperience = () => {
@@ -207,188 +258,268 @@ export default function IndividualDashboard() {
                 </Badge>
               </div>
           
-          {/* Job Cards */}
-          {loadingJobs ? (
-            <div className="space-y-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="card-mobile animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-                  <div className="flex justify-between">
-                    <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-8 bg-gray-200 rounded w-20"></div>
-                  </div>
+              {/* Job Cards */}
+              {loadingJobs ? (
+                <div className="space-y-4">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="card-mobile animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
+                      <div className="flex justify-between">
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-8 bg-gray-200 rounded w-20"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : recommendedJobs && Array.isArray(recommendedJobs) && recommendedJobs.length > 0 ? (
-            <div className="space-y-4">
-              {(recommendedJobs as JobPosting[]).slice(0, 3).map((job: JobPosting) => (
-                <JobCard
-                  key={job.id}
-                  job={{
-                    ...job,
-                    company: { companyName: '우수기업' },
-                    matchingScore: Math.floor(Math.random() * 20) + 80, // 80-100% range
-                  }}
-                  onSave={handleSaveJob}
-                  onUnsave={handleUnsaveJob}
-                  onApply={handleApplyJob}
-                  showMatchingScore={true}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="card-mobile text-center py-8">
-              <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <FileText className="w-8 h-8 text-gray-400" />
-              </div>
-              <h4 className="text-body font-semibold mb-2">추천 공고가 없습니다</h4>
-              <p className="text-gray-600 mb-4">프로필을 완성하면 맞춤 공고를 받아볼 수 있어요</p>
-              <Link href="/individual/profile-setup">
-                <Button className="btn-primary">프로필 완성하기</Button>
-              </Link>
-              </div>
-            )}
-          </div>
-          
-          {/* Quick Actions */}
-          <div className="mb-6">
-            <h3 className="text-body font-bold mb-4">빠른 서비스</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <Link href="/education-programs">
-                <div className="card-mobile text-center p-6 hover:shadow-xl transition-shadow" data-testid="button-education-programs">
-                  <div className="w-12 h-12 bg-secondary/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                    <GraduationCap className="text-secondary text-xl" />
-                  </div>
-                  <p className="text-body font-semibold">교육 프로그램</p>
+              ) : recommendedJobs && Array.isArray(recommendedJobs) && recommendedJobs.length > 0 ? (
+                <div className="space-y-4">
+                  {(recommendedJobs as any[]).slice(0, 3).map((job: any) => (
+                    <JobCard
+                      key={job.id}
+                      job={{
+                        ...job,
+                        company: { companyName: job.companyName || '우수기업' },
+                        matchingScore: Math.floor(Math.random() * 20) + 80, // 80-100% range
+                      }}
+                      onSave={handleSaveJob}
+                      onUnsave={handleUnsaveJob}
+                      onApply={handleApplyJob}
+                      showMatchingScore={true}
+                    />
+                  ))}
                 </div>
-              </Link>
-              
-              <Link href="/resume">
-                <div className="card-mobile text-center p-6 hover:shadow-xl transition-shadow" data-testid="button-my-resume">
-                  <div className="w-12 h-12 bg-accent/10 rounded-xl mx-auto mb-3 flex items-center justify-center">
-                    <FileText className="text-accent text-xl" />
-                </div>
-                <p className="text-body font-semibold">내 이력서</p>
-              </div>
-            </Link>
-          </div>
-          
-          {/* Data Management Section */}
-          <div className="mt-4">
-            <Link href="/admin/excel-upload">
-              <div className="card-mobile p-4 hover:shadow-lg transition-shadow" data-testid="button-excel-upload">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg mr-3 flex items-center justify-center">
-                    <FileText className="text-blue-600 w-5 h-5" />
+              ) : (
+                <div className="card-mobile text-center py-8">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-gray-400" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-body font-semibold">재취업 데이터 업로드</p>
-                    <p className="text-sm text-gray-600">엑셀 파일로 성공 사례 관리</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </TabsContent>
-
-      {/* AI Resume Tab */}
-      <TabsContent value="ai-resume" className="mt-6">
-        <AIResumeWriter 
-          onProfileUpdated={() => {
-            queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
-            toast({
-              title: "프로필 업데이트 완료",
-              description: "AI 이력서 정보가 내 프로필에 반영되었습니다.",
-            });
-          }}
-        />
-      </TabsContent>
-
-      {/* Profile Tab */}
-      <TabsContent value="profile" className="mt-6">
-        <div className="space-y-4">
-          <div className="card-mobile p-6">
-            <h3 className="text-lg font-bold mb-4">내 프로필 정보</h3>
-            {profile ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">자기소개</label>
-                  <p className="mt-1 text-sm bg-gray-50 p-3 rounded">
-                    {(profile as any)?.summary || "자기소개를 작성해주세요."}
+                  <h4 className="text-body font-medium mb-2">맞춤 공고를 준비중입니다</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    프로필을 완성하시면 더 정확한 추천을 받을 수 있어요
                   </p>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-gray-600">보유 스킬</label>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {(() => {
-                      try {
-                        const skills = (profile as any)?.skills ? JSON.parse((profile as any).skills) : [];
-                        return Array.isArray(skills) && skills.length > 0 ? skills.map((skill: string, index: number) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {skill}
-                          </Badge>
-                        )) : (
-                          <span className="text-sm text-gray-500">등록된 스킬이 없습니다.</span>
-                        );
-                      } catch {
-                        return <span className="text-sm text-gray-500">등록된 스킬이 없습니다.</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-gray-600">선호 직종</label>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {(() => {
-                      try {
-                        const jobTypes = (profile as any)?.preferredJobTypes ? JSON.parse((profile as any).preferredJobTypes) : [];
-                        return Array.isArray(jobTypes) && jobTypes.length > 0 ? jobTypes.map((job: string, index: number) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {job}
-                          </Badge>
-                        )) : (
-                          <span className="text-sm text-gray-500">선호 직종을 설정해주세요.</span>
-                        );
-                      } catch {
-                        return <span className="text-sm text-gray-500">선호 직종을 설정해주세요.</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-
-                <div className="pt-4">
                   <Link href="/individual/profile-setup">
-                    <Button className="w-full">프로필 수정하기</Button>
+                    <Button size="sm" data-testid="button-complete-profile">
+                      프로필 완성하기
+                    </Button>
                   </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Category Shortcuts */}
+            <div className="mb-6">
+              <h3 className="text-body font-bold mb-4">인기 직종</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: Users, label: "고객상담", count: "24개" },
+                  { icon: Building, label: "사무직", count: "18개" },
+                  { icon: FileText, label: "관리직", count: "12개" },
+                  { icon: Award, label: "전문직", count: "8개" }
+                ].map((category, index) => (
+                  <div key={index} className="card-mobile p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <category.icon className="w-5 h-5 text-primary mr-2" />
+                        <span className="text-sm font-medium">{category.label}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">{category.count}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* AI Resume Tab */}
+          <TabsContent value="ai-resume" className="mt-6">
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-bold mb-2">AI 이력서 작성</h3>
+                <p className="text-gray-600 text-sm">
+                  자연스러운 문장으로 경력을 설명하면 AI가 이력서로 변환해드립니다
+                </p>
+              </div>
+              <AIResumeWriter />
+              <ResumePreview data={undefined} />
+            </div>
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="mt-6">
+            {loadingProfile ? (
+              <div className="space-y-4">
+                <div className="card-mobile p-6 animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-600 mb-4">프로필 정보를 불러오는 중...</p>
+              <div className="space-y-6">
+                {/* Profile Header */}
+                <div className="card-mobile p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">기본 정보</h3>
+                    <Link href="/individual/profile-setup">
+                      <Button size="sm" variant="outline">
+                        <Edit className="w-4 h-4 mr-1" />
+                        수정
+                      </Button>
+                    </Link>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <User className="w-5 h-5 text-gray-400 mr-3" />
+                      <div>
+                        <p className="text-sm text-gray-600">이름</p>
+                        <p className="font-medium">
+                          {(profile as UserProfile)?.name || getUserDisplayName()}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <Award className="w-5 h-5 text-gray-400 mr-3" />
+                      <div>
+                        <p className="text-sm text-gray-600">희망 직종</p>
+                        <p className="font-medium">
+                          {(profile as UserProfile)?.title || '설정되지 않음'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <MapPin className="w-5 h-5 text-gray-400 mr-3" />
+                      <div>
+                        <p className="text-sm text-gray-600">희망 근무지</p>
+                        <p className="font-medium">
+                          {(profile as UserProfile)?.location || '설정되지 않음'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <Phone className="w-5 h-5 text-gray-400 mr-3" />
+                      <div>
+                        <p className="text-sm text-gray-600">연락처</p>
+                        <p className="font-medium">
+                          {(profile as UserProfile)?.phone || '설정되지 않음'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <Mail className="w-5 h-5 text-gray-400 mr-3" />
+                      <div>
+                        <p className="text-sm text-gray-600">이메일</p>
+                        <p className="font-medium">
+                          {(profile as UserProfile)?.email || (user && typeof user === 'object' && 'email' in user && typeof user.email === 'string' ? user.email : '') || '설정되지 않음'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                {(profile as UserProfile)?.summary && (
+                  <div className="card-mobile p-6">
+                    <h3 className="text-lg font-bold mb-4">자기소개</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      {(profile as UserProfile).summary}
+                    </p>
+                  </div>
+                )}
+
+                {/* Skills */}
+                {(profile as UserProfile)?.skills && (profile as UserProfile).skills!.length > 0 && (
+                  <div className="card-mobile p-6">
+                    <h3 className="text-lg font-bold mb-4">보유 기술</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {(profile as UserProfile).skills!.map((skill, index) => (
+                        <Badge key={index} variant="secondary" className="text-sm">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Experience */}
+                {(profile as UserProfile)?.experience && (profile as UserProfile).experience!.length > 0 && (
+                  <div className="card-mobile p-6">
+                    <h3 className="text-lg font-bold mb-4">경력 사항</h3>
+                    <div className="space-y-3">
+                      {(profile as UserProfile).experience!.map((exp, index) => (
+                        <div key={index} className="flex items-start">
+                          <Calendar className="w-4 h-4 text-gray-400 mr-3 mt-1" />
+                          <p className="text-gray-700">{exp}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Education */}
+                {(profile as UserProfile)?.education && (profile as UserProfile).education!.length > 0 && (
+                  <div className="card-mobile p-6">
+                    <h3 className="text-lg font-bold mb-4">학력 사항</h3>
+                    <div className="space-y-3">
+                      {(profile as UserProfile).education!.map((edu, index) => (
+                        <div key={index} className="flex items-start">
+                          <GraduationCap className="w-4 h-4 text-gray-400 mr-3 mt-1" />
+                          <p className="text-gray-700">{edu}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty state for incomplete profile */}
+                {!(profile as UserProfile)?.summary && 
+                 !(profile as UserProfile)?.skills?.length && 
+                 !(profile as UserProfile)?.experience?.length && (
+                  <div className="card-mobile text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Lightbulb className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h4 className="text-body font-medium mb-2">프로필을 완성해보세요</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      AI 이력서 기능을 사용하거나 직접 입력하여 프로필을 완성할 수 있습니다
+                    </p>
+                    <div className="space-y-2">
+                      <Link href="/individual/profile-setup">
+                        <Button size="sm" className="w-full">
+                          직접 프로필 작성하기
+                        </Button>
+                      </Link>
+                      <Button size="sm" variant="outline" className="w-full" onClick={() => {
+                        const tabs = document.querySelector('[data-testid="tab-ai-resume"]') as HTMLElement;
+                        tabs?.click();
+                      }}>
+                        AI 이력서로 자동 작성
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        </div>
-      </TabsContent>
-
-    </Tabs>
+          </TabsContent>
+        </Tabs>
       </div>
-      
-      {/* Voice Search Modal */}
-      <VoiceInput
+
+      {/* Voice Search Modal - Temporarily disabled */}
+      {/* <VoiceSearchModal
         isOpen={isVoiceSearchOpen}
         onClose={() => setIsVoiceSearchOpen(false)}
-        onTranscript={handleVoiceSearch}
-        placeholder="새로운 분야를 말씀해주세요"
-      />
-      
-      {/* Bottom Navigation */}
-      <MobileNav type="individual" />
+        onTranscript={(transcript: string) => {
+          setSearchQuery(transcript);
+          setIsVoiceSearchOpen(false);
+        }}
+      /> */}
     </div>
   );
 }

@@ -17,7 +17,7 @@ interface ParsedResume {
 }
 
 interface ResumePreviewProps {
-  data: ParsedResume;
+  data?: ParsedResume;
 }
 
 export function ResumePreview({ data }: ResumePreviewProps) {
