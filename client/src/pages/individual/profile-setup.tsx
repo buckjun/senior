@@ -251,10 +251,10 @@ export default function IndividualProfileSetup() {
           </div>
           
           {/* Natural Language AI Conversion */}
-          <div className="border-2 border-blue-200 rounded-2xl p-6 bg-blue-50/50">
+          <div className="border-2 border-[#F5F5DC] rounded-2xl p-6 bg-[#FFFEF0]/50">
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
-                <Edit className="text-blue-600 text-xl" />
+              <div className="w-12 h-12 bg-[#F5F5DC] rounded-xl flex items-center justify-center mr-4">
+                <Edit className="text-[#D4B896] text-xl" />
               </div>
               <div>
                 <h3 className="text-body font-bold">텍스트 변환</h3>
@@ -263,7 +263,7 @@ export default function IndividualProfileSetup() {
             </div>
             <Button 
               onClick={() => setIsAIResumeModalOpen(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full bg-[#D4B896] hover:bg-[#D4B896]/90 text-white"
               data-testid="button-ai-resume-writer"
             >
               <Edit className="mr-2 h-5 w-5" />

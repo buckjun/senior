@@ -337,7 +337,7 @@ export default function CompanyRecommendationsPage() {
                 {/* Action Button */}
                 <div className="flex justify-end">
                   <Button 
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white"
                     data-testid={`button-view-company-${index}`}
                   >
                     상세 정보 보기
@@ -354,14 +354,14 @@ export default function CompanyRecommendationsPage() {
             <Button 
               variant="outline" 
               onClick={handleBackToCategories}
-              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              className="border-[#D4B896] text-[#D4B896] hover:bg-[#FFFEF0]"
               data-testid="button-change-categories"
             >
               직종 변경하기
             </Button>
             <Button 
               onClick={handleBackToDashboard}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white"
               data-testid="button-back-to-dashboard"
             >
               대시보드로 돌아가기

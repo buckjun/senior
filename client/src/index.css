@@ -135,20 +135,20 @@ body {
 }
 
 .status-info {
-  @apply bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300;
+  @apply bg-[#FFFEF0] text-[#D4B896] dark:bg-[#FFFEF0] dark:text-[#D4B896];
 }
 
 /* Professional color palette */
 .text-primary {
-  @apply text-blue-600 dark:text-blue-400;
+  @apply text-[#D4B896] dark:text-[#D4B896];
 }
 
 .bg-primary {
-  @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+  @apply bg-[#D4B896] hover:bg-[#D4B896]/90 dark:bg-[#D4B896] dark:hover:bg-[#D4B896]/90;
 }
 
 .gradient-primary {
-  @apply bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600;
+  @apply bg-gradient-to-r from-[#D4B896] to-[#D4B896]/90 dark:from-[#D4B896] dark:to-[#D4B896]/90;
 }
 
 /* Web app layout helpers */
