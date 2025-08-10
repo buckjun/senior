@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mic, MicOff, Square } from 'lucide-react';
+import { Mic, MicOff, Square, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface VoiceInputProps {
@@ -44,47 +44,39 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
     };
 
     recognition.current.onresult = (event: any) => {
-      console.log('Speech recognition result received', event);
-      let finalTranscriptPart = '';
-      let interimTranscriptPart = '';
+      console.log('Speech recognition result received', event.results);
+      
+      let newFinalTranscript = '';
+      let newInterimTranscript = '';
 
-      // Process all results from the event
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        const confidence = event.results[i][0].confidence;
-        console.log(`Result ${i}: "${transcript}" (final: ${event.results[i].isFinal}, confidence: ${confidence})`);
+      // Build complete transcript from all results
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        const transcriptText = result[0].transcript;
+        const confidence = result[0].confidence;
         
-        if (event.results[i].isFinal) {
-          finalTranscriptPart += transcript;
+        console.log(`Result ${i}: "${transcriptText}" (final: ${result.isFinal}, confidence: ${confidence || 'N/A'})`);
+        
+        if (result.isFinal) {
+          newFinalTranscript += transcriptText;
         } else {
-          interimTranscriptPart += transcript;
+          newInterimTranscript += transcriptText;
         }
       }
 
-      // Update final transcript only when we get final results
-      if (finalTranscriptPart) {
-        console.log('Final transcript received:', finalTranscriptPart);
-        setFinalTranscript(prev => {
-          const newFinal = prev + finalTranscriptPart;
-          console.log('Updated final transcript:', newFinal);
-          return newFinal;
-        });
-        setInterimTranscript(''); // Clear interim when we get final
+      // Update states
+      if (newFinalTranscript) {
+        console.log('Updating final transcript:', newFinalTranscript);
+        setFinalTranscript(newFinalTranscript);
       }
       
-      // Update interim transcript (replace completely, don't accumulate)
-      if (interimTranscriptPart) {
-        console.log('Interim transcript:', interimTranscriptPart);
-        setInterimTranscript(interimTranscriptPart);
-      }
+      console.log('Updating interim transcript:', newInterimTranscript);
+      setInterimTranscript(newInterimTranscript);
       
-      // Update display transcript: finalTranscript + current interim
-      setTranscript(prevFinal => {
-        const currentFinal = prevFinal + (finalTranscriptPart || '');
-        const displayText = currentFinal + (interimTranscriptPart || '');
-        console.log('Display transcript updated:', displayText);
-        return displayText;
-      });
+      // Update display transcript (combination of final + interim)
+      const displayText = newFinalTranscript + newInterimTranscript;
+      console.log('Updating display transcript:', displayText);
+      setTranscript(displayText);
     };
 
     recognition.current.onerror = (event: any) => {
@@ -139,21 +131,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
       // Clear interim results on end
       setInterimTranscript('');
       
-      // Auto-submit if we have final transcript and were recording
-      setTimeout(() => {
-        setFinalTranscript(current => {
-          console.log('Auto-submitting final transcript on end:', current);
-          if (current.trim()) {
-            onTranscript(current.trim());
-            // Close modal after successful transcription
-            setTimeout(() => {
-              onClose();
-            }, 500);
-            return '';
-          }
-          return current;
-        });
-      }, 100); // Small delay to ensure all state updates are complete
+      // Don't auto-submit on end - let user decide when to complete
     };
 
     return () => {
@@ -200,9 +178,22 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
   };
 
   const handleComplete = () => {
-    const finalText = finalTranscript.trim();
-    if (finalText) {
-      onTranscript(finalText);
+    // Stop recording first
+    stopRecording();
+    
+    // Get current transcript (includes both final and interim)
+    const currentText = transcript.trim() || finalTranscript.trim();
+    console.log('Completing with text:', currentText);
+    
+    if (currentText) {
+      onTranscript(currentText);
+      onClose();
+      setTranscript('');
+      setFinalTranscript('');
+      setInterimTranscript('');
+    } else {
+      console.log('No text to submit');
+      // Still close the modal even if no text
       onClose();
       setTranscript('');
       setFinalTranscript('');
@@ -277,22 +268,21 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
             <div className="flex-1 flex space-x-2">
               <Button
                 onClick={stopRecording}
-                variant="destructive"
+                variant="outline"
                 className="flex-1 py-4"
-                data-testid="button-stop-recording"
+                data-testid="button-pause-recording"
               >
                 <Square className="mr-2 h-4 w-4" />
                 중지
               </Button>
-              {transcript && (
-                <Button
-                  onClick={handleComplete}
-                  className="flex-1 btn-primary"
-                  data-testid="button-complete-voice"
-                >
-                  완료
-                </Button>
-              )}
+              <Button
+                onClick={handleComplete}
+                className="flex-1 btn-primary"
+                data-testid="button-end-recording"
+              >
+                <Check className="mr-2 h-4 w-4" />
+                종료
+              </Button>
             </div>
           )}
         </div>
