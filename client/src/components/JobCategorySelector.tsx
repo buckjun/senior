@@ -48,10 +48,10 @@ export function JobCategorySelector({
   return (
     <div className="space-y-6">
       {/* Instructions */}
-      <div className="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+      <div className="bg-white rounded-2xl p-6 border border-[#F5F5DC] shadow-sm">
         <div className="flex items-start space-x-3">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-          <div className="text-blue-800">
+          <Info className="w-5 h-5 text-[#D4B896] mt-0.5" />
+          <div className="text-[#2F3036]">
             <strong>경험이 있거나 도전해보고 싶으신 직종</strong>을 1~2개 선택해주세요.
             선택하신 직종을 바탕으로 맞춤 회사를 추천해드립니다.
           </div>
@@ -60,19 +60,19 @@ export function JobCategorySelector({
 
       {/* Selection Summary */}
       {selectedCategories.length > 0 && (
-        <div className="bg-white rounded-2xl p-4 border border-blue-100 shadow-sm">
-          <p className="text-sm text-gray-600 mb-3 text-center">선택한 직종:</p>
+        <div className="bg-white rounded-2xl p-4 border border-[#F5F5DC] shadow-sm">
+          <p className="text-sm text-[#2F3036]/70 mb-3 text-center">선택한 직종:</p>
           <div className="flex justify-center flex-wrap gap-2">
             {selectedCategories.map((categoryId) => {
               const category = categories.find(c => c.id === categoryId);
               return category ? (
-                <Badge key={categoryId} className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+                <Badge key={categoryId} className="bg-[#F5F5DC] text-[#2F3036] hover:bg-[#D4B896]">
                   {category.displayName}
                 </Badge>
               ) : null;
             })}
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
+          <p className="text-xs text-[#2F3036]/50 mt-2 text-center">
             {selectedCategories.length}/2 선택됨
           </p>
         </div>
@@ -89,9 +89,9 @@ export function JobCategorySelector({
               key={category.id}
               className={`bg-white rounded-2xl p-6 border transition-all cursor-pointer ${
                 isSelected 
-                  ? 'border-blue-500 bg-blue-50 shadow-md' 
+                  ? 'border-[#D4B896] bg-[#FFFEF0] shadow-md' 
                   : isSelectable 
-                    ? 'border-gray-200 hover:border-blue-300 hover:shadow-md' 
+                    ? 'border-gray-200 hover:border-[#D4B896] hover:shadow-md' 
                     : 'border-gray-200 opacity-50 cursor-not-allowed'
               }`}
               onClick={() => {
@@ -107,7 +107,7 @@ export function JobCategorySelector({
                   checked={isSelected}
                   disabled={!isSelectable}
                   data-testid={`checkbox-category-${category.name}`}
-                  className="text-blue-600"
+                  className="text-[#D4B896]"
                 />
               </div>
               <p className="text-sm text-gray-600">
@@ -123,7 +123,7 @@ export function JobCategorySelector({
         <Button 
           onClick={onComplete}
           disabled={selectedCategories.length === 0 || isLoading}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-medium rounded-xl"
+          className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white px-8 py-3 text-lg font-medium rounded-xl"
           data-testid="button-complete-selection"
         >
           {isLoading ? (

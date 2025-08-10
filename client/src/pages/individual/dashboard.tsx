@@ -221,15 +221,15 @@ export default function Dashboard() {
       <main className="container-web py-8 pb-20">
         <div className="w-full space-y-6">
           {/* Welcome Card */}
-          <Card className="bg-gradient-to-r from-blue-50 to-white border-blue-100">
+          <Card className="bg-gradient-to-r from-[#FFFEF0] to-white border-[#F5F5DC]">
             <CardHeader>
-              <CardTitle className="text-title text-gray-900">안녕하세요, {getUserDisplayName()}님! 👋</CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardTitle className="text-title text-[#2F3036]">안녕하세요, {getUserDisplayName()}님! 👋</CardTitle>
+              <CardDescription className="text-[#2F3036]/70">
                 일있슈가 회원님의 경험과 관심사에 맞는 기업을 추천해드립니다.
               </CardDescription>
               <div className="pt-4">
                 <Link href="/individual/job-category-selection">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white">
                     <Building className="w-4 h-4 mr-2" />
                     나에게 맞는 기업 찾기
                   </Button>
@@ -301,7 +301,7 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <Link href="/individual/job-category-selection">
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-blue-200 text-blue-600 hover:bg-blue-50" data-testid="button-job-categories">
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-[#D4B896] text-[#D4B896] hover:bg-[#FFFEF0]" data-testid="button-job-categories">
                     <Building className="w-6 h-6" />
                     <span className="text-sm font-medium">맞춤 기업 찾기</span>
                   </Button>

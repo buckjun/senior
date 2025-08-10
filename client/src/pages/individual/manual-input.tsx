@@ -129,7 +129,7 @@ export default function ManualInputPage() {
             <Button
               onClick={handleSave}
               disabled={updateProfileMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-[#D4B896] hover:bg-[#D4B896]/90"
               data-testid="button-save-profile"
             >
               <Save className="h-4 w-4 mr-2" />
@@ -145,7 +145,7 @@ export default function ManualInputPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-blue-600" />
+              <User className="h-5 w-5 text-[#D4B896]" />
               기본 정보
             </CardTitle>
           </CardHeader>
@@ -306,10 +306,10 @@ export default function ManualInputPage() {
         </Card>
 
         {/* 안내 문구 */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div className="bg-[#FFFEF0] border border-[#F5F5DC] rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <div className="text-blue-600 mt-0.5">💡</div>
-            <div className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="text-[#D4B896] mt-0.5">💡</div>
+            <div className="text-sm text-[#2F3036]">
               <p className="font-medium mb-1">작성 가이드</p>
               <ul className="space-y-1 text-xs">
                 <li>• 이름과 자기소개는 필수 입력 항목입니다</li>

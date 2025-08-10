@@ -18,8 +18,8 @@ export default function Welcome() {
             onClick={() => setIsIndividual(true)}
             className={`flex-1 py-3 text-lg font-medium border-b-2 transition-colors ${
               isIndividual 
-                ? 'text-gray-800 border-blue-500' 
-                : 'text-gray-500 border-transparent'
+                ? 'text-[#2F3036] border-[#D4B896]' 
+                : 'text-[#2F3036]/70 border-transparent'
             }`}
             data-testid="tab-individual"
           >
@@ -29,8 +29,8 @@ export default function Welcome() {
             onClick={() => setIsIndividual(false)}
             className={`flex-1 py-3 text-lg font-medium border-b-2 transition-colors ${
               !isIndividual 
-                ? 'text-gray-800 border-blue-500' 
-                : 'text-gray-500 border-transparent'
+                ? 'text-[#2F3036] border-[#D4B896]' 
+                : 'text-[#2F3036]/70 border-transparent'
             }`}
             data-testid="tab-company"
           >

@@ -85,12 +85,12 @@ export default function CompanyRecommendationsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFFEF0] to-white">
         <div className="text-center">
           <p className="text-red-600 mb-4">추천을 가져오는 중 오류가 발생했습니다.</p>
           <Button 
             onClick={handleBackToCategories} 
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             직종 선택으로 돌아가기
@@ -103,24 +103,24 @@ export default function CompanyRecommendationsPage() {
   const { recommendations = [], userCategories = [], totalCompanies = 0 } = recommendationsData || {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFFEF0] to-white">
       {/* Header */}
-      <div className="bg-white border-b border-blue-100 px-4 py-6">
+      <div className="bg-white border-b border-[#F5F5DC] px-4 py-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-4 mb-6">
             <Button 
               variant="ghost" 
               onClick={handleBackToDashboard}
-              className="p-2 hover:bg-blue-50"
+              className="p-2 hover:bg-[#FFFEF0]"
               data-testid="button-back-dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-[#2F3036]">
                 맞춤 기업 추천
               </h1>
-              <p className="text-gray-600">
+              <p className="text-[#2F3036]/70">
                 일있슈가 회원님의 프로필을 분석하여 추천하는 기업들입니다
               </p>
             </div>
@@ -129,13 +129,13 @@ export default function CompanyRecommendationsPage() {
           {/* Selected Categories & Statistics */}
           <div className="grid md:grid-cols-2 gap-6">
             {/* Selected Categories */}
-            <div className="bg-blue-50 rounded-2xl p-6">
-              <h3 className="font-semibold text-gray-900 mb-3">선택한 직종</h3>
+            <div className="bg-[#FFFEF0] rounded-2xl p-6">
+              <h3 className="font-semibold text-[#2F3036] mb-3">선택한 직종</h3>
               <div className="flex flex-wrap gap-2">
                 {userCategories.map((category: any) => (
                   <span 
                     key={category.id} 
-                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                    className="px-3 py-1 bg-[#F5F5DC] text-[#2F3036] rounded-full text-sm font-medium"
                   >
                     {category.displayName}
                   </span>
@@ -144,22 +144,22 @@ export default function CompanyRecommendationsPage() {
             </div>
 
             {/* Statistics */}
-            <div className="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm">
-              <h3 className="font-semibold text-gray-900 mb-4">추천 현황</h3>
+            <div className="bg-white rounded-2xl p-6 border border-[#F5F5DC] shadow-sm">
+              <h3 className="font-semibold text-[#2F3036] mb-4">추천 현황</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">{recommendations.length}</div>
-                  <div className="text-xs text-gray-600">추천 기업</div>
+                  <div className="text-2xl font-bold text-[#D4B896]">{recommendations.length}</div>
+                  <div className="text-xs text-[#2F3036]/60">추천 기업</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-600">{totalCompanies}</div>
-                  <div className="text-xs text-gray-600">전체 기업</div>
+                  <div className="text-2xl font-bold text-[#D4B896]">{totalCompanies}</div>
+                  <div className="text-xs text-[#2F3036]/60">전체 기업</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-purple-600">
+                  <div className="text-2xl font-bold text-[#D4B896]">
                     {recommendations.length > 0 ? Math.round(recommendations[0]?.matchingScore || 0) : 0}%
                   </div>
-                  <div className="text-xs text-gray-600">최고 매칭</div>
+                  <div className="text-xs text-[#2F3036]/60">최고 매칭</div>
                 </div>
               </div>
             </div>
@@ -172,13 +172,13 @@ export default function CompanyRecommendationsPage() {
           {/* Recommendations List */}
           {recommendations.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Building2 className="w-10 h-10 text-blue-600" />
+              <div className="w-20 h-20 bg-[#F5F5DC] rounded-full flex items-center justify-center mx-auto mb-6">
+                <Building2 className="w-10 h-10 text-[#D4B896]" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-[#2F3036] mb-2">
                 추천 기업이 없습니다
               </h3>
-              <p className="text-gray-600 mb-8">
+              <p className="text-[#2F3036]/70 mb-8">
                 선택하신 직종에 맞는 기업을 찾지 못했습니다.<br />
                 다른 직종을 선택하거나 프로필을 더 자세히 작성해보세요.
               </p>
@@ -193,7 +193,7 @@ export default function CompanyRecommendationsPage() {
                 </Button>
                 <Button 
                   onClick={() => setLocation('/individual/profile-setup')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white"
                 >
                   프로필 보완하기
                 </Button>
@@ -202,28 +202,28 @@ export default function CompanyRecommendationsPage() {
         ) : (
           <div className="grid gap-6">
             {recommendations.map((company, index) => (
-              <div key={company.id} className="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all">
+              <div key={company.id} className="bg-white rounded-2xl p-6 border border-[#F5F5DC] shadow-sm hover:shadow-md transition-all">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">{company.companyName}</h3>
-                      <div className="flex items-center gap-1 bg-blue-50 px-3 py-1 rounded-full">
-                        <Star className="w-4 h-4 text-blue-600 fill-current" />
-                        <span className="text-sm font-semibold text-blue-700">
+                      <h3 className="text-xl font-bold text-[#2F3036]">{company.companyName}</h3>
+                      <div className="flex items-center gap-1 bg-[#FFFEF0] px-3 py-1 rounded-full">
+                        <Star className="w-4 h-4 text-[#D4B896] fill-current" />
+                        <span className="text-sm font-semibold text-[#2F3036]">
                           {company.matchingScore}%
                         </span>
                       </div>
                     </div>
-                    <h4 className="text-lg font-medium text-gray-700 mb-3">
+                    <h4 className="text-lg font-medium text-[#2F3036]/70 mb-3">
                       {company.jobTitle}
                     </h4>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                     company.matchingScore >= 80 
-                      ? 'bg-green-100 text-green-700' 
+                      ? 'bg-[#FFFEF0] text-[#D4B896]' 
                       : company.matchingScore >= 60 
-                        ? 'bg-blue-100 text-blue-700'
+                        ? 'bg-[#F5F5DC] text-[#2F3036]'
                         : 'bg-gray-100 text-gray-700'
                   }`}>
                     {getScoreLabel(company.matchingScore)}
@@ -234,38 +234,38 @@ export default function CompanyRecommendationsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div className="space-y-3">
                     {company.location && (
-                      <div className="flex items-center text-gray-600">
-                        <MapPin className="w-4 h-4 mr-3 text-blue-600" />
+                      <div className="flex items-center text-[#2F3036]/70">
+                        <MapPin className="w-4 h-4 mr-3 text-[#D4B896]" />
                         <span>{company.location}</span>
                       </div>
                     )}
                     {company.companySize && (
-                      <div className="flex items-center text-gray-600">
-                        <Users className="w-4 h-4 mr-3 text-blue-600" />
+                      <div className="flex items-center text-[#2F3036]/70">
+                        <Users className="w-4 h-4 mr-3 text-[#D4B896]" />
                         <span>{company.companySize}</span>
                       </div>
                     )}
                     {company.employmentType && (
-                      <div className="flex items-center text-gray-600">
-                        <Building2 className="w-4 h-4 mr-3 text-blue-600" />
+                      <div className="flex items-center text-[#2F3036]/70">
+                        <Building2 className="w-4 h-4 mr-3 text-[#D4B896]" />
                         <span>{company.employmentType}</span>
                       </div>
                     )}
                   </div>
                   <div className="space-y-3">
-                    <div className="flex items-center text-gray-600">
-                      <Banknote className="w-4 h-4 mr-3 text-blue-600" />
+                    <div className="flex items-center text-[#2F3036]/70">
+                      <Banknote className="w-4 h-4 mr-3 text-[#D4B896]" />
                       <span className="font-medium">{formatSalary(company.salary)}</span>
                     </div>
                     {company.deadline && (
-                      <div className="flex items-center text-gray-600">
-                        <Calendar className="w-4 h-4 mr-3 text-blue-600" />
+                      <div className="flex items-center text-[#2F3036]/70">
+                        <Calendar className="w-4 h-4 mr-3 text-[#D4B896]" />
                         <span>마감: {company.deadline}</span>
                       </div>
                     )}
                     {company.experience && (
-                      <div className="flex items-center text-gray-600">
-                        <Trophy className="w-4 h-4 mr-3 text-blue-600" />
+                      <div className="flex items-center text-[#2F3036]/70">
+                        <Trophy className="w-4 h-4 mr-3 text-[#D4B896]" />
                         <span>{company.experience}</span>
                       </div>
                     )}
@@ -274,48 +274,48 @@ export default function CompanyRecommendationsPage() {
 
                 {/* Skills */}
                 {company.skills && (
-                  <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-2">관련 기술/자격증</h4>
-                    <p className="text-gray-700 text-sm">{company.skills}</p>
+                  <div className="mb-6 p-4 bg-[#FFFEF0] rounded-lg">
+                    <h4 className="font-semibold text-[#2F3036] mb-2">관련 기술/자격증</h4>
+                    <p className="text-[#2F3036]/70 text-sm">{company.skills}</p>
                   </div>
                 )}
 
                 {/* Matching Details */}
-                <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                  <h4 className="font-semibold text-gray-900 mb-4">매칭 분석</h4>
+                <div className="bg-[#F5F5DC] rounded-xl p-4 mb-4">
+                  <h4 className="font-semibold text-[#2F3036] mb-4">매칭 분석</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">분야 매칭</span>
-                        <span className="text-sm font-medium text-blue-700">{company.matchingDetails.fieldMatch}%</span>
+                        <span className="text-sm text-[#2F3036]/70">분야 매칭</span>
+                        <span className="text-sm font-medium text-[#2F3036]">{company.matchingDetails.fieldMatch}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-white rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all" 
+                          className="bg-[#D4B896] h-2 rounded-full transition-all" 
                           style={{ width: `${company.matchingDetails.fieldMatch}%` }}
                         ></div>
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">경력 매칭</span>
-                        <span className="text-sm font-medium text-blue-700">{company.matchingDetails.experienceMatch}%</span>
+                        <span className="text-sm text-[#2F3036]/70">경력 매칭</span>
+                        <span className="text-sm font-medium text-[#2F3036]">{company.matchingDetails.experienceMatch}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-white rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all" 
+                          className="bg-[#D4B896] h-2 rounded-full transition-all" 
                           style={{ width: `${company.matchingDetails.experienceMatch}%` }}
                         ></div>
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">학력 매칭</span>
-                        <span className="text-sm font-medium text-blue-700">{company.matchingDetails.educationMatch}%</span>
+                        <span className="text-sm text-[#2F3036]/70">학력 매칭</span>
+                        <span className="text-sm font-medium text-[#2F3036]">{company.matchingDetails.educationMatch}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-white rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all" 
+                          className="bg-[#D4B896] h-2 rounded-full transition-all" 
                           style={{ width: `${company.matchingDetails.educationMatch}%` }}
                         ></div>
                       </div>
