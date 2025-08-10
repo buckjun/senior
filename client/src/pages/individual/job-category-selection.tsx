@@ -36,7 +36,7 @@ export default function JobCategorySelectionPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/user/job-categories'] });
       
       // Redirect to company recommendations
-      setLocation('/individual/company-recommendations');
+      setLocation('/individual/recommendations');
     },
     onError: (error: any) => {
       toast({

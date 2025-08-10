@@ -74,7 +74,9 @@ function Router() {
           <Route path="/individual/profile-view" component={IndividualProfileView} />
           <Route path="/individual/manual-input" component={ManualInputPage} />
           <Route path="/individual/job-categories" component={JobCategorySelection} />
+          <Route path="/individual/job-category-selection" component={JobCategorySelection} />
           <Route path="/individual/recommendations" component={CompanyRecommendations} />
+          <Route path="/individual/company-recommendations" component={CompanyRecommendations} />
           <Route path="/individual/recommended-courses" component={RecommendedCourses} />
           <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/search" component={JobSearch} />

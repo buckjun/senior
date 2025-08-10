@@ -48,11 +48,11 @@ export default function CompanyRecommendationsPage() {
   });
 
   const handleBackToCategories = () => {
-    setLocation('/individual/job-categories');
+    setLocation('/individual/job-category-selection');
   };
 
   const handleBackToDashboard = () => {
-    setLocation('/individual/dashboard');
+    setLocation('/dashboard');
   };
 
   const formatSalary = (salary: number | null) => {
