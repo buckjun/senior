@@ -35,8 +35,8 @@ export default function JobCategorySelectionPage() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/user/job-categories'] });
       
-      // Redirect to AI resume writer
-      setLocation('/individual/profile-setup');
+      // Redirect to company recommendations
+      setLocation('/individual/company-recommendations');
     },
     onError: (error: any) => {
       toast({
@@ -74,82 +74,78 @@ export default function JobCategorySelectionPage() {
 
   if (categoriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">직종 정보를 불러오는 중...</p>
+          <p className="text-gray-600">직종 정보를 불러오는 중...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            직종 선택하기
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            귀하의 경험과 관심 분야에 맞는 직종을 선택해주세요. 
-            이를 바탕으로 맞춤 채용정보를 추천드립니다.
-          </p>
-        </div>
-
-        {/* Progress indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center space-x-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      {/* Header */}
+      <div className="bg-white border-b border-blue-100 px-4 py-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              맞춤 직종 선택
+            </h1>
+            <p className="text-gray-600">
+              경험과 관심 분야에 맞는 직종을 선택하면 일있슈가 최적의 기업을 추천해드립니다
+            </p>
+          </div>
+          
+          {/* Progress Steps */}
+          <div className="mt-8 flex items-center justify-center space-x-6">
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium">
+              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium">
                 1
               </div>
-              <span className="ml-2 text-blue-600 font-medium">직종 선택</span>
+              <span className="ml-3 text-blue-600 font-medium">직종 선택</span>
             </div>
-            <div className="w-12 h-px bg-gray-300 dark:bg-gray-600"></div>
+            <div className="w-16 h-0.5 bg-blue-200"></div>
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-500 flex items-center justify-center text-sm font-medium">
+              <div className="w-10 h-10 rounded-full bg-blue-200 text-blue-400 flex items-center justify-center font-medium">
                 2
               </div>
-              <span className="ml-2 text-gray-500">이력서 작성</span>
-            </div>
-            <div className="w-12 h-px bg-gray-300 dark:bg-gray-600"></div>
-            <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 text-gray-500 flex items-center justify-center text-sm font-medium">
-                3
-              </div>
-              <span className="ml-2 text-gray-500">회사 추천</span>
+              <span className="ml-3 text-gray-500">기업 추천</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Job Category Selector */}
-        <JobCategorySelector
-          categories={categories}
-          selectedCategories={selectedCategories}
-          onSelectionChange={handleSelectionChange}
-          onComplete={handleComplete}
-          isLoading={saveCategories.isPending}
-        />
-
-        {/* Previous selection indicator */}
-        {userCategories.length > 0 && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              이전에 선택하신 직종:
-            </p>
-            <div className="flex justify-center gap-2">
-              {userCategories.map((category) => (
-                <span 
-                  key={category.id}
-                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-full text-sm"
-                >
-                  {category.displayName}
-                </span>
-              ))}
+      <div className="px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Previous selection indicator */}
+          {userCategories.length > 0 && (
+            <div className="mb-6 bg-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+              <p className="text-sm text-gray-600 mb-3">
+                이전에 선택하신 직종:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {userCategories.map((category) => (
+                  <span 
+                    key={category.id}
+                    className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                  >
+                    {category.displayName}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Job Category Selector */}
+          <JobCategorySelector
+            categories={categories}
+            selectedCategories={selectedCategories}
+            onSelectionChange={handleSelectionChange}
+            onComplete={handleComplete}
+            isLoading={saveCategories.isPending}
+          />
+        </div>
       </div>
     </div>
   );

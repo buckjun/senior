@@ -76,10 +76,11 @@ export default function CompanyRecommendationsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">맞춤 회사를 찾는 중...</p>
+          <p className="text-gray-600">일있슈가 맞춤 회사를 찾는 중...</p>
+          <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요</p>
         </div>
       </div>
     );
@@ -87,10 +88,13 @@ export default function CompanyRecommendationsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white">
         <div className="text-center">
           <p className="text-red-600 mb-4">추천을 가져오는 중 오류가 발생했습니다.</p>
-          <Button onClick={handleBackToCategories} variant="outline">
+          <Button 
+            onClick={handleBackToCategories} 
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             직종 선택으로 돌아가기
           </Button>
@@ -102,220 +106,271 @@ export default function CompanyRecommendationsPage() {
   const { recommendations = [], userCategories = [], totalCompanies = 0 } = recommendationsData || {};
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      {/* Header */}
+      <div className="bg-white border-b border-blue-100 px-4 py-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 mb-6">
             <Button 
               variant="ghost" 
               onClick={handleBackToDashboard}
-              className="p-2"
+              className="p-2 hover:bg-blue-50"
               data-testid="button-back-dashboard"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                맞춤 회사 추천
+              <h1 className="text-2xl font-bold text-gray-900">
+                맞춤 기업 추천
               </h1>
-              <p className="text-gray-600 dark:text-gray-300">
-                선택하신 직종과 프로필을 기반으로 추천드립니다
+              <p className="text-gray-600">
+                일있슈가 회원님의 프로필을 분석하여 추천하는 기업들입니다
               </p>
             </div>
           </div>
 
-          {/* Selected Categories */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">선택한 직종:</span>
-            {userCategories.map((category: any) => (
-              <Badge key={category.id} variant="secondary" className="text-xs">
-                {category.displayName}
-              </Badge>
-            ))}
-          </div>
+          {/* Selected Categories & Statistics */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Selected Categories */}
+            <div className="bg-blue-50 rounded-2xl p-6">
+              <h3 className="font-semibold text-gray-900 mb-3">선택한 직종</h3>
+              <div className="flex flex-wrap gap-2">
+                {userCategories.map((category: any) => (
+                  <span 
+                    key={category.id} 
+                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                  >
+                    {category.displayName}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-          {/* Statistics */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-blue-600">{recommendations.length}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">추천 회사</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-green-600">{totalCompanies}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">총 관련 회사</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-purple-600">
-                  {recommendations.length > 0 ? Math.round(recommendations[0]?.matchingScore || 0) : 0}%
+            {/* Statistics */}
+            <div className="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm">
+              <h3 className="font-semibold text-gray-900 mb-4">추천 현황</h3>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{recommendations.length}</div>
+                  <div className="text-xs text-gray-600">추천 기업</div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-300">최고 매칭점수</div>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">{totalCompanies}</div>
+                  <div className="text-xs text-gray-600">전체 기업</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {recommendations.length > 0 ? Math.round(recommendations[0]?.matchingScore || 0) : 0}%
+                  </div>
+                  <div className="text-xs text-gray-600">최고 매칭</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Recommendations List */}
-        {recommendations.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <Building2 className="w-16 h-16 mx-auto" />
+      <div className="px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Recommendations List */}
+          {recommendations.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Building2 className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                추천 기업이 없습니다
+              </h3>
+              <p className="text-gray-600 mb-8">
+                선택하신 직종에 맞는 기업을 찾지 못했습니다.<br />
+                다른 직종을 선택하거나 프로필을 더 자세히 작성해보세요.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  onClick={handleBackToCategories} 
+                  variant="outline"
+                  data-testid="button-reselect-categories"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  직종 다시 선택
+                </Button>
+                <Button 
+                  onClick={() => setLocation('/individual/profile-setup')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  프로필 보완하기
+                </Button>
+              </div>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              추천 회사가 없습니다
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              선택하신 직종에 맞는 회사를 찾지 못했습니다. 다른 직종을 선택해보세요.
-            </p>
-            <Button onClick={handleBackToCategories} data-testid="button-reselect-categories">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              직종 다시 선택하기
-            </Button>
-          </div>
         ) : (
           <div className="grid gap-6">
             {recommendations.map((company, index) => (
-              <Card key={company.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CardTitle className="text-lg">{company.companyName}</CardTitle>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          <span className={`text-sm font-medium ${getScoreColor(company.matchingScore)}`}>
-                            {company.matchingScore}점
-                          </span>
-                        </div>
+              <div key={company.id} className="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm hover:shadow-md transition-all">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-xl font-bold text-gray-900">{company.companyName}</h3>
+                      <div className="flex items-center gap-1 bg-blue-50 px-3 py-1 rounded-full">
+                        <Star className="w-4 h-4 text-blue-600 fill-current" />
+                        <span className="text-sm font-semibold text-blue-700">
+                          {company.matchingScore}%
+                        </span>
                       </div>
-                      <h3 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        {company.jobTitle}
-                      </h3>
                     </div>
-                    <Badge 
-                      variant={company.matchingScore >= 80 ? "default" : "secondary"}
-                      className="ml-2"
-                    >
-                      {getScoreLabel(company.matchingScore)}
-                    </Badge>
+                    <h4 className="text-lg font-medium text-gray-700 mb-3">
+                      {company.jobTitle}
+                    </h4>
                   </div>
-                </CardHeader>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    company.matchingScore >= 80 
+                      ? 'bg-green-100 text-green-700' 
+                      : company.matchingScore >= 60 
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {getScoreLabel(company.matchingScore)}
+                  </span>
+                </div>
 
-                <CardContent>
-                  {/* Company Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div className="space-y-2">
-                      {company.location && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {company.location}
-                        </div>
-                      )}
-                      {company.companySize && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                          <Users className="w-4 h-4 mr-2" />
-                          {company.companySize}
-                        </div>
-                      )}
-                      {company.employmentType && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                          <Building2 className="w-4 h-4 mr-2" />
-                          {company.employmentType}
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                        <Banknote className="w-4 h-4 mr-2" />
-                        {formatSalary(company.salary)}
+                {/* Company Info Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-3">
+                    {company.location && (
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="w-4 h-4 mr-3 text-blue-600" />
+                        <span>{company.location}</span>
                       </div>
-                      {company.deadline && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          마감: {company.deadline}
-                        </div>
-                      )}
-                      {company.experience && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                          <Trophy className="w-4 h-4 mr-2" />
-                          {company.experience}
-                        </div>
-                      )}
-                    </div>
+                    )}
+                    {company.companySize && (
+                      <div className="flex items-center text-gray-600">
+                        <Users className="w-4 h-4 mr-3 text-blue-600" />
+                        <span>{company.companySize}</span>
+                      </div>
+                    )}
+                    {company.employmentType && (
+                      <div className="flex items-center text-gray-600">
+                        <Building2 className="w-4 h-4 mr-3 text-blue-600" />
+                        <span>{company.employmentType}</span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Skills */}
-                  {company.skills && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">관련 기술/자격증:</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{company.skills}</p>
+                  <div className="space-y-3">
+                    <div className="flex items-center text-gray-600">
+                      <Banknote className="w-4 h-4 mr-3 text-blue-600" />
+                      <span className="font-medium">{formatSalary(company.salary)}</span>
                     </div>
-                  )}
+                    {company.deadline && (
+                      <div className="flex items-center text-gray-600">
+                        <Calendar className="w-4 h-4 mr-3 text-blue-600" />
+                        <span>마감: {company.deadline}</span>
+                      </div>
+                    )}
+                    {company.experience && (
+                      <div className="flex items-center text-gray-600">
+                        <Trophy className="w-4 h-4 mr-3 text-blue-600" />
+                        <span>{company.experience}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-                  {/* Matching Details */}
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">매칭 상세</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span>분야 매칭</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={company.matchingDetails.fieldMatch} className="w-16 h-2" />
-                          <span className="w-8">{company.matchingDetails.fieldMatch}%</span>
-                        </div>
+                {/* Skills */}
+                {company.skills && (
+                  <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 mb-2">관련 기술/자격증</h4>
+                    <p className="text-gray-700 text-sm">{company.skills}</p>
+                  </div>
+                )}
+
+                {/* Matching Details */}
+                <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                  <h4 className="font-semibold text-gray-900 mb-4">매칭 분석</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">분야 매칭</span>
+                        <span className="text-sm font-medium text-blue-700">{company.matchingDetails.fieldMatch}%</span>
                       </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span>경력 매칭</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={company.matchingDetails.experienceMatch} className="w-16 h-2" />
-                          <span className="w-8">{company.matchingDetails.experienceMatch}%</span>
-                        </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all" 
+                          style={{ width: `${company.matchingDetails.fieldMatch}%` }}
+                        ></div>
                       </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span>학력 매칭</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={company.matchingDetails.educationMatch} className="w-16 h-2" />
-                          <span className="w-8">{company.matchingDetails.educationMatch}%</span>
-                        </div>
-                      </div>
-                      {company.matchingDetails.certificationBonus > 0 && (
-                        <div className="flex items-center justify-between text-xs text-green-600">
-                          <span>자격증 보너스</span>
-                          <span>+{company.matchingDetails.certificationBonus}점</span>
-                        </div>
-                      )}
                     </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">경력 매칭</span>
+                        <span className="text-sm font-medium text-blue-700">{company.matchingDetails.experienceMatch}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all" 
+                          style={{ width: `${company.matchingDetails.experienceMatch}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">학력 매칭</span>
+                        <span className="text-sm font-medium text-blue-700">{company.matchingDetails.educationMatch}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all" 
+                          style={{ width: `${company.matchingDetails.educationMatch}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    {company.matchingDetails.certificationBonus > 0 && (
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm text-gray-600">자격증 보너스</span>
+                          <span className="text-sm font-medium text-green-700">+{company.matchingDetails.certificationBonus}점</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-green-500 h-2 rounded-full w-full"></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  {/* Action Button */}
-                  <div className="mt-4 flex justify-end">
-                    <Button size="sm" data-testid={`button-view-company-${index}`}>
-                      상세 정보 보기
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Action Button */}
+                <div className="flex justify-end">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    data-testid={`button-view-company-${index}`}
+                  >
+                    상세 정보 보기
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         )}
 
         {/* Footer Actions */}
-        <div className="mt-8 text-center">
+        <div className="mt-12 text-center">
           <div className="flex justify-center gap-4">
             <Button 
               variant="outline" 
               onClick={handleBackToCategories}
+              className="border-blue-200 text-blue-600 hover:bg-blue-50"
               data-testid="button-change-categories"
             >
               직종 변경하기
             </Button>
             <Button 
               onClick={handleBackToDashboard}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
               data-testid="button-back-to-dashboard"
             >
               대시보드로 돌아가기
             </Button>
           </div>
+        </div>
         </div>
       </div>
     </div>

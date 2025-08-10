@@ -220,12 +220,20 @@ export default function Dashboard() {
       <main className="container-web py-8 pb-20">
         <div className="w-full space-y-6">
           {/* Welcome Card */}
-          <Card>
+          <Card className="bg-gradient-to-r from-blue-50 to-white border-blue-100">
             <CardHeader>
-              <CardTitle className="text-title text-[#2F3036]">안녕하세요, {getUserDisplayName()}님! 👋</CardTitle>
-              <CardDescription className="text-[#2F3036]/70">
-                오늘도 새로운 기회를 찾아보세요. AI가 맞춤형 채용정보를 추천해드립니다.
+              <CardTitle className="text-title text-gray-900">안녕하세요, {getUserDisplayName()}님! 👋</CardTitle>
+              <CardDescription className="text-gray-600">
+                일있슈가 회원님의 경험과 관심사에 맞는 기업을 추천해드립니다.
               </CardDescription>
+              <div className="pt-4">
+                <Link href="/individual/job-category-selection">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Building className="w-4 h-4 mr-2" />
+                    나에게 맞는 기업 찾기
+                  </Button>
+                </Link>
+              </div>
             </CardHeader>
           </Card>
 
@@ -292,9 +300,9 @@ export default function Dashboard() {
                   </Button>
                 </Link>
                 <Link href="/individual/job-category-selection">
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]" data-testid="button-job-categories">
+                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-blue-200 text-blue-600 hover:bg-blue-50" data-testid="button-job-categories">
                     <Building className="w-6 h-6" />
-                    <span className="text-sm">직종 선택</span>
+                    <span className="text-sm font-medium">맞춤 기업 찾기</span>
                   </Button>
                 </Link>
                 <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2 border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]" data-testid="button-ai-resume">
