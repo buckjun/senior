@@ -12,6 +12,7 @@ import {
   userJobCategories,
   companies,
   courses,
+  onlineCourses,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -40,6 +41,8 @@ import {
   type InsertReemploymentStatistics,
   type Course,
   type InsertCourse,
+  type OnlineCourse,
+  type InsertOnlineCourse,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, like, or } from "drizzle-orm";
@@ -113,11 +116,17 @@ export interface IStorage {
   // Company operations  
   getCompaniesByCategories(categories: string[]): Promise<Company[]>;
   
-  // Course operations
+  // Course operations (offline)
   getAllCourses(): Promise<Course[]>;
   getCoursesByCategory(category: string): Promise<Course[]>;
   getCourseCategories(): Promise<string[]>;
   bulkCreateCourses(courses: InsertCourse[]): Promise<Course[]>;
+  
+  // Online course operations
+  getAllOnlineCourses(): Promise<OnlineCourse[]>;
+  getOnlineCoursesByCategory(category: string): Promise<OnlineCourse[]>;
+  getOnlineCourseCategories(): Promise<string[]>;
+  bulkCreateOnlineCourses(courses: InsertOnlineCourse[]): Promise<OnlineCourse[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -621,6 +630,40 @@ export class DatabaseStorage implements IStorage {
   async bulkCreateCourses(coursesData: InsertCourse[]): Promise<Course[]> {
     const result = await db
       .insert(courses)
+      .values(coursesData)
+      .returning();
+    
+    return result;
+  }
+
+  // Online course operations
+  async getAllOnlineCourses(): Promise<OnlineCourse[]> {
+    return await db
+      .select()
+      .from(onlineCourses)
+      .orderBy(desc(onlineCourses.viewCount), desc(onlineCourses.createdAt));
+  }
+
+  async getOnlineCoursesByCategory(category: string): Promise<OnlineCourse[]> {
+    return await db
+      .select()
+      .from(onlineCourses)
+      .where(eq(onlineCourses.category, category))
+      .orderBy(desc(onlineCourses.viewCount), desc(onlineCourses.createdAt));
+  }
+
+  async getOnlineCourseCategories(): Promise<string[]> {
+    const result = await db
+      .selectDistinct({ category: onlineCourses.category })
+      .from(onlineCourses)
+      .where(sql`${onlineCourses.category} IS NOT NULL`);
+    
+    return result.map(row => row.category);
+  }
+
+  async bulkCreateOnlineCourses(coursesData: InsertOnlineCourse[]): Promise<OnlineCourse[]> {
+    const result = await db
+      .insert(onlineCourses)
       .values(coursesData)
       .returning();
     

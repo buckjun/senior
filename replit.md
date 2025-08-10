@@ -14,6 +14,24 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
+## Voice Recognition and Online Course Import Fixes  
+- **Date**: August 10, 2025
+- **Changes**: Critical bug fixes for voice recognition and course recommendation system
+  - **Voice Recognition Fix**: Resolved automatic result transmission issue
+    - Added comprehensive debugging logs for mobile compatibility 
+    - Implemented auto-submit functionality when speech recognition ends
+    - Fixed issue where users had to manually click "완료" button
+    - Voice input now automatically transmits results to parent component and closes modal
+    - Enhanced mobile Replit app compatibility with detailed error logging
+  - **Online Course Import Success**: Resolved CSV parsing issues 
+    - Fixed BOM (Byte Order Mark) encoding problem in CSV headers
+    - Implemented dynamic key detection to handle encoding issues
+    - Successfully imported 795 online courses across 9 categories
+    - Categories: 정보통신, 공급업, 의료, 예술, 건설업, 운수 및 창고업, 과학 기술 서비스업, 마케팅, 제조업
+  - **Mixed Recommendation System**: Now fully operational with complete course database
+    - 4 offline + 2 online course recommendations using Gemini AI
+    - Complete integration with user profile data and course matching algorithm
+
 ## Brand and Color Theme Updates
 - **Date**: August 10, 2025
 - **Changes**: Complete brand identity and color theme unification

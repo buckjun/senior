@@ -410,5 +410,24 @@ export const insertCourseSchema = createInsertSchema(courses).omit({
   updatedAt: true,
 });
 
+// Online courses table for Seoul Learn 4050 online data
+export const onlineCourses = pgTable("online_courses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: varchar("category", { length: 100 }).notNull(), // 강의분류 (건설업, 정보통신 등)
+  title: varchar("title", { length: 300 }).notNull(), // 강의명
+  viewCount: integer("view_count").default(0), // 조회수_숫자
+  viewCountText: varchar("view_count_text", { length: 100 }), // 조회수 텍스트
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOnlineCourseSchema = createInsertSchema(onlineCourses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
+export type OnlineCourse = typeof onlineCourses.$inferSelect;
+export type InsertOnlineCourse = z.infer<typeof insertOnlineCourseSchema>;

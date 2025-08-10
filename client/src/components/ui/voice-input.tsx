@@ -44,12 +44,16 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
     };
 
     recognition.current.onresult = (event: any) => {
+      console.log('Speech recognition result received', event);
       let finalTranscriptPart = '';
       let interimTranscriptPart = '';
 
       // Process all results from the event
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
+        const confidence = event.results[i][0].confidence;
+        console.log(`Result ${i}: "${transcript}" (final: ${event.results[i].isFinal}, confidence: ${confidence})`);
+        
         if (event.results[i].isFinal) {
           finalTranscriptPart += transcript;
         } else {
@@ -59,19 +63,27 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
 
       // Update final transcript only when we get final results
       if (finalTranscriptPart) {
-        setFinalTranscript(prev => prev + finalTranscriptPart);
+        console.log('Final transcript received:', finalTranscriptPart);
+        setFinalTranscript(prev => {
+          const newFinal = prev + finalTranscriptPart;
+          console.log('Updated final transcript:', newFinal);
+          return newFinal;
+        });
         setInterimTranscript(''); // Clear interim when we get final
       }
       
       // Update interim transcript (replace completely, don't accumulate)
       if (interimTranscriptPart) {
+        console.log('Interim transcript:', interimTranscriptPart);
         setInterimTranscript(interimTranscriptPart);
       }
       
       // Update display transcript: finalTranscript + current interim
       setTranscript(prevFinal => {
         const currentFinal = prevFinal + (finalTranscriptPart || '');
-        return currentFinal + (interimTranscriptPart || '');
+        const displayText = currentFinal + (interimTranscriptPart || '');
+        console.log('Display transcript updated:', displayText);
+        return displayText;
       });
     };
 
@@ -123,8 +135,25 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
       console.log('Speech recognition ended');
       setIsListening(false);
       setIsRecording(false);
+      
       // Clear interim results on end
       setInterimTranscript('');
+      
+      // Auto-submit if we have final transcript and were recording
+      setTimeout(() => {
+        setFinalTranscript(current => {
+          console.log('Auto-submitting final transcript on end:', current);
+          if (current.trim()) {
+            onTranscript(current.trim());
+            // Close modal after successful transcription
+            setTimeout(() => {
+              onClose();
+            }, 500);
+            return '';
+          }
+          return current;
+        });
+      }, 100); // Small delay to ensure all state updates are complete
     };
 
     return () => {

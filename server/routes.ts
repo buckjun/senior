@@ -892,9 +892,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const allCourses = await storage.getAllCourses();
+      const allOfflineCourses = await storage.getAllCourses();
+      const allOnlineCourses = await storage.getAllOnlineCourses();
       
-      if (allCourses.length === 0) {
+      if (allOfflineCourses.length === 0 && allOnlineCourses.length === 0) {
         return res.json([]);
       }
       
@@ -909,9 +910,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         preferredLocation: userProfile?.location || '미지정'
       };
       
-      // Create prompt for Gemini API
-      const prompt = `
-당신은 한국 50-60세 중장년층을 위한 교육 과정 추천 전문가입니다. 
+      // Create prompts for Gemini API - separate for offline and online
+      const offlinePrompt = `
+당신은 한국 50-60세 중장년층을 위한 오프라인 교육 과정 추천 전문가입니다. 
 
 사용자 프로필:
 - 분야: ${userContext.field}
@@ -922,10 +923,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 - 관심사: ${userContext.interests.join(', ')}
 - 선호 지역: ${userContext.preferredLocation}
 
-다음 ${allCourses.length}개의 교육과정 중에서 이 사용자에게 가장 적합한 상위 10개 과정을 선별하고, 각각에 대해 1-100점 매칭 점수와 추천 이유를 제공해주세요.
+다음 오프라인 교육과정 중에서 이 사용자에게 가장 적합한 상위 4개 과정을 선별하고, 각각에 대해 1-100점 매칭 점수와 추천 이유를 제공해주세요.
 
-교육과정 목록:
-${allCourses.slice(0, 50).map((course, index) => 
+오프라인 교육과정 목록:
+${allOfflineCourses.slice(0, 30).map((course, index) => 
   `${index + 1}. ${course.title} (${course.category}) - ${course.institution} - ${course.duration} - ${course.cost}`
 ).join('\n')}
 
@@ -941,67 +942,140 @@ ${allCourses.slice(0, 50).map((course, index) =>
 }
 `;
 
-      // Call Gemini API
+      const onlinePrompt = `
+당신은 한국 50-60세 중장년층을 위한 온라인 교육 과정 추천 전문가입니다. 
+
+사용자 프로필:
+- 분야: ${userContext.field}
+- 이전 직업: ${userContext.previousJobTitle}
+- 기술: ${userContext.skills.join(', ')}
+- 경력: ${userContext.experience}
+- 학력: ${userContext.education}
+- 관심사: ${userContext.interests.join(', ')}
+
+다음 온라인 교육과정 중에서 이 사용자에게 가장 적합한 상위 2개 과정을 선별하고, 각각에 대해 1-100점 매칭 점수와 추천 이유를 제공해주세요.
+
+온라인 교육과정 목록 (조회수 높은 순):
+${allOnlineCourses.slice(0, 30).map((course, index) => 
+  `${index + 1}. ${course.title} (${course.category}) - 조회수: ${course.viewCount}`
+).join('\n')}
+
+다음 JSON 형식으로 응답해주세요:
+{
+  "recommendations": [
+    {
+      "courseIndex": 1,
+      "matchingScore": 85,
+      "matchingReasons": ["관련 경력과 일치", "시간 자유도 높음", "인기도 높음"]
+    }
+  ]
+}
+`;
+
+      // Call Gemini API for both offline and online courses
       const { GoogleGenAI } = require('@google/genai');
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       
-      const response = await ai.models.generateContent({
+      const responseSchema = {
+        type: "object",
+        properties: {
+          recommendations: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                courseIndex: { type: "number" },
+                matchingScore: { type: "number" },
+                matchingReasons: {
+                  type: "array",
+                  items: { type: "string" }
+                }
+              },
+              required: ["courseIndex", "matchingScore", "matchingReasons"]
+            }
+          }
+        },
+        required: ["recommendations"]
+      };
+
+      // Get offline recommendations (4개)
+      const offlineResponse = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         config: {
           responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              recommendations: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    courseIndex: { type: "number" },
-                    matchingScore: { type: "number" },
-                    matchingReasons: {
-                      type: "array",
-                      items: { type: "string" }
-                    }
-                  },
-                  required: ["courseIndex", "matchingScore", "matchingReasons"]
-                }
-              }
-            },
-            required: ["recommendations"]
-          }
+          responseSchema: responseSchema
         },
-        contents: prompt,
+        contents: offlinePrompt,
       });
 
-      const result = JSON.parse(response.text || '{"recommendations": []}');
+      // Get online recommendations (2개) 
+      const onlineResponse = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: responseSchema
+        },
+        contents: onlinePrompt,
+      });
+
+      const offlineResult = JSON.parse(offlineResponse.text || '{"recommendations": []}');
+      const onlineResult = JSON.parse(onlineResponse.text || '{"recommendations": []}');
       
       // Map AI recommendations back to course objects
-      const recommendedCourses = result.recommendations
-        .filter((rec: any) => rec.courseIndex > 0 && rec.courseIndex <= Math.min(allCourses.length, 50))
+      const recommendedOfflineCourses = offlineResult.recommendations
+        .filter((rec: any) => rec.courseIndex > 0 && rec.courseIndex <= Math.min(allOfflineCourses.length, 30))
         .map((rec: any) => ({
-          ...allCourses[rec.courseIndex - 1],
+          ...allOfflineCourses[rec.courseIndex - 1],
+          courseType: 'offline',
           matchingScore: Math.min(Math.max(rec.matchingScore, 0), 100),
-          matchingReasons: rec.matchingReasons.slice(0, 3) // Limit to 3 reasons
+          matchingReasons: rec.matchingReasons.slice(0, 3)
         }))
-        .slice(0, 10); // Limit to top 10
+        .slice(0, 4); // Limit to 4 offline courses
+
+      const recommendedOnlineCourses = onlineResult.recommendations
+        .filter((rec: any) => rec.courseIndex > 0 && rec.courseIndex <= Math.min(allOnlineCourses.length, 30))
+        .map((rec: any) => ({
+          ...allOnlineCourses[rec.courseIndex - 1],
+          courseType: 'online',
+          matchingScore: Math.min(Math.max(rec.matchingScore, 0), 100),
+          matchingReasons: rec.matchingReasons.slice(0, 3)
+        }))
+        .slice(0, 2); // Limit to 2 online courses
       
-      res.json(recommendedCourses);
+      // Combine recommendations (4 offline + 2 online)
+      const combinedRecommendations = [
+        ...recommendedOfflineCourses,
+        ...recommendedOnlineCourses
+      ];
+      
+      res.json(combinedRecommendations);
     } catch (error) {
       console.error("Error generating course recommendations:", error);
       
-      // Fallback: Return random selection with basic scoring
+      // Fallback: Return mixed selection with basic scoring
       try {
-        const allCourses = await storage.getAllCourses();
-        const fallbackCourses = allCourses
-          .slice(0, 10)
+        const allOfflineCourses = await storage.getAllCourses();
+        const allOnlineCourses = await storage.getAllOnlineCourses();
+        
+        const fallbackOffline = allOfflineCourses
+          .slice(0, 4)
           .map(course => ({
             ...course,
-            matchingScore: Math.floor(Math.random() * 30) + 50, // 50-80 range
+            courseType: 'offline',
+            matchingScore: Math.floor(Math.random() * 30) + 50,
             matchingReasons: ['프로필 분석 결과 추천', '지역 및 분야 고려']
           }));
+
+        const fallbackOnline = allOnlineCourses
+          .slice(0, 2)
+          .map(course => ({
+            ...course,
+            courseType: 'online',
+            matchingScore: Math.floor(Math.random() * 30) + 60,
+            matchingReasons: ['인기도 높음', '시간 자유도']
+          }));
         
-        res.json(fallbackCourses);
+        res.json([...fallbackOffline, ...fallbackOnline]);
       } catch (fallbackError) {
         console.error("Fallback also failed:", fallbackError);
         res.status(500).json({ message: "Failed to generate course recommendations" });
