@@ -388,3 +388,27 @@ export type Company = typeof companies.$inferSelect;
 export type InsertJobCategory = z.infer<typeof insertJobCategorySchema>;
 export type InsertUserJobCategory = z.infer<typeof insertUserJobCategorySchema>;
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
+
+// Courses table for offline course recommendations
+export const courses = pgTable("courses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: varchar("category", { length: 100 }).notNull(), // 강의 분류 (건설업, 정보통신 등)
+  title: varchar("title", { length: 300 }).notNull(), // 강의명
+  institution: varchar("institution", { length: 200 }).notNull(), // 교육기관
+  duration: varchar("duration", { length: 200 }), // 교육기간
+  cost: varchar("cost", { length: 100 }), // 교육비용
+  address: varchar("address", { length: 300 }), // 주소
+  city: varchar("city", { length: 50 }), // 시도
+  district: varchar("district", { length: 50 }), // 구
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCourseSchema = createInsertSchema(courses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Course = typeof courses.$inferSelect;
+export type InsertCourse = z.infer<typeof insertCourseSchema>;

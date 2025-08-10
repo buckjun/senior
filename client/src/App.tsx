@@ -17,6 +17,7 @@ import CompanyRecommendations from "@/pages/individual/company-recommendations";
 import JobSearch from "@/pages/individual/job-search";
 import SavedJobs from "@/pages/individual/saved-jobs";
 import ManualInputPage from "@/pages/individual/manual-input";
+import RecommendedCourses from "@/pages/individual/recommended-courses";
 import CompanySignup from "@/pages/company/signup";
 import CompanyDashboard from "@/pages/company/dashboard";
 import JobPosting from "@/pages/company/job-posting";
@@ -74,6 +75,7 @@ function Router() {
           <Route path="/individual/manual-input" component={ManualInputPage} />
           <Route path="/individual/job-categories" component={JobCategorySelection} />
           <Route path="/individual/recommendations" component={CompanyRecommendations} />
+          <Route path="/individual/recommended-courses" component={RecommendedCourses} />
           <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/search" component={JobSearch} />
           <Route path="/saved-jobs" component={SavedJobs} />

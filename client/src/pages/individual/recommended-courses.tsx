@@ -1,0 +1,240 @@
+import { useState, useEffect } from "react";
+import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  BookOpen, 
+  MapPin, 
+  Calendar, 
+  DollarSign, 
+  Building, 
+  ArrowLeft,
+  Star,
+  Clock,
+  Users,
+  Filter
+} from "lucide-react";
+import type { Course } from "@shared/schema";
+
+interface RecommendedCourse extends Course {
+  matchingScore: number;
+  matchingReasons: string[];
+}
+
+export default function RecommendedCourses() {
+  const { user } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  const { data: recommendedCourses, isLoading } = useQuery<RecommendedCourse[]>({
+    queryKey: ['/api/courses/recommended'],
+    enabled: !!user,
+  });
+
+  const { data: categories } = useQuery<string[]>({
+    queryKey: ['/api/courses/categories'],
+  });
+
+  const filteredCourses = selectedCategory 
+    ? recommendedCourses?.filter(course => course.category === selectedCategory)
+    : recommendedCourses;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-white via-[#FFFEF0] to-white">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-[#2F3036]/10 sticky top-0 z-10">
+        <div className="container-web mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href="/individual/dashboard">
+                <Button variant="ghost" size="sm" className="text-[#2F3036] hover:bg-[#F5F5DC]">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  뒤로
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-xl font-bold text-[#2F3036]">추천 강좌</h1>
+                <p className="text-sm text-[#2F3036]/70">프로필에 맞는 맞춤 교육과정을 추천해드립니다</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" className="border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]">
+                <Filter className="w-4 h-4 mr-2" />
+                필터
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container-web mx-auto px-4 py-6 pb-20">
+        {/* Category Filter */}
+        {categories && categories.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-[#2F3036] text-lg">분야별 강좌</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={selectedCategory === null ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(null)}
+                  className={selectedCategory === null 
+                    ? "bg-[#2F3036] text-white" 
+                    : "border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]"
+                  }
+                >
+                  전체
+                </Button>
+                {categories.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category)}
+                    className={selectedCategory === category 
+                      ? "bg-[#2F3036] text-white" 
+                      : "border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]"
+                    }
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <Skeleton className="w-16 h-16 rounded-lg" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Recommended Courses */}
+        {filteredCourses && filteredCourses.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-[#2F3036]">
+                맞춤 추천 강좌 ({filteredCourses.length}개)
+              </h2>
+            </div>
+            
+            {filteredCourses.map((course) => (
+              <Card key={course.id} className="hover:shadow-md transition-shadow border-[#2F3036]/10">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="w-12 h-12 bg-[#F5F5DC] rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-6 h-6 text-[#2F3036]" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-semibold text-[#2F3036] text-lg leading-tight mb-2">
+                            {course.title}
+                          </h3>
+                          <Badge className="ml-2 bg-[#F5F5DC] text-[#2F3036] hover:bg-[#F5F5DC]/80">
+                            <Star className="w-3 h-3 mr-1" />
+                            {course.matchingScore}% 매칭
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm text-[#2F3036]/70">
+                          <div className="flex items-center space-x-2">
+                            <Building className="w-4 h-4" />
+                            <span>{course.institution}</span>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>{course.duration}</span>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <DollarSign className="w-4 h-4" />
+                            <span>{course.cost}</span>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="w-4 h-4" />
+                            <span>{course.address} ({course.city} {course.district})</span>
+                          </div>
+                        </div>
+
+                        {/* Matching Reasons */}
+                        {course.matchingReasons && course.matchingReasons.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-xs font-medium text-[#2F3036] mb-1">추천 이유:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {course.matchingReasons.map((reason, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs bg-[#F5F5DC]/50 text-[#2F3036]">
+                                  {reason}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-4 border-t border-[#2F3036]/10">
+                    <Badge variant="outline" className="border-[#2F3036]/20 text-[#2F3036]">
+                      {course.category}
+                    </Badge>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm" className="border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]">
+                        상세보기
+                      </Button>
+                      <Button size="sm" className="bg-[#2F3036] text-white hover:bg-[#2F3036]/90">
+                        신청하기
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {filteredCourses && filteredCourses.length === 0 && !isLoading && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <BookOpen className="w-16 h-16 text-[#2F3036]/30 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-[#2F3036] mb-2">추천 강좌가 없습니다</h3>
+              <p className="text-[#2F3036]/70 mb-4">
+                프로필을 더 자세히 작성하시면 맞춤 강좌를 추천해드립니다.
+              </p>
+              <Link href="/individual/profile-setup">
+                <Button className="bg-[#2F3036] text-white hover:bg-[#2F3036]/90">
+                  프로필 완성하기
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+      </main>
+    </div>
+  );
+}

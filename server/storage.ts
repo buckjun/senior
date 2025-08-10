@@ -11,6 +11,7 @@ import {
   jobCategories,
   userJobCategories,
   companies,
+  courses,
   type User,
   type UpsertUser,
   type UserProfile,
@@ -37,6 +38,8 @@ import {
   type ReemploymentStatistics,
   type InsertSeniorReemploymentData,
   type InsertReemploymentStatistics,
+  type Course,
+  type InsertCourse,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, like, or } from "drizzle-orm";
@@ -109,6 +112,12 @@ export interface IStorage {
   
   // Company operations  
   getCompaniesByCategories(categories: string[]): Promise<Company[]>;
+  
+  // Course operations
+  getAllCourses(): Promise<Course[]>;
+  getCoursesByCategory(category: string): Promise<Course[]>;
+  getCourseCategories(): Promise<string[]>;
+  bulkCreateCourses(courses: InsertCourse[]): Promise<Course[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -582,6 +591,40 @@ export class DatabaseStorage implements IStorage {
       .orderBy(companies.companyName);
 
     return companiesData;
+  }
+
+  // Course operations
+  async getAllCourses(): Promise<Course[]> {
+    return await db
+      .select()
+      .from(courses)
+      .orderBy(desc(courses.createdAt));
+  }
+
+  async getCoursesByCategory(category: string): Promise<Course[]> {
+    return await db
+      .select()
+      .from(courses)
+      .where(eq(courses.category, category))
+      .orderBy(desc(courses.createdAt));
+  }
+
+  async getCourseCategories(): Promise<string[]> {
+    const result = await db
+      .selectDistinct({ category: courses.category })
+      .from(courses)
+      .where(sql`${courses.category} IS NOT NULL`);
+    
+    return result.map(row => row.category);
+  }
+
+  async bulkCreateCourses(coursesData: InsertCourse[]): Promise<Course[]> {
+    const result = await db
+      .insert(courses)
+      .values(coursesData)
+      .returning();
+    
+    return result;
   }
 }
 

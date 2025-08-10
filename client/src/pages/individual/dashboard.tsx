@@ -30,7 +30,8 @@ import {
   Plus,
   Layers,
   ArrowRight,
-  Eye
+  Eye,
+  BookOpen
 } from "lucide-react";
 
 interface JobPosting {
@@ -373,6 +374,19 @@ export default function Dashboard() {
           </button>
           
           <button
+            onClick={() => setActiveBottomSection(activeBottomSection === 'courses' ? null : 'courses')}
+            className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-colors ${
+              activeBottomSection === 'courses' 
+                ? 'bg-[#F5F5DC] text-[#2F3036]' 
+                : 'text-[#2F3036]/70 hover:text-[#2F3036]'
+            }`}
+            data-testid="button-courses"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span className="text-xs font-medium">추천강좌</span>
+          </button>
+          
+          <button
             onClick={() => setActiveBottomSection(activeBottomSection === 'profile' ? null : 'profile')}
             className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-colors ${
               activeBottomSection === 'profile' 
@@ -432,6 +446,26 @@ export default function Dashboard() {
                       추천 공고가 없습니다. 프로필을 완성하면 맞춤 추천을 받을 수 있습니다.
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {activeBottomSection === 'courses' && (
+              <div>
+                <h3 className="text-lg font-semibold text-[#2F3036] mb-4">추천 강좌</h3>
+                <div className="space-y-3">
+                  <div className="text-center py-6">
+                    <BookOpen className="w-12 h-12 text-[#2F3036]/40 mx-auto mb-3" />
+                    <p className="text-sm text-[#2F3036]/70 mb-3">
+                      AI가 당신의 프로필을 분석하여<br />
+                      맞춤형 교육과정을 추천해드립니다
+                    </p>
+                    <Link href="/individual/recommended-courses">
+                      <Button size="sm" className="bg-[#2F3036] text-white hover:bg-[#2F3036]/90">
+                        추천 강좌 보기
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}

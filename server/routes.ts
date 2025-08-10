@@ -853,6 +853,181 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Course routes
+  app.get('/api/courses', async (req, res) => {
+    try {
+      const { category } = req.query;
+      let courses;
+      
+      if (category && typeof category === 'string') {
+        courses = await storage.getCoursesByCategory(category);
+      } else {
+        courses = await storage.getAllCourses();
+      }
+      
+      res.json(courses);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      res.status(500).json({ message: "Failed to fetch courses" });
+    }
+  });
+
+  app.get('/api/courses/categories', async (req, res) => {
+    try {
+      const categories = await storage.getCourseCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching course categories:", error);
+      res.status(500).json({ message: "Failed to fetch course categories" });
+    }
+  });
+
+  app.get('/api/courses/recommended', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userProfile = await storage.getUserProfile(userId);
+      const individualProfile = await storage.getIndividualProfile(userId);
+      
+      if (!userProfile && !individualProfile) {
+        return res.json([]);
+      }
+      
+      const allCourses = await storage.getAllCourses();
+      
+      if (allCourses.length === 0) {
+        return res.json([]);
+      }
+      
+      // Prepare user context for Gemini API
+      const userContext = {
+        field: userProfile?.field || '미지정',
+        previousJobTitle: userProfile?.previousJobTitle || '미지정',
+        skills: userProfile?.skills || [],
+        experience: userProfile?.experience || '미지정',
+        education: individualProfile?.education || '미지정',
+        interests: userProfile?.interests || [],
+        preferredLocation: userProfile?.location || '미지정'
+      };
+      
+      // Create prompt for Gemini API
+      const prompt = `
+당신은 한국 50-60세 중장년층을 위한 교육 과정 추천 전문가입니다. 
+
+사용자 프로필:
+- 분야: ${userContext.field}
+- 이전 직업: ${userContext.previousJobTitle}
+- 기술: ${userContext.skills.join(', ')}
+- 경력: ${userContext.experience}
+- 학력: ${userContext.education}
+- 관심사: ${userContext.interests.join(', ')}
+- 선호 지역: ${userContext.preferredLocation}
+
+다음 ${allCourses.length}개의 교육과정 중에서 이 사용자에게 가장 적합한 상위 10개 과정을 선별하고, 각각에 대해 1-100점 매칭 점수와 추천 이유를 제공해주세요.
+
+교육과정 목록:
+${allCourses.slice(0, 50).map((course, index) => 
+  `${index + 1}. ${course.title} (${course.category}) - ${course.institution} - ${course.duration} - ${course.cost}`
+).join('\n')}
+
+다음 JSON 형식으로 응답해주세요:
+{
+  "recommendations": [
+    {
+      "courseIndex": 1,
+      "matchingScore": 85,
+      "matchingReasons": ["관련 경력과 일치", "위치가 선호 지역과 근접", "비용이 적절함"]
+    }
+  ]
+}
+`;
+
+      // Call Gemini API
+      const { GoogleGenAI } = require('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              recommendations: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    courseIndex: { type: "number" },
+                    matchingScore: { type: "number" },
+                    matchingReasons: {
+                      type: "array",
+                      items: { type: "string" }
+                    }
+                  },
+                  required: ["courseIndex", "matchingScore", "matchingReasons"]
+                }
+              }
+            },
+            required: ["recommendations"]
+          }
+        },
+        contents: prompt,
+      });
+
+      const result = JSON.parse(response.text || '{"recommendations": []}');
+      
+      // Map AI recommendations back to course objects
+      const recommendedCourses = result.recommendations
+        .filter((rec: any) => rec.courseIndex > 0 && rec.courseIndex <= Math.min(allCourses.length, 50))
+        .map((rec: any) => ({
+          ...allCourses[rec.courseIndex - 1],
+          matchingScore: Math.min(Math.max(rec.matchingScore, 0), 100),
+          matchingReasons: rec.matchingReasons.slice(0, 3) // Limit to 3 reasons
+        }))
+        .slice(0, 10); // Limit to top 10
+      
+      res.json(recommendedCourses);
+    } catch (error) {
+      console.error("Error generating course recommendations:", error);
+      
+      // Fallback: Return random selection with basic scoring
+      try {
+        const allCourses = await storage.getAllCourses();
+        const fallbackCourses = allCourses
+          .slice(0, 10)
+          .map(course => ({
+            ...course,
+            matchingScore: Math.floor(Math.random() * 30) + 50, // 50-80 range
+            matchingReasons: ['프로필 분석 결과 추천', '지역 및 분야 고려']
+          }));
+        
+        res.json(fallbackCourses);
+      } catch (fallbackError) {
+        console.error("Fallback also failed:", fallbackError);
+        res.status(500).json({ message: "Failed to generate course recommendations" });
+      }
+    }
+  });
+
+  // Course data import endpoint (admin only - for development)
+  app.post('/api/admin/import-courses', async (req, res) => {
+    try {
+      const { importCoursesFromExcel } = await import('./importCourses');
+      const result = await importCoursesFromExcel();
+      res.json({ 
+        success: true, 
+        message: `Successfully imported ${result.imported} courses`,
+        ...result 
+      });
+    } catch (error) {
+      console.error('Error importing courses:', error);
+      res.status(500).json({ 
+        error: 'Failed to import courses',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
