@@ -900,14 +900,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Prepare user context for Gemini API
+      const aiAnalysis = individualProfile?.aiAnalysis as any;
       const userContext = {
-        field: userProfile?.field || '미지정',
-        previousJobTitle: userProfile?.previousJobTitle || '미지정',
-        skills: userProfile?.skills || [],
-        experience: userProfile?.experience || '미지정',
-        education: individualProfile?.education || '미지정',
-        interests: userProfile?.interests || [],
-        preferredLocation: userProfile?.location || '미지정'
+        field: aiAnalysis?.field || '미지정',
+        previousJobTitle: aiAnalysis?.previousJobTitle || aiAnalysis?.title || '미지정',
+        skills: (individualProfile?.skills as string[]) || [],
+        experience: (individualProfile?.experience as any) || '미지정',
+        education: aiAnalysis?.education || '미지정',
+        interests: aiAnalysis?.interests || [],
+        preferredLocation: (individualProfile?.preferredLocations as string[])?.[0] || '미지정'
       };
       
       // Create prompts for Gemini API - separate for offline and online

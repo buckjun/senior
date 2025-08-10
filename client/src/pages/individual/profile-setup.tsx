@@ -64,21 +64,26 @@ export default function IndividualProfileSetup() {
 
   const processVoiceMutation = useMutation({
     mutationFn: async (transcript: string) => {
-      const response = await apiRequest('POST', '/api/ai/process-voice', { transcript });
+      console.log('Processing voice transcript:', transcript);
+      const response = await apiRequest('POST', '/api/parse-resume', { 
+        resumeText: transcript 
+      });
       return await response.json();
     },
     onSuccess: (data) => {
-      localStorage.setItem('aiAnalysis', JSON.stringify(data.analysis));
+      console.log('Voice processing successful:', data);
       toast({
-        title: "분석 완료",
-        description: "음성 입력이 성공적으로 분석되었습니다.",
+        title: "음성 분석 완료!",
+        description: "음성이 성공적으로 이력서로 변환되었습니다.",
       });
-      setLocation('/individual/recommendations');
+      // Navigate to dashboard to see updated profile
+      setLocation('/individual/dashboard');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Voice processing error:', error);
       toast({
-        title: "분석 실패",
-        description: "음성 분석 중 오류가 발생했습니다.",
+        title: "음성 분석 실패",
+        description: "음성을 이력서로 변환하는 중 오류가 발생했습니다. 다시 시도해주세요.",
         variant: "destructive",
       });
     }

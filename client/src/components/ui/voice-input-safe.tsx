@@ -36,7 +36,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
         recognition.current = new SpeechRecognition();
         
         // Configure recognition
-        recognition.current.continuous = false;
+        recognition.current.continuous = true;
         recognition.current.interimResults = true;
         recognition.current.lang = 'ko-KR';
         recognition.current.maxAlternatives = 1;
@@ -84,6 +84,17 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ë§ì”
           try {
             console.log('Recognition ended');
             setIsRecording(false);
+            
+            // Restart recognition if still recording (for continuous mode)
+            if (isRecording && recognition.current) {
+              setTimeout(() => {
+                try {
+                  recognition.current.start();
+                } catch (error) {
+                  console.log('Recognition restart failed:', error);
+                }
+              }, 100);
+            }
           } catch (error) {
             console.error('Error in onend:', error);
           }
