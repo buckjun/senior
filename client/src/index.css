@@ -135,20 +135,20 @@ body {
 }
 
 .status-info {
-  @apply bg-[#FFFEF0] text-[#D4B896] dark:bg-[#FFFEF0] dark:text-[#D4B896];
+  @apply bg-[#FFFEF0] text-[#FF8C42] dark:bg-[#FFFEF0] dark:text-[#FF8C42];
 }
 
 /* Professional color palette */
 .text-primary {
-  @apply text-[#D4B896] dark:text-[#D4B896];
+  @apply text-[#FF8C42] dark:text-[#FF8C42];
 }
 
 .bg-primary {
-  @apply bg-[#D4B896] hover:bg-[#D4B896]/90 dark:bg-[#D4B896] dark:hover:bg-[#D4B896]/90;
+  @apply bg-[#FF8C42] hover:bg-[#FF8C42]/90 dark:bg-[#FF8C42] dark:hover:bg-[#FF8C42]/90;
 }
 
 .gradient-primary {
-  @apply bg-gradient-to-r from-[#D4B896] to-[#D4B896]/90 dark:from-[#D4B896] dark:to-[#D4B896]/90;
+  @apply bg-gradient-to-r from-[#FF8C42] to-[#FF8C42]/90 dark:from-[#FF8C42] dark:to-[#FF8C42]/90;
 }
 
 /* Web app layout helpers */

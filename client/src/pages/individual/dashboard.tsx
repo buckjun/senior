@@ -229,7 +229,7 @@ export default function Dashboard() {
               </CardDescription>
               <div className="pt-4">
                 <Link href="/individual/job-category-selection">
-                  <Button className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white">
+                  <Button className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white">
                     <Building className="w-4 h-4 mr-2" />
                     나에게 맞는 기업 찾기
                   </Button>

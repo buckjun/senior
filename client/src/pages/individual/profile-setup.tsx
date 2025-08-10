@@ -263,7 +263,7 @@ export default function IndividualProfileSetup() {
             </div>
             <Button 
               onClick={() => setIsAIResumeModalOpen(true)}
-              className="w-full bg-[#D4B896] hover:bg-[#D4B896]/90 text-white"
+              className="w-full bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
               data-testid="button-ai-resume-writer"
             >
               <Edit className="mr-2 h-5 w-5" />

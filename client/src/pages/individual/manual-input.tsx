@@ -129,7 +129,7 @@ export default function ManualInputPage() {
             <Button
               onClick={handleSave}
               disabled={updateProfileMutation.isPending}
-              className="bg-[#D4B896] hover:bg-[#D4B896]/90"
+              className="bg-[#FF8C42] hover:bg-[#FF8C42]/90"
               data-testid="button-save-profile"
             >
               <Save className="h-4 w-4 mr-2" />
@@ -145,7 +145,7 @@ export default function ManualInputPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-[#D4B896]" />
+              <User className="h-5 w-5 text-[#FF8C42]" />
               기본 정보
             </CardTitle>
           </CardHeader>

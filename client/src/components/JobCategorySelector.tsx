@@ -107,7 +107,7 @@ export function JobCategorySelector({
                   checked={isSelected}
                   disabled={!isSelectable}
                   data-testid={`checkbox-category-${category.name}`}
-                  className="text-[#D4B896]"
+                  className="text-[#FF8C42]"
                 />
               </div>
               <p className="text-sm text-gray-600">
@@ -123,7 +123,7 @@ export function JobCategorySelector({
         <Button 
           onClick={onComplete}
           disabled={selectedCategories.length === 0 || isLoading}
-          className="bg-[#D4B896] hover:bg-[#D4B896]/90 text-white px-8 py-3 text-lg font-medium rounded-xl"
+          className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white px-8 py-3 text-lg font-medium rounded-xl"
           data-testid="button-complete-selection"
         >
           {isLoading ? (
