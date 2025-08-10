@@ -213,7 +213,7 @@ export default function IndividualProfileSetup() {
               maxFileSize={10485760} // 10MB
               onGetUploadParameters={handleGetUploadParameters}
               onComplete={handleFileUploadComplete}
-              buttonClassName="w-full btn-ghost"
+              buttonClassName="w-full bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               <Upload className="mr-2 h-5 w-5" />
               파일 선택 (PDF, DOC, HWP)
