@@ -112,8 +112,9 @@ export default function Dashboard() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white via-[#FFFEF0] to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2F3036]"></div>
+      <div className="min-h-screen bg-gradient-to-b from-white via-[#FFFEF0] to-white flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#F5F5DC] border-t-[#D4B896] rounded-full animate-spin mb-4"></div>
+        <p className="text-lg font-medium text-[#2F3036] mt-4">내일을 향한 새로운 출발</p>
       </div>
     );
   }

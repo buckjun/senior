@@ -55,8 +55,9 @@ function Router() {
   // 스플래시 화면이 끝난 후 인증 로딩 중이면 간단한 로딩만 표시
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white via-[#FFFEF0] to-white">
+        <div className="w-12 h-12 border-4 border-[#F5F5DC] border-t-[#D4B896] rounded-full animate-spin mb-4"></div>
+        <p className="text-lg font-medium text-[#2F3036] mt-4">내일을 향한 새로운 출발</p>
       </div>
     );
   }

@@ -74,11 +74,9 @@ export default function JobCategorySelectionPage() {
 
   if (categoriesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">직종 정보를 불러오는 중...</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white via-[#FFFEF0] to-white">
+        <div className="w-12 h-12 border-4 border-[#F5F5DC] border-t-[#D4B896] rounded-full animate-spin mb-4"></div>
+        <p className="text-lg font-medium text-[#2F3036] mt-4">내일을 향한 새로운 출발</p>
       </div>
     );
   }
