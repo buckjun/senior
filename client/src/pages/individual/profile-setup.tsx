@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Mic, Upload, Camera, Edit } from 'lucide-react';
 import { Link } from 'wouter';
-import { VoiceInput } from '@/components/ui/voice-input';
+import { VoiceInput } from '@/components/ui/voice-input-safe';
 import { ObjectUploader } from '@/components/ObjectUploader';
 import { AIResumeWriter } from '@/components/AIResumeWriter';
 import { useMutation } from '@tanstack/react-query';
