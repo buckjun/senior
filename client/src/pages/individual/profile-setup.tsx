@@ -185,7 +185,7 @@ export default function IndividualProfileSetup() {
             </div>
             <Button 
               onClick={() => setIsVoiceModalOpen(true)}
-              className="w-full btn-primary"
+              className="w-full bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
               disabled={processVoiceMutation.isPending}
               data-testid="button-voice-input"
             >
