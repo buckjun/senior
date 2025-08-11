@@ -258,7 +258,7 @@ export default function IndividualProfileSetup() {
                 <Edit className="text-[#D4B896] text-xl" />
               </div>
               <div>
-                <h3 className="text-body font-bold">텍스트 변환</h3>
+                <h3 className="text-body font-bold">써보셔유~</h3>
                 <p className="text-gray-600">평소 말하듯이 작성하면 AI가 변환</p>
               </div>
             </div>
