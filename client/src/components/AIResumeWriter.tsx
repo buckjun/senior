@@ -21,12 +21,13 @@ interface ParsedResume {
 }
 
 interface AIResumeWriterProps {
+  initialText?: string;
   onResumeGenerated?: (data: ParsedResume) => void;
   onProfileUpdated?: () => void;
 }
 
-export function AIResumeWriter({ onResumeGenerated, onProfileUpdated }: AIResumeWriterProps) {
-  const [inputText, setInputText] = useState("");
+export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileUpdated }: AIResumeWriterProps) {
+  const [inputText, setInputText] = useState(initialText);
   const [parsedData, setParsedData] = useState<ParsedResume | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();

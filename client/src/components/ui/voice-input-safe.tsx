@@ -36,7 +36,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
         recognition.current = new SpeechRecognition();
         
         // Configure recognition
-        recognition.current.continuous = true;
+        recognition.current.continuous = false;
         recognition.current.interimResults = true;
         recognition.current.lang = 'ko-KR';
         recognition.current.maxAlternatives = 1;
@@ -52,19 +52,26 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
 
         recognition.current.onresult = (event: any) => {
           try {
-            let fullTranscript = '';
+            let finalTranscript = '';
+            let interimTranscript = '';
             
             if (event.results) {
               for (let i = 0; i < event.results.length; i++) {
                 const result = event.results[i];
                 if (result && result[0] && result[0].transcript) {
-                  fullTranscript += result[0].transcript;
+                  if (result.isFinal) {
+                    finalTranscript += result[0].transcript;
+                  } else {
+                    interimTranscript += result[0].transcript;
+                  }
                 }
               }
             }
             
-            console.log('Transcript:', fullTranscript);
-            setTranscript(fullTranscript);
+            // Only show final transcript, not interim
+            if (finalTranscript) {
+              setTranscript(prev => prev + finalTranscript);
+            }
             
           } catch (error) {
             console.error('Error processing results:', error);
@@ -84,17 +91,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
           try {
             console.log('Recognition ended');
             setIsRecording(false);
-            
-            // Restart recognition if still recording (for continuous mode)
-            if (isRecording && recognition.current) {
-              setTimeout(() => {
-                try {
-                  recognition.current.start();
-                } catch (error) {
-                  console.log('Recognition restart failed:', error);
-                }
-              }, 100);
-            }
+            // Remove auto-restart functionality
           } catch (error) {
             console.error('Error in onend:', error);
           }
@@ -252,7 +249,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
           {!isRecording ? (
             <Button
               onClick={startRecording}
-              className="flex-1 btn-primary"
+              className="flex-1 bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
               disabled={!isSupported}
               data-testid="button-start-recording"
             >
@@ -260,25 +257,14 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
               녹음 시작
             </Button>
           ) : (
-            <div className="flex-1 flex space-x-2">
-              <Button
-                onClick={stopRecording}
-                variant="outline"
-                className="flex-1 py-4"
-                data-testid="button-pause-recording"
-              >
-                <Square className="mr-2 h-4 w-4" />
-                중지
-              </Button>
-              <Button
-                onClick={handleComplete}
-                className="flex-1 btn-primary"
-                data-testid="button-end-recording"
-              >
-                <Check className="mr-2 h-4 w-4" />
-                종료
-              </Button>
-            </div>
+            <Button
+              onClick={handleComplete}
+              className="flex-1 bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+              data-testid="button-complete-recording"
+            >
+              <Check className="mr-2 h-4 w-4" />
+              녹음 완료
+            </Button>
           )}
         </div>
 

@@ -90,7 +90,10 @@ export default function IndividualProfileSetup() {
   });
 
   const handleVoiceTranscript = (transcript: string) => {
-    processVoiceMutation.mutate(transcript);
+    // Open AI Resume Writer modal with the voice transcript
+    setProfileData(prev => ({ ...prev, careerText: transcript }));
+    setIsVoiceModalOpen(false);
+    setIsAIResumeModalOpen(true);
   };
 
   const handleFileUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
@@ -328,7 +331,16 @@ export default function IndividualProfileSetup() {
               </Button>
             </div>
             <div className="p-6">
-              <AIResumeWriter />
+              <AIResumeWriter 
+                initialText={profileData.careerText}
+                onResumeGenerated={(data) => {
+                  console.log('Resume generated:', data);
+                }}
+                onProfileUpdated={() => {
+                  setLocation('/individual/dashboard');
+                  setIsAIResumeModalOpen(false);
+                }}
+              />
             </div>
           </div>
         </div>
