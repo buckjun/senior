@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,7 @@ interface RecommendedCourse extends Course {
 
 export default function RecommendedCourses() {
   const { user } = useAuth();
+  const [location, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const { data: recommendedCourses, isLoading } = useQuery<RecommendedCourse[]>({
@@ -139,7 +140,7 @@ export default function RecommendedCourses() {
               </h2>
             </div>
             
-            {filteredCourses.map((course) => (
+            {filteredCourses.map((course, index) => (
               <Card key={course.id} className="hover:shadow-md transition-shadow border-[#2F3036]/10">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -158,25 +159,30 @@ export default function RecommendedCourses() {
                           </Badge>
                         </div>
                         
-                        <div className="space-y-2 text-sm text-[#2F3036]/70">
-                          <div className="flex items-center space-x-2">
-                            <Building className="w-4 h-4" />
-                            <span>{course.institution}</span>
+                        <div className="space-y-3">
+                          <div className="bg-[#F5F5DC] rounded-lg p-3">
+                            <h4 className="text-sm font-semibold text-[#2F3036] mb-2">이력서에 추가될 요소</h4>
+                            <div className="space-y-1 text-sm text-[#2F3036]/80">
+                              <div>• {course.title} 수료증</div>
+                              <div>• {course.category} 분야 교육 이수</div>
+                              <div>• {course.institution} 교육기관 수료</div>
+                              {course.category.includes('정보통신') && <div>• 정보처리기능사 관련 교육</div>}
+                              {course.category.includes('의료') && <div>• 의료관리학 관련 자격</div>}
+                              {course.category.includes('제조업') && <div>• 품질관리 관련 자격</div>}
+                              {course.category.includes('마케팅') && <div>• 디지털마케팅 전문가 과정</div>}
+                              {course.category.includes('건설업') && <div>• 건설안전기사 관련 교육</div>}
+                              {course.category.includes('운수') && <div>• 물류관리사 관련 과정</div>}
+                              {course.category.includes('과학') && <div>• 기술사 관련 전문교육</div>}
+                              {course.category.includes('예술') && <div>• 예술심리상담사 과정</div>}
+                              {course.category.includes('공급업') && <div>• 유통관리사 관련 교육</div>}
+                            </div>
                           </div>
                           
-                          <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4" />
-                            <span>{course.duration}</span>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <DollarSign className="w-4 h-4" />
-                            <span>{course.cost}</span>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="w-4 h-4" />
-                            <span>{course.address} ({course.city} {course.district})</span>
+                          <div className="text-xs text-[#2F3036]/60 space-y-1">
+                            <div>🏢 {course.institution}</div>
+                            <div>📅 {course.duration}</div>
+                            <div>💰 {course.cost}</div>
+                            <div>📍 {course.address} ({course.city} {course.district})</div>
                           </div>
                         </div>
 
@@ -206,7 +212,12 @@ export default function RecommendedCourses() {
                       <Button variant="outline" size="sm" className="border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]">
                         상세보기
                       </Button>
-                      <Button size="sm" className="bg-[#2F3036] text-white hover:bg-[#2F3036]/90">
+                      <Button 
+                        size="sm" 
+                        className="bg-[#2F3036] text-white hover:bg-[#2F3036]/90"
+                        onClick={() => setLocation(`/individual/course-detail/${course.id}`)}
+                        data-testid={`button-apply-course-${index}`}
+                      >
                         신청하기
                       </Button>
                     </div>

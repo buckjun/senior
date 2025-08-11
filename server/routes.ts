@@ -106,6 +106,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add education to profile route
+  app.post('/api/individual-profiles/add-education', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { education, certification, skills } = req.body;
+
+      // Get existing profile
+      let existingProfile = await storage.getIndividualProfile(userId);
+      
+      if (!existingProfile) {
+        // Create a new profile for the user
+        existingProfile = await storage.createIndividualProfile({
+          userId: userId,
+          summary: '',
+          skills: JSON.stringify([]),
+          experience: JSON.stringify([]),
+          preferredJobTypes: JSON.stringify([]),
+          preferredLocations: JSON.stringify([])
+        });
+      }
+
+      // Parse existing data
+      const existingSkills = JSON.parse(existingProfile.skills || '[]');
+      const existingExperience = JSON.parse(existingProfile.experience || '[]');
+
+      // Add new education and skills
+      const updatedSkills = [...new Set([...existingSkills, ...skills])];
+      const updatedExperience = [...existingExperience, education];
+
+      // Update profile with new education
+      const updateData = {
+        skills: JSON.stringify(updatedSkills),
+        experience: JSON.stringify(updatedExperience),
+        aiAnalysis: JSON.stringify({
+          lastUpdated: new Date().toISOString(),
+          source: 'course_completion',
+          addedEducation: education,
+          addedCertification: certification,
+          addedSkills: skills
+        })
+      };
+
+      const updatedProfile = await storage.updateIndividualProfile(existingProfile.id, updateData);
+
+      res.json({ 
+        message: "교육 이력이 성공적으로 추가되었습니다",
+        profile: updatedProfile,
+        addedEducation: education,
+        addedCertification: certification,
+        addedSkills: skills
+      });
+    } catch (error) {
+      console.error("Error adding education to profile:", error);
+      res.status(500).json({ message: "교육 이력 추가 중 오류가 발생했습니다" });
+    }
+  });
+
   app.put('/api/individual-profiles', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
