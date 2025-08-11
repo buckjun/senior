@@ -53,10 +53,29 @@ export function loadCompanyJobsBySector(sector: string): CompanyJob[] {
       return allJobs;
     }
     
-    // 다른 업종 파일 처리
-    const csvPath = path.join(process.cwd(), 'attached_assets', `${sector}_1754742652411.csv`);
+    // 다른 업종 파일 처리 - 실제 파일명에 맞게 수정
+    let csvPath = '';
     
-    if (!fs.existsSync(csvPath)) {
+    // 각 업종별 실제 파일명 매핑
+    if (sector === '건설업') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '건설업_1754742652411.csv');
+    } else if (sector === '공급업') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '공급업_1754742652409.csv');
+    } else if (sector === '과학 기술 서비스업') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '과학 기술 서비스업_1754742652411.csv');
+    } else if (sector === '마케팅') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '마케팅_1754742652409.csv');
+    } else if (sector === '예술') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '예술_1754742652411.csv');
+    } else if (sector === '운수 및 창고업') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '운수 및 창고업_1754742652410.csv');
+    } else if (sector === '의료') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '의료_1754742652410.csv');
+    } else if (sector === '정보통신') {
+      csvPath = path.join(process.cwd(), 'attached_assets', '정보통신_1754742652410.csv');
+    }
+    
+    if (!csvPath || !fs.existsSync(csvPath)) {
       console.log(`CSV 파일을 찾을 수 없습니다: ${csvPath}`);
       return [];
     }

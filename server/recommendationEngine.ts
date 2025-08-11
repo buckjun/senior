@@ -98,6 +98,21 @@ export function getCompanyJobs(): CompanyJob[] {
   return companiesCache;
 }
 
+// 캐시를 재로드하는 함수 추가
+export function reloadCompanyJobsCache(): CompanyJob[] {
+  console.log('Reloading company jobs cache...');
+  companiesCache = [];
+  try {
+    companiesCache = loadAllCompanyJobs();
+    console.log(`Reloaded ${companiesCache.length} company jobs from CSV files`);
+    return companiesCache;
+  } catch (error) {
+    console.error('Error reloading company jobs:', error);
+    companiesCache = [];
+    return [];
+  }
+}
+
 export function getLearningPrograms() {
   if (programsCache.length === 0) {
     try {

@@ -6,6 +6,7 @@ import { parseResumeFromText } from "./naturalLanguageService";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { aiService } from "./aiService";
+import { reloadCompanyJobsCache } from "./recommendationEngine";
 import { insertUserProfileSchema, insertIndividualProfileSchema, insertCompanyProfileSchema, insertJobPostingSchema, insertJobApplicationSchema, insertSeniorReemploymentDataSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -1298,6 +1299,30 @@ ${allOnlineCourses.slice(0, 30).map((course, index) =>
       console.error('Error importing courses:', error);
       res.status(500).json({ 
         error: 'Failed to import courses',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // CSV 데이터 재로드 API 엔드포인트
+  app.post('/api/admin/reload-csv-data', isAuthenticated, async (req, res) => {
+    try {
+      console.log('Starting CSV data reload...');
+      const reloadedJobs = reloadCompanyJobsCache();
+      
+      res.json({
+        success: true,
+        message: `CSV 데이터가 성공적으로 재로드되었습니다`,
+        totalJobsLoaded: reloadedJobs.length,
+        sectors: reloadedJobs.reduce((acc: any, job) => {
+          acc[job.sector] = (acc[job.sector] || 0) + 1;
+          return acc;
+        }, {})
+      });
+    } catch (error) {
+      console.error('CSV 재로드 오류:', error);
+      res.status(500).json({
+        error: 'CSV 데이터 재로드 중 오류가 발생했습니다.',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }

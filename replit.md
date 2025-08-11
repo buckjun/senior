@@ -20,6 +20,11 @@ This is an AI-powered career matching platform specifically designed for Korean 
   * **Current Performance**: 70+ points (토목학과: 76.2점, 제조업 수리: 72점)
   * **Improvement Factor**: 2.5x enhancement, exceeding 70+ target goal
   * **Technical Enhancements**: Advanced intent extraction, sophisticated keyword mapping, repair/maintenance prioritization, high-level professional bonus system
+- **CSV Data System Overhaul (August 11, 2025)**: Successfully updated and reloaded all Excel/CSV files:
+  * **File Path Corrections**: Updated csvReader.ts to match actual attached file names across all 9 sectors
+  * **Data Volume**: 527 total job postings across sectors (건설업: 131, 제조업: 150, 정보통신: 53, etc.)
+  * **Cache Reload System**: Added reloadCompanyJobsCache() function and /api/admin/reload-csv-data endpoint
+  * **Real-time Updates**: Can refresh data without server restart
 
 # User Preferences
 
