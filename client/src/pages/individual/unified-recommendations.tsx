@@ -381,60 +381,81 @@ export default function UnifiedRecommendations() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recommendations.programs.map((program, index) => (
-                <Card key={`${program.id}-${index}`} className="border-[#2F3036]/20 hover:border-[#FF8C42]/50 transition-colors">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-[#2F3036] text-lg">{program.title}</CardTitle>
-                        <div className="flex items-center gap-2 mt-1">
-                          {program.provider && (
-                            <span className="text-[#2F3036]/70 text-sm">{program.provider}</span>
-                          )}
-                          <Badge variant={program.type === 'online' ? 'default' : 'secondary'} className="text-xs">
-                            {program.type === 'online' ? '온라인' : '오프라인'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge className="bg-[#FF8C42]/10 text-[#FF8C42] border-[#FF8C42]/30">
-                          추천도: {program.cover + program.relevance}
-                        </Badge>
-                      </div>
+            {(() => {
+              // 모든 프로그램의 매칭도가 0인지 확인
+              const hasRelevantPrograms = recommendations.programs.some(program => 
+                (program.cover || 0) + (program.relevance || 0) > 0
+              );
+              
+              if (!hasRelevantPrograms) {
+                return (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-[#FF8C42]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <GraduationCap className="w-8 h-8 text-[#FF8C42]/60" />
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {program.duration && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="w-4 h-4 text-[#2F3036]/60" />
-                        <span className="text-[#2F3036]/70">기간: {program.duration}</span>
-                      </div>
-                    )}
-                    
-                    {program.skills.length > 0 && (
-                      <div>
-                        <div className="text-sm text-[#2F3036]/70 mb-2">학습 기술</div>
-                        <div className="flex flex-wrap gap-1">
-                          {program.skills.map((skill, skillIndex) => (
-                            <Badge key={`${skill}-${skillIndex}`} variant="outline" className="border-[#FF8C42]/30 text-[#FF8C42] text-xs">
-                              {skill}
+                    <p className="text-[#2F3036]/70 text-lg">해당 직무에 매칭되는 교육 프로그램이 없습니다.</p>
+                    <p className="text-[#2F3036]/50 text-sm mt-2">다른 업종을 선택하거나 프로필을 업데이트해보세요.</p>
+                  </div>
+                );
+              }
+              
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {recommendations.programs.map((program, index) => (
+                    <Card key={`${program.id}-${index}`} className="border-[#2F3036]/20 hover:border-[#FF8C42]/50 transition-colors">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-[#2F3036] text-lg">{program.title}</CardTitle>
+                            <div className="flex items-center gap-2 mt-1">
+                              {program.provider && (
+                                <span className="text-[#2F3036]/70 text-sm">{program.provider}</span>
+                              )}
+                              <Badge variant={program.type === 'online' ? 'default' : 'secondary'} className="text-xs">
+                                {program.type === 'online' ? '온라인' : '오프라인'}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge className="bg-[#FF8C42]/10 text-[#FF8C42] border-[#FF8C42]/30">
+                              추천도: {(program.cover || 0) + (program.relevance || 0)}
                             </Badge>
-                          ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    
-                    <div className="flex justify-end">
-                      <Button size="sm" className="bg-[#2F3036] hover:bg-[#2F3036]/90 text-white">
-                        <Award className="w-4 h-4 mr-2" />
-                        신청하기
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {program.duration && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="w-4 h-4 text-[#2F3036]/60" />
+                            <span className="text-[#2F3036]/70">기간: {program.duration}</span>
+                          </div>
+                        )}
+                        
+                        {program.skills.length > 0 && (
+                          <div>
+                            <div className="text-sm text-[#2F3036]/70 mb-2">학습 기술</div>
+                            <div className="flex flex-wrap gap-1">
+                              {program.skills.map((skill, skillIndex) => (
+                                <Badge key={`${skill}-${skillIndex}`} variant="outline" className="border-[#FF8C42]/30 text-[#FF8C42] text-xs">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-end">
+                          <Button size="sm" className="bg-[#2F3036] hover:bg-[#2F3036]/90 text-white">
+                            <Award className="w-4 h-4 mr-2" />
+                            신청하기
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       </main>
