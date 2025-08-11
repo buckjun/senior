@@ -14,6 +14,17 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
+## AI Resume Profile Data Display Fix
+- **Date**: August 11, 2025
+- **Changes**: Fixed critical issue where AI-generated resume data wasn't showing in user profile
+  - **Root Cause**: Profile view was checking for non-existent `education` field in database schema
+  - **Database Schema Fix**: Updated profile condition to match actual schema fields (summary, skills, experience, preferredJobTypes, preferredLocations, aiAnalysis)
+  - **Field Mapping Correction**: Aligned client-server field mapping for proper data saving
+  - **Enhanced Debugging**: Added comprehensive logging for AI resume data flow tracking
+  - **Cache Invalidation**: Improved real-time updates across profile sections
+  - **Navigation Fix**: Redirects to dashboard after successful profile update
+  - **Status**: AI resume generation now properly saves and displays in "내정보" section
+
 ## Job Matching System Redesign Complete
 - **Date**: August 10, 2025 
 - **Changes**: Complete redesign of job category selection and company recommendation system

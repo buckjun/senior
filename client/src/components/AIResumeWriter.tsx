@@ -61,20 +61,26 @@ export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileU
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ParsedResume) => {
+      console.log('Updating profile with data:', data);
+      
       const updateData: Record<string, any> = {};
       
       if (data.summary?.trim()) updateData.summary = data.summary.trim();
       if (data.skills?.length > 0) updateData.skills = data.skills.filter(skill => skill.trim());
+      if (data.experience?.length > 0) updateData.experience = data.experience;
+      
+      // 서버 API가 기대하는 필드명으로 매핑
       if (data.title?.trim()) updateData.title = data.title.trim();
       if (data.location?.trim()) updateData.location = data.location.trim();
-      if (data.experience?.length > 0) updateData.experience = data.experience;
-      if (data.education?.length > 0) updateData.education = data.education;
 
+      console.log('Final update data:', updateData);
       return await apiRequest("POST", "/api/individual-profiles/ai-resume", updateData);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log('Profile update success:', response);
       queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
       queryClient.invalidateQueries({ queryKey: ['/api/jobs/recommended'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/recommendations'] });
       onProfileUpdated?.();
       
       toast({
@@ -82,9 +88,9 @@ export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileU
         description: "이제 맞춤 회사 추천을 받으실 수 있습니다.",
       });
 
-      // Navigate to recommendations after profile update
+      // Navigate to dashboard instead of recommendations
       setTimeout(() => {
-        window.location.href = '/individual/recommendations';
+        window.location.href = '/individual/dashboard';
       }, 1500);
     },
     onError: (error: any) => {

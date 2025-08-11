@@ -15,7 +15,7 @@ import {
   MapPin, 
   Award, 
   Briefcase, 
-  GraduationCap,
+  Brain,
   Target,
   Star
 } from 'lucide-react';
@@ -103,19 +103,22 @@ export default function IndividualProfileView() {
     );
   }
 
+  console.log('Profile data received:', profile);
+
   const profileData = profile as UserProfile;
   const skills = parseJsonField(profileData?.skills);
   const experience = parseJsonField(profileData?.experience);
-  const education = parseJsonField(profileData?.education);
   const preferredJobTypes = parseJsonField(profileData?.preferredJobTypes);
   const preferredLocations = parseJsonField(profileData?.preferredLocations);
 
-  // Check if user has meaningful profile data
+  // Check if user has meaningful profile data - 데이터베이스 스키마에 맞춰 수정
   const hasProfileData = profileData && (
-    profileData.summary || 
+    (profileData.summary && profileData.summary.trim() !== '') || 
     skills.length > 0 || 
     experience.length > 0 || 
-    education.length > 0
+    preferredJobTypes.length > 0 ||
+    preferredLocations.length > 0 ||
+    profileData.aiAnalysis
   );
 
   if (!hasProfileData) {
@@ -292,22 +295,33 @@ export default function IndividualProfileView() {
           </Card>
         )}
 
-        {/* Education */}
-        {education.length > 0 && (
+        {/* AI Analysis Results */}
+        {profileData.aiAnalysis && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="w-5 h-5" style={{ color: '#2F3036' }} />
-                학력 사항
+                <Brain className="w-5 h-5" style={{ color: '#2F3036' }} />
+                AI 분석 결과
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {education.map((edu, index) => (
-                  <div key={index} className="border-l-2 border-green-200 pl-4 py-2">
-                    <p className="text-body">{edu}</p>
-                  </div>
-                ))}
+                <div className="border-l-2 border-purple-200 pl-4 py-2">
+                  <p className="text-sm text-gray-600">
+                    최근 AI 분석일: {(() => {
+                      try {
+                        const analysis = typeof profileData.aiAnalysis === 'string' 
+                          ? JSON.parse(profileData.aiAnalysis) 
+                          : profileData.aiAnalysis;
+                        return analysis?.lastGenerated ? 
+                          new Date(analysis.lastGenerated).toLocaleDateString('ko-KR') : 
+                          '분석 날짜 없음';
+                      } catch {
+                        return '분석 정보 없음';
+                      }
+                    })()}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
