@@ -303,10 +303,6 @@ export const insertSeniorReemploymentDataSchema = createInsertSchema(seniorReemp
   updatedAt: true,
 });
 
-// User types and schemas
-export type UpsertUser = typeof users.$inferInsert;
-export type User = typeof users.$inferSelect;
-
 // Authentication schemas
 export const signupSchema = createInsertSchema(users, {
   username: z.string().min(3, "아이디는 3글자 이상이어야 합니다").max(50, "아이디는 50글자 이하여야 합니다"),
@@ -315,6 +311,7 @@ export const signupSchema = createInsertSchema(users, {
   phoneNumber: z.string().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
+  userType: z.enum(['individual', 'company']).default('individual'),
 }).omit({ id: true, createdAt: true, updatedAt: true, profileImageUrl: true, isActive: true });
 
 export const loginSchema = z.object({
@@ -322,6 +319,9 @@ export const loginSchema = z.object({
   password: z.string().min(1, "비밀번호를 입력해주세요"),
   userType: z.enum(['individual', 'company']).default('individual'),
 });
+
+export type SignupData = z.infer<typeof signupSchema>;
+export type LoginData = z.infer<typeof loginSchema>;
 
 export type SignupData = z.infer<typeof signupSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
@@ -383,9 +383,8 @@ export const insertCompanySchema = createInsertSchema(companies).omit({
   createdAt: true,
 });
 
-// Types
-// Include id in UpsertUser for authentication
-export type UpsertUser = z.infer<typeof insertUserSchema> & { id: string };
+// Types  
+export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type IndividualProfile = typeof individualProfiles.$inferSelect;
