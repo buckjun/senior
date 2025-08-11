@@ -375,7 +375,73 @@ export default function IndividualProfileView() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-body text-gray-700">{profileData.aiAnalysis}</p>
+              {(() => {
+                try {
+                  // aiAnalysis가 문자열인 경우 파싱 시도
+                  if (typeof profileData.aiAnalysis === 'string') {
+                    const analysis = JSON.parse(profileData.aiAnalysis);
+                    return (
+                      <div className="space-y-3">
+                        {analysis.generatedSummary && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-1">AI 생성 요약</h4>
+                            <p className="text-sm text-gray-700">{analysis.generatedSummary}</p>
+                          </div>
+                        )}
+                        {analysis.extractedSkills && analysis.extractedSkills.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-1">추출된 기술</h4>
+                            <div className="flex flex-wrap gap-1">
+                              {analysis.extractedSkills.map((skill: string, index: number) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500">
+                          마지막 업데이트: {new Date(analysis.lastGenerated).toLocaleString('ko-KR')}
+                        </div>
+                      </div>
+                    );
+                  }
+                  // aiAnalysis가 이미 객체인 경우
+                  else if (typeof profileData.aiAnalysis === 'object') {
+                    const analysis = profileData.aiAnalysis;
+                    return (
+                      <div className="space-y-3">
+                        {analysis.generatedSummary && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-1">AI 생성 요약</h4>
+                            <p className="text-sm text-gray-700">{analysis.generatedSummary}</p>
+                          </div>
+                        )}
+                        {analysis.extractedSkills && analysis.extractedSkills.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-1">추출된 기술</h4>
+                            <div className="flex flex-wrap gap-1">
+                              {analysis.extractedSkills.map((skill: string, index: number) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500">
+                          마지막 업데이트: {new Date(analysis.lastGenerated).toLocaleString('ko-KR')}
+                        </div>
+                      </div>
+                    );
+                  }
+                } catch (e) {
+                  console.error('AI 분석 데이터 파싱 오류:', e);
+                  return (
+                    <p className="text-sm text-gray-500">AI 분석 데이터를 표시할 수 없습니다.</p>
+                  );
+                }
+              })()}
             </CardContent>
           </Card>
         )}
