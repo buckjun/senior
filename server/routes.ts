@@ -127,12 +127,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Parse existing data
-      const existingSkills = JSON.parse(existingProfile.skills || '[]');
-      const existingExperience = JSON.parse(existingProfile.experience || '[]');
+      // Parse existing data safely
+      let existingSkills = [];
+      let existingExperience = [];
+      
+      try {
+        existingSkills = JSON.parse(existingProfile.skills || '[]');
+        if (!Array.isArray(existingSkills)) {
+          existingSkills = [];
+        }
+      } catch (error) {
+        console.log('Error parsing existing skills, using empty array:', error instanceof Error ? error.message : String(error));
+        existingSkills = [];
+      }
+      
+      try {
+        existingExperience = JSON.parse(existingProfile.experience || '[]');
+        if (!Array.isArray(existingExperience)) {
+          existingExperience = [];
+        }
+      } catch (error) {
+        console.log('Error parsing existing experience, using empty array:', error instanceof Error ? error.message : String(error));
+        existingExperience = [];
+      }
 
       // Add new education and skills
-      const updatedSkills = [...new Set([...existingSkills, ...skills])];
+      const updatedSkills = [...Array.from(new Set([...existingSkills, ...skills]))];
       const updatedExperience = [...existingExperience, education];
 
       // Update profile with new education

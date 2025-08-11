@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   BookOpen, 
   MapPin, 
@@ -111,7 +111,7 @@ export default function RecommendedCourses() {
 
   const handleConfirmApplication = () => {
     if (selectedCourse) {
-      setAppliedCourses(prev => new Set([...prev, selectedCourse.id]));
+      setAppliedCourses(prev => new Set([...Array.from(prev), selectedCourse.id]));
       setShowApplicationModal(false);
       setSelectedCourse(null);
       
@@ -360,6 +360,9 @@ export default function RecommendedCourses() {
             <DialogTitle className="text-xl font-bold text-[#2F3036]">
               신청완료되었습니다! 🎉
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              강의 신청 완료 확인 모달입니다
+            </DialogDescription>
           </DialogHeader>
           
           <div className="text-center space-y-4">
@@ -375,7 +378,8 @@ export default function RecommendedCourses() {
             
             <div className="text-sm text-[#2F3036]/70 space-y-2">
               <p>강의 신청이 성공적으로 완료되었습니다!</p>
-              <p>이제 <span className="font-medium text-[#FF8C42]">"수강완료"</span> 버튼을 클릭하여</p>
+              <p>강의를 모두 수강하시면</p>
+              <p><span className="font-medium text-[#FF8C42]">"수강완료"</span> 버튼을 클릭하여</p>
               <p>이력서에 수료증을 추가하실 수 있습니다.</p>
             </div>
 
