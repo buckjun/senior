@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Building2, MapPin, Users, Calendar, Banknote, Trophy, ArrowLeft, Star } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Building2, MapPin, Users, Calendar, Banknote, Trophy, ArrowLeft, Star, CheckCircle2, Sparkles, ThumbsUp, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface MatchedCompany {
@@ -41,6 +42,8 @@ interface RecommendationsResponse {
 export default function CompanyRecommendationsPage() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [appliedCompany, setAppliedCompany] = useState<MatchedCompany | null>(null);
 
   // Fetch recommendations
   const { data: recommendationsData, isLoading, error } = useQuery<RecommendationsResponse>({
@@ -53,6 +56,35 @@ export default function CompanyRecommendationsPage() {
 
   const handleBackToDashboard = () => {
     setLocation('/dashboard');
+  };
+
+  const handleApply = (company: MatchedCompany) => {
+    setAppliedCompany(company);
+    setShowApplicationModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowApplicationModal(false);
+    setAppliedCompany(null);
+  };
+
+  // Random congratulatory messages
+  const congratMessages = [
+    "축하합니다! 지원이 완료되었습니다.",
+    "성공적으로 지원하셨습니다!",
+    "지원서가 전송되었습니다!",
+    "훌륭한 선택입니다! 지원 완료!",
+    "새로운 기회의 시작입니다!"
+  ];
+
+  const getRandomMessage = () => {
+    return congratMessages[Math.floor(Math.random() * congratMessages.length)];
+  };
+
+  // Random celebration icons
+  const celebrationIcons = [CheckCircle2, Sparkles, ThumbsUp, Trophy, Award];
+  const getRandomIcon = () => {
+    return celebrationIcons[Math.floor(Math.random() * celebrationIcons.length)];
   };
 
   const formatSalary = (salary: number | null) => {
@@ -345,6 +377,7 @@ export default function CompanyRecommendationsPage() {
                   </Button>
                   <Button 
                     className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+                    onClick={() => handleApply(company)}
                     data-testid={`button-apply-company-${index}`}
                   >
                     지원하기
@@ -377,6 +410,66 @@ export default function CompanyRecommendationsPage() {
         </div>
         </div>
       </div>
+
+      {/* Application Success Modal */}
+      <Dialog open={showApplicationModal} onOpenChange={setShowApplicationModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              {(() => {
+                const RandomIcon = getRandomIcon();
+                return <RandomIcon className="w-8 h-8 text-green-600" />;
+              })()}
+            </div>
+            <DialogTitle className="text-xl font-bold text-[#2F3036]">
+              {getRandomMessage()}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="text-center space-y-4">
+            {appliedCompany && (
+              <div className="bg-[#F5F5DC] rounded-lg p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Building2 className="w-5 h-5 text-[#FF8C42]" />
+                  <span className="font-semibold text-[#2F3036]">{appliedCompany.companyName}</span>
+                </div>
+                <p className="text-[#2F3036]/70 text-sm">{appliedCompany.jobTitle}</p>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <Star className="w-4 h-4 text-yellow-500" />
+                  <span className="text-sm text-[#2F3036]">매칭률 {appliedCompany.matchingScore}%</span>
+                </div>
+              </div>
+            )}
+            
+            <div className="text-sm text-[#2F3036]/70 space-y-2">
+              <p>지원서가 성공적으로 전송되었습니다.</p>
+              <p>담당자가 검토 후 연락드릴 예정입니다.</p>
+              <p className="font-medium text-[#FF8C42]">좋은 결과가 있기를 바랍니다! 🎉</p>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleCloseModal}
+                className="flex-1"
+                data-testid="button-close-application-modal"
+              >
+                닫기
+              </Button>
+              <Button 
+                onClick={() => {
+                  handleCloseModal();
+                  setLocation('/dashboard');
+                }}
+                className="flex-1 bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+                data-testid="button-back-to-dashboard-from-modal"
+              >
+                대시보드로 이동
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
