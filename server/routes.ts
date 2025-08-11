@@ -191,79 +191,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ai/analyze-resume-image', isAuthenticated, async (req: any, res) => {
     try {
       const { base64Image } = req.body;
-      const userId = req.user.claims.sub;
       
       const extractedText = await aiService.analyzeResumeImage(base64Image);
       const analysis = await aiService.analyzeCareerProfile(extractedText);
       
-      // 이미지 분석 성공 후 자동으로 프로필 업데이트
-      if (extractedText && analysis) {
+      // Parse the extracted text to get structured data for preview
+      let parsedData = null;
+      if (extractedText) {
         try {
-          // Parse the extracted text to get structured data
-          const parsedData = await parseResumeFromText(extractedText);
-          
-          // Get existing profile or create one if it doesn't exist
-          let existingProfile = await storage.getIndividualProfile(userId);
-          
-          if (!existingProfile) {
-            existingProfile = await storage.createIndividualProfile({
-              userId: userId,
-              summary: '',
-              skills: JSON.stringify([]),
-              experience: JSON.stringify([]),
-              preferredJobTypes: JSON.stringify([]),
-              preferredLocations: JSON.stringify([])
-            });
-          }
-
-          // Prepare update data
-          const updateData: any = {};
-          
-          if (parsedData.summary && typeof parsedData.summary === 'string' && parsedData.summary.trim()) {
-            updateData.summary = parsedData.summary.trim();
-          }
-          
-          if (parsedData.skills && Array.isArray(parsedData.skills) && parsedData.skills.length > 0) {
-            const validSkills = parsedData.skills.filter(skill => skill && typeof skill === 'string' && skill.trim());
-            if (validSkills.length > 0) {
-              updateData.skills = JSON.stringify(validSkills) as any;
-            }
-          }
-          
-          if (parsedData.experience && Array.isArray(parsedData.experience) && parsedData.experience.length > 0) {
-            updateData.experience = JSON.stringify(parsedData.experience) as any;
-          }
-          
-          if (parsedData.title && typeof parsedData.title === 'string' && parsedData.title.trim()) {
-            updateData.preferredJobTypes = JSON.stringify([parsedData.title.trim()]) as any;
-          }
-          
-          if (parsedData.location && typeof parsedData.location === 'string' && parsedData.location.trim()) {
-            updateData.preferredLocations = JSON.stringify([parsedData.location.trim()]) as any;
-          }
-
-          // Always update AI analysis
-          updateData.aiAnalysis = JSON.stringify({
-            lastGenerated: new Date().toISOString(),
-            source: 'image_upload',
-            extractedText: extractedText,
-            extractedSkills: parsedData.skills || [],
-            generatedSummary: parsedData.summary || '',
-            processedFields: Object.keys(updateData).filter(key => key !== 'aiAnalysis')
-          }) as any;
-
-          // Update profile if there's meaningful data
-          if (Object.keys(updateData).length > 1) { // More than just aiAnalysis
-            const updatedProfile = await storage.updateIndividualProfile(userId, updateData);
-            console.log('Profile updated automatically after image analysis:', updatedProfile);
-          }
-        } catch (updateError) {
-          console.error('프로필 자동 업데이트 실패 (이미지):', updateError);
-          // 프로필 업데이트 실패해도 분석 결과는 반환
+          parsedData = await parseResumeFromText(extractedText);
+        } catch (parseError) {
+          console.error('이미지 텍스트 파싱 오류:', parseError);
         }
       }
       
-      res.json({ extractedText, analysis });
+      res.json({ extractedText, analysis, parsedData });
     } catch (error) {
       console.error("Error analyzing resume image:", error);
       res.status(500).json({ message: "Failed to analyze resume image" });
@@ -275,7 +217,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { transcript } = req.body;
       const processedText = await aiService.processVoiceTranscript(transcript);
       const analysis = await aiService.analyzeCareerProfile(processedText);
-      res.json({ processedText, analysis });
+      
+      // Parse the processed text to get structured data for preview
+      let parsedData = null;
+      if (processedText) {
+        try {
+          parsedData = await parseResumeFromText(processedText);
+        } catch (parseError) {
+          console.error('음성 텍스트 파싱 오류:', parseError);
+        }
+      }
+      
+      res.json({ processedText, analysis, parsedData });
     } catch (error) {
       console.error("Error processing voice:", error);
       res.status(500).json({ message: "Failed to process voice input" });
@@ -746,76 +699,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/parse-resume', isAuthenticated, async (req: any, res) => {
     try {
       const { text } = req.body;
-      const userId = req.user.claims.sub;
       
       if (!text || typeof text !== "string") {
         return res.status(400).json({ error: "텍스트가 필요합니다." });
       }
 
       const result = await parseResumeFromText(text);
-      
-      // 파싱 성공 후 자동으로 프로필 업데이트
-      if (result) {
-        try {
-          // Get existing profile or create one if it doesn't exist
-          let existingProfile = await storage.getIndividualProfile(userId);
-          
-          if (!existingProfile) {
-            existingProfile = await storage.createIndividualProfile({
-              userId: userId,
-              summary: '',
-              skills: JSON.stringify([]),
-              experience: JSON.stringify([]),
-              preferredJobTypes: JSON.stringify([]),
-              preferredLocations: JSON.stringify([])
-            });
-          }
-
-          // Prepare update data
-          const updateData: any = {};
-          
-          if (result.summary && typeof result.summary === 'string' && result.summary.trim()) {
-            updateData.summary = result.summary.trim();
-          }
-          
-          if (result.skills && Array.isArray(result.skills) && result.skills.length > 0) {
-            const validSkills = result.skills.filter(skill => skill && typeof skill === 'string' && skill.trim());
-            if (validSkills.length > 0) {
-              updateData.skills = JSON.stringify(validSkills) as any;
-            }
-          }
-          
-          if (result.experience && Array.isArray(result.experience) && result.experience.length > 0) {
-            updateData.experience = JSON.stringify(result.experience) as any;
-          }
-          
-          if (result.title && typeof result.title === 'string' && result.title.trim()) {
-            updateData.preferredJobTypes = JSON.stringify([result.title.trim()]) as any;
-          }
-          
-          if (result.location && typeof result.location === 'string' && result.location.trim()) {
-            updateData.preferredLocations = JSON.stringify([result.location.trim()]) as any;
-          }
-
-          // Always update AI analysis
-          updateData.aiAnalysis = JSON.stringify({
-            lastGenerated: new Date().toISOString(),
-            source: 'text_input',
-            extractedSkills: result.skills || [],
-            generatedSummary: result.summary || '',
-            processedFields: Object.keys(updateData).filter(key => key !== 'aiAnalysis')
-          }) as any;
-
-          // Update profile if there's meaningful data
-          if (Object.keys(updateData).length > 1) { // More than just aiAnalysis
-            const updatedProfile = await storage.updateIndividualProfile(userId, updateData);
-            console.log('Profile updated automatically after text parsing:', updatedProfile);
-          }
-        } catch (updateError) {
-          console.error('프로필 자동 업데이트 실패:', updateError);
-          // 프로필 업데이트 실패해도 파싱 결과는 반환
-        }
-      }
       
       res.json(result);
     } catch (error) {

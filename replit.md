@@ -14,18 +14,18 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## Complete Resume Creation System Unification
+## Resume Creation Preview System Implementation  
 - **Date**: August 11, 2025
-- **Changes**: Fixed issue where only certain resume creation methods updated user profile
-  - **Problem**: Text-based resume creation and image upload weren't updating user profiles
-  - **Solution**: Modified ALL resume creation endpoints to automatically update profiles:
-    - `/api/parse-resume` (text input) - now auto-updates profile
-    - `/api/ai/analyze-resume-image` (image upload) - now auto-updates profile  
-    - `/api/ai/process-voice` (voice input) - already working
-  - **Client-Side Simplification**: Removed duplicate profile update logic from AIResumeWriter
-  - **Consistent Experience**: All resume creation methods now automatically save to "내정보"
-  - **User Flow**: Parse → Auto-save → Cache invalidation → Success message → Dashboard redirect
-  - **Status**: Universal profile updates working for all resume creation methods
+- **Changes**: Implemented user confirmation workflow for AI resume generation
+  - **Problem**: Users couldn't verify AI conversion results before profile updates
+  - **Solution**: Added preview-before-apply workflow for ALL resume creation methods:
+    - `/api/parse-resume` (text input) - shows preview, requires user confirmation
+    - `/api/ai/analyze-resume-image` (image upload) - shows preview, requires user confirmation
+    - `/api/ai/process-voice` (voice input) - shows preview, requires user confirmation
+  - **User Experience**: Parse → Preview → User Verification → Manual Apply → Profile Update
+  - **Server Changes**: Removed automatic profile updates, added parsedData to all AI responses
+  - **Client Changes**: Added confirmation step with "내 정보에 적용하기" button
+  - **Status**: Users can now verify AI conversion accuracy before profile updates
 
 ## AI Resume Profile Data Display Fix  
 - **Date**: August 11, 2025
