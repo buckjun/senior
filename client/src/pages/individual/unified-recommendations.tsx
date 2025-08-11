@@ -9,10 +9,12 @@ import {
   ArrowLeft, 
   Briefcase, 
   Building2, 
+  Building,
   GraduationCap, 
   MapPin, 
   DollarSign, 
   Clock, 
+  Calendar,
   Award,
   TrendingUp,
   ExternalLink
@@ -44,6 +46,11 @@ interface UnifiedRecommendation {
     skills: string[];
     location?: string;
     salary?: string;
+    field?: string;
+    experience?: string;
+    deadline?: string;
+    employmentType?: string;
+    companySize?: string;
     score: number;
   }>;
   programs: Array<{
@@ -217,10 +224,6 @@ export default function UnifiedRecommendations() {
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.occupations?.length || 0}</div>
-                <div className="text-sm text-[#2F3036]/70">추천 직업</div>
-              </div>
-              <div className="text-center">
                 <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.jobs?.length || 0}</div>
                 <div className="text-sm text-[#2F3036]/70">추천 공고</div>
               </div>
@@ -232,64 +235,7 @@ export default function UnifiedRecommendations() {
           </CardContent>
         </Card>
 
-        {/* Occupations Section */}
-        <Card className="border-[#2F3036]/20">
-          <CardHeader>
-            <CardTitle className="text-[#2F3036] flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-[#FF8C42]" />
-              추천 직업 ({recommendations.occupations?.length || 0}개)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(recommendations.occupations || []).map((occupation) => (
-                <Card key={occupation.id} className="border-[#2F3036]/20 hover:border-[#FF8C42]/50 transition-colors">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{getSectorIcon(occupation.sector)}</span>
-                        <div>
-                          <CardTitle className="text-[#2F3036] text-lg">{occupation.title}</CardTitle>
-                          <Badge variant="outline" className="border-[#2F3036]/20 text-[#2F3036] text-xs mt-1">
-                            {occupation.sector}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Badge className={`${getScoreColor(occupation.score)} font-medium`}>
-                        {getScoreLabel(occupation.score)}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-[#2F3036]/60" />
-                        <span className="text-[#2F3036]/70">최소 {occupation.minYears}년</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4 text-[#2F3036]/60" />
-                        <span className="text-[#2F3036]/70">{occupation.reqEdu}</span>
-                      </div>
-                    </div>
-                    
-                    {occupation.skills.length > 0 && (
-                      <div>
-                        <div className="text-sm text-[#2F3036]/70 mb-2">필요 기술</div>
-                        <div className="flex flex-wrap gap-1">
-                          {occupation.skills.map(skill => (
-                            <Badge key={skill} variant="outline" className="border-[#FF8C42]/30 text-[#FF8C42] text-xs">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Jobs Section */}
         <Card className="border-[#2F3036]/20">
@@ -322,27 +268,56 @@ export default function UnifiedRecommendations() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
-                      {job.location && (
+                  <CardContent className="space-y-4">
+                    {/* 엑셀 파일에서 요청한 모든 상세 정보 표시 */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-[#2F3036]/60" />
-                          <span className="text-[#2F3036]/70">{job.location}</span>
+                          <span className="font-medium text-[#2F3036]">지역:</span>
+                          <span className="text-[#2F3036]/70">{job.location || '정보 없음'}</span>
                         </div>
-                      )}
-                      {job.salary && (
+                        <div className="flex items-center gap-2">
+                          <GraduationCap className="w-4 h-4 text-[#2F3036]/60" />
+                          <span className="font-medium text-[#2F3036]">학력:</span>
+                          <span className="text-[#2F3036]/70">{job.reqEdu || '정보 없음'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-[#2F3036]/60" />
+                          <span className="font-medium text-[#2F3036]">경력:</span>
+                          <span className="text-[#2F3036]/70">{job.experience || '정보 없음'}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="w-4 h-4 text-[#2F3036]/60" />
+                          <span className="font-medium text-[#2F3036]">분야:</span>
+                          <span className="text-[#2F3036]/70">{job.field || '정보 없음'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-[#2F3036]/60" />
+                          <span className="font-medium text-[#2F3036]">고용형태:</span>
+                          <span className="text-[#2F3036]/70">{job.employmentType || '정보 없음'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Building className="w-4 h-4 text-[#2F3036]/60" />
+                          <span className="font-medium text-[#2F3036]">기업규모:</span>
+                          <span className="text-[#2F3036]/70">{job.companySize || '정보 없음'}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <DollarSign className="w-4 h-4 text-[#2F3036]/60" />
-                          <span className="text-[#2F3036]/70">{job.salary}</span>
+                          <span className="font-medium text-[#2F3036]">급여:</span>
+                          <span className="text-[#2F3036]/70">{job.salary || '정보 없음'}</span>
                         </div>
-                      )}
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-[#2F3036]/60" />
-                        <span className="text-[#2F3036]/70">최소 {job.minYears}년</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4 text-[#2F3036]/60" />
-                        <span className="text-[#2F3036]/70">{job.reqEdu}</span>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-[#2F3036]/60" />
+                          <span className="font-medium text-[#2F3036]">마감일:</span>
+                          <span className="text-[#2F3036]/70">{job.deadline || '정보 없음'}</span>
+                        </div>
                       </div>
                     </div>
                     
