@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Mic, MicOff, Square, Check } from 'lucide-react';
+import { Mic, MicOff, Square, Check, Wand2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ResumePreview } from '@/components/ResumePreview';
 
 interface VoiceInputProps {
   isOpen: boolean;
@@ -15,6 +16,9 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isSupported, setIsSupported] = useState(true);
+  const [showConvertButton, setShowConvertButton] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
+  const [convertedResult, setConvertedResult] = useState<any>(null);
   const recognition = useRef<any>(null);
   const { toast } = useToast();
 
@@ -68,10 +72,18 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
               }
             }
             
-            // Only show final transcript, not interim
-            if (finalTranscript) {
-              setTranscript(prev => prev + finalTranscript);
+            // Build complete transcript without duplication
+            let completeTranscript = '';
+            if (event.results) {
+              for (let i = 0; i < event.results.length; i++) {
+                const result = event.results[i];
+                if (result && result[0] && result[0].transcript) {
+                  completeTranscript += result[0].transcript;
+                }
+              }
             }
+            
+            setTranscript(completeTranscript);
             
           } catch (error) {
             console.error('Error processing results:', error);
@@ -163,22 +175,62 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
     }
   };
 
-  // Safe complete
+  // Safe complete - now just stops recording and shows convert button
   const handleComplete = () => {
     try {
       console.log('Completing with transcript:', transcript);
       
       stopRecording();
-      
-      if (transcript.trim()) {
-        onTranscript(transcript.trim());
-      }
-      
-      handleClose();
+      setShowConvertButton(true);
       
     } catch (error) {
       console.error('Error completing:', error);
-      handleClose();
+      stopRecording();
+    }
+  };
+
+  // Handle convert to resume
+  const handleConvertToResume = async () => {
+    if (!transcript.trim()) {
+      toast({
+        title: "입력 필요",
+        description: "음성 녹음 내용이 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsConverting(true);
+    try {
+      // Call the parse resume API
+      const response = await fetch('/api/parse-resume', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: transcript.trim() }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to convert resume');
+      }
+
+      const result = await response.json();
+      setConvertedResult(result);
+      
+      toast({
+        title: "이력서 분석 완료! ✨",
+        description: "자연어에서 이력서 정보를 성공적으로 추출했습니다.",
+      });
+    } catch (error) {
+      console.error('Error converting resume:', error);
+      toast({
+        title: "분석 실패",
+        description: "이력서 분석 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConverting(false);
     }
   };
 
@@ -187,6 +239,8 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
     try {
       stopRecording();
       setTranscript('');
+      setShowConvertButton(false);
+      setConvertedResult(null);
       onClose();
     } catch (error) {
       console.error('Error closing:', error);
@@ -196,7 +250,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="mobile-container max-w-sm mx-auto bottom-0 top-auto translate-y-0 rounded-t-3xl rounded-b-none border-0 p-6">
+      <DialogContent className="mobile-container max-w-2xl mx-auto bottom-0 top-auto translate-y-0 rounded-t-3xl rounded-b-none border-0 p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="sr-only">
           <DialogTitle>음성 입력</DialogTitle>
           <DialogDescription>음성으로 텍스트를 입력하세요.</DialogDescription>
@@ -246,7 +300,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
             취소
           </Button>
           
-          {!isRecording ? (
+          {!isRecording && !showConvertButton ? (
             <Button
               onClick={startRecording}
               className="flex-1 bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
@@ -256,7 +310,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
               <Mic className="mr-2 h-5 w-5" />
               녹음 시작
             </Button>
-          ) : (
+          ) : isRecording ? (
             <Button
               onClick={handleComplete}
               className="flex-1 bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
@@ -265,13 +319,48 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "말�
               <Check className="mr-2 h-4 w-4" />
               녹음 완료
             </Button>
-          )}
+          ) : showConvertButton ? (
+            <Button
+              onClick={handleConvertToResume}
+              className="flex-1 bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+              disabled={isConverting}
+              data-testid="button-convert-resume"
+            >
+              {isConverting ? (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                  AI 분석 중...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  이력서로 변환하기
+                </>
+              )}
+            </Button>
+          ) : null}
         </div>
 
-        {!isRecording && (
+        {!isRecording && !showConvertButton && (
           <p className="text-sm text-gray-500 text-center mt-4">
             "15년간 매장관리 업무를 담당했습니다"와 같이 말씀해주세요
           </p>
+        )}
+
+        {/* Resume Conversion Result */}
+        {convertedResult && (
+          <div className="mt-6 border-t pt-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <h4 className="text-lg font-bold text-yellow-800 mb-2 flex items-center">
+                <Sparkles className="mr-2 h-5 w-5" />
+                이력서 분석 완료!
+              </h4>
+              <p className="text-sm text-yellow-700">
+                자연어에서 이력서 정보를 성공적으로 추출했습니다.
+              </p>
+            </div>
+            <ResumePreview data={convertedResult} />
+          </div>
         )}
       </DialogContent>
     </Dialog>

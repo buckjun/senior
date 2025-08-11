@@ -90,10 +90,8 @@ export default function IndividualProfileSetup() {
   });
 
   const handleVoiceTranscript = (transcript: string) => {
-    // Open AI Resume Writer modal with the voice transcript
-    setProfileData(prev => ({ ...prev, careerText: transcript }));
-    setIsVoiceModalOpen(false);
-    setIsAIResumeModalOpen(true);
+    // Voice input modal now handles everything internally
+    console.log('Voice transcript received:', transcript);
   };
 
   const handleFileUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
