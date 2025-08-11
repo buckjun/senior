@@ -71,6 +71,7 @@ export default function UnifiedRecommendations() {
   const [location, setLocation] = useLocation();
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [resumeText, setResumeText] = useState<string>('');
+  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -123,10 +124,19 @@ export default function UnifiedRecommendations() {
     return `보통 ${score}%`;
   };
 
-  const handleJobApply = (jobTitle: string) => {
+  const handleJobApply = (jobId: string, jobTitle: string) => {
+    setAppliedJobs(prev => new Set([...prev, jobId]));
     toast({
       title: "온라인 지원완료",
       description: `온라인 지원완료 되었습니다. ${user?.username || user?.id}의 합격을 응원합니다.`,
+      variant: "default",
+    });
+  };
+
+  const handleViewApplicationStatus = (jobTitle: string) => {
+    toast({
+      title: "지원현황 확인",
+      description: `${jobTitle}에 대한 지원현황을 확인합니다.`,
       variant: "default",
     });
   };
@@ -354,16 +364,29 @@ export default function UnifiedRecommendations() {
                       </div>
                     )}
                     
-                    <div className="flex justify-end">
-                      <Button 
-                        size="sm" 
-                        className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
-                        onClick={() => handleJobApply(job.title)}
-                        data-testid={`button-apply-job-${job.id}`}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        지원하기
-                      </Button>
+                    <div className="flex justify-end gap-2">
+                      {!appliedJobs.has(job.id) ? (
+                        <Button 
+                          size="sm" 
+                          className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+                          onClick={() => handleJobApply(job.id, job.title)}
+                          data-testid={`button-apply-job-${job.id}`}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          지원하기
+                        </Button>
+                      ) : (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="border-[#FF8C42] text-[#FF8C42] hover:bg-[#FF8C42]/10"
+                          onClick={() => handleViewApplicationStatus(job.title)}
+                          data-testid={`button-view-status-${job.id}`}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          지원현황 보기
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
