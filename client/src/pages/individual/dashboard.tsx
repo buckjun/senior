@@ -31,7 +31,9 @@ import {
   Layers,
   ArrowRight,
   Eye,
-  BookOpen
+  BookOpen,
+  Brain,
+  BarChart3
 } from "lucide-react";
 
 interface JobPosting {
@@ -227,11 +229,17 @@ export default function Dashboard() {
               <CardDescription className="text-[#2F3036]/70">
                 일있슈가 회원님의 경험과 관심사에 맞는 기업을 추천해드립니다.
               </CardDescription>
-              <div className="pt-4">
+              <div className="pt-4 space-y-3">
                 <Link href="/individual/job-category-selection">
-                  <Button className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white">
+                  <Button className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white w-full">
                     <Building className="w-4 h-4 mr-2" />
                     나에게 맞는 기업 찾기
+                  </Button>
+                </Link>
+                <Link href="/individual/algorithm-visualization">
+                  <Button variant="outline" className="border-[#FF8C42] text-[#FF8C42] hover:bg-[#FF8C42] hover:text-white w-full">
+                    <Brain className="w-4 h-4 mr-2" />
+                    매칭 알고리즘 보기
                   </Button>
                 </Link>
               </div>

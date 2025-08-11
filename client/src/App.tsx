@@ -23,6 +23,7 @@ import CompanyDashboard from "@/pages/company/dashboard";
 import JobPosting from "@/pages/company/job-posting";
 import AIRecommendations from "@/pages/company/ai-recommendations";
 import ExcelUploadPage from "@/pages/admin/excel-upload";
+import AlgorithmVisualization from "@/pages/individual/algorithm-visualization";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -80,6 +81,7 @@ function Router() {
           <Route path="/individual/company-recommendations" component={CompanyRecommendations} />
           <Route path="/individual/recommended-courses" component={RecommendedCourses} />
           <Route path="/individual/dashboard" component={IndividualDashboard} />
+          <Route path="/individual/algorithm-visualization" component={AlgorithmVisualization} />
           <Route path="/individual/search" component={JobSearch} />
           <Route path="/saved-jobs" component={SavedJobs} />
           <Route path="/company/signup" component={CompanySignup} />
