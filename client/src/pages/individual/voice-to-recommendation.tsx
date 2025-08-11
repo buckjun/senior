@@ -9,23 +9,46 @@ import { VoiceRecognitionModal } from '@/components/VoiceRecognitionModal';
 import { apiRequest } from '@/lib/queryClient';
 import SectorSelection from './sector-selection';
 
+interface ResumeAnalysisResult {
+  profile: {
+    years: number;
+    education: string;
+    skills: string[];
+  };
+  sectorGuess: Array<{ sector: string; score: number }>;
+  sectors: string[];
+  resumeText?: string;
+}
+
 export default function VoiceToRecommendation() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [showVoiceModal, setShowVoiceModal] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResult | null>(null);
 
   // 음성 이력서 분석 mutation
   const analyzeResumeMutation = useMutation({
-    mutationFn: async (resumeText: string) => {
-      return await apiRequest('POST', '/api/resume-analysis', { resumeText });
+    mutationFn: async (resumeText: string): Promise<ResumeAnalysisResult> => {
+      const result = await apiRequest('POST', '/api/resume-analysis', { resumeText });
+      return result as ResumeAnalysisResult;
     },
     onSuccess: (data) => {
-      setAnalysisResult(data);
-      toast({
-        title: "이력서 분석 완료! 🎉",
-        description: `${data.sectorGuess.length}개 업종이 추천되었습니다.`,
-      });
+      console.log('Resume analysis result:', data);
+      // 데이터 검증
+      if (data && data.profile && data.sectorGuess && data.sectors) {
+        setAnalysisResult(data);
+        toast({
+          title: "이력서 분석 완료! 🎉",
+          description: `${data.sectorGuess.length}개 업종이 추천되었습니다.`,
+        });
+      } else {
+        console.error('Invalid analysis result structure:', data);
+        toast({
+          title: "분석 실패",
+          description: "서버에서 올바르지 않은 데이터를 반환했습니다.",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -43,7 +66,7 @@ export default function VoiceToRecommendation() {
   };
 
   // 분석 결과가 있으면 업종 선택 화면 표시
-  if (analysisResult) {
+  if (analysisResult && analysisResult.profile && analysisResult.sectorGuess && analysisResult.sectors) {
     return (
       <SectorSelection 
         profile={analysisResult.profile}

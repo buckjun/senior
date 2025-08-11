@@ -20,7 +20,7 @@ const sectorVocab: Record<string, string[]> = {
 };
 
 // 2) 간단 토크나이저 & 헬퍼
-const tokenize = (s = '') => (s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean));
+const tokenize = (s = '') => (s.toLowerCase().replace(/[^a-zA-Z0-9가-힣\s]/g, ' ').split(/\s+/).filter(Boolean));
 const hasAny = (text: string, keywords: string[] = []) => 
   keywords.reduce((acc, kw) => acc + (text.includes(kw) ? 1 : 0), 0);
 

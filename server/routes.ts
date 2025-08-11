@@ -810,7 +810,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         profile, 
         sectorGuess, 
-        sectors: SECTORS 
+        sectors: SECTORS,
+        resumeText: resumeText
       });
     } catch (error) {
       console.error('이력서 분석 오류:', error);

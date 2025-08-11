@@ -21,6 +21,25 @@ export default function SectorSelection({
   const [location, setLocation] = useLocation();
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
 
+  // 데이터 안전성 검사
+  if (!profile || !sectorGuess || !sectors) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-white flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-[#2F3036] mb-4">데이터를 불러오는 중 오류가 발생했습니다.</p>
+            <Button 
+              onClick={() => setLocation('/individual/voice-to-recommendation')} 
+              className="bg-[#FF8C42] hover:bg-[#FF8C42]/90"
+            >
+              다시 시도하기
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const toggleSector = (sector: string) => {
     setSelectedSectors(prev => {
       if (prev.includes(sector)) {
