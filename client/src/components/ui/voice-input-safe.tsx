@@ -39,16 +39,17 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ÎßêÏî
 
         recognition.current = new SpeechRecognition();
         
-        // Configure recognition
-        recognition.current.continuous = false;
-        recognition.current.interimResults = true;
-        recognition.current.lang = 'ko-KR';
-        recognition.current.maxAlternatives = 1;
+        // Configure recognition - MDN recommended settings
+        recognition.current.continuous = true;       // Keep listening until stop() is called
+        recognition.current.interimResults = true;   // Show interim results
+        recognition.current.lang = 'ko-KR';          // Korean language
+        recognition.current.maxAlternatives = 1;     // Only return the best result
 
         // Safe event handlers
         recognition.current.onstart = () => {
           try {
             console.log('Recognition started');
+            setIsRecording(true);
           } catch (error) {
             console.error('Error in onstart:', error);
           }
@@ -56,34 +57,19 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ÎßêÏî
 
         recognition.current.onresult = (event: any) => {
           try {
-            let finalTranscript = '';
-            let interimTranscript = '';
+            // MDN recommended approach for building transcript
+            let transcript = '';
             
-            if (event.results) {
-              for (let i = 0; i < event.results.length; i++) {
-                const result = event.results[i];
-                if (result && result[0] && result[0].transcript) {
-                  if (result.isFinal) {
-                    finalTranscript += result[0].transcript;
-                  } else {
-                    interimTranscript += result[0].transcript;
-                  }
-                }
+            // Iterate through all results
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              const result = event.results[i];
+              if (result[0]) {
+                transcript += result[0].transcript;
               }
             }
             
-            // Build complete transcript without duplication
-            let completeTranscript = '';
-            if (event.results) {
-              for (let i = 0; i < event.results.length; i++) {
-                const result = event.results[i];
-                if (result && result[0] && result[0].transcript) {
-                  completeTranscript += result[0].transcript;
-                }
-              }
-            }
-            
-            setTranscript(completeTranscript);
+            // Update transcript state
+            setTranscript(transcript);
             
           } catch (error) {
             console.error('Error processing results:', error);
@@ -93,6 +79,11 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ÎßêÏî
         recognition.current.onerror = (event: any) => {
           try {
             console.error('Recognition error:', event.error);
+            // Don't automatically stop on certain errors
+            if (event.error === 'no-speech' || event.error === 'audio-capture') {
+              console.log('Non-critical error, continuing...');
+              return;
+            }
             setIsRecording(false);
           } catch (error) {
             console.error('Error in error handler:', error);
@@ -103,7 +94,8 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ÎßêÏî
           try {
             console.log('Recognition ended');
             setIsRecording(false);
-            // Remove auto-restart functionality
+            // Only restart if still supposed to be recording
+            // This prevents auto-restart after manual stop
           } catch (error) {
             console.error('Error in onend:', error);
           }
@@ -145,7 +137,7 @@ export function VoiceInput({ isOpen, onClose, onTranscript, placeholder = "ÎßêÏî
       }
 
       setTranscript('');
-      setIsRecording(true);
+      setShowConvertButton(false);
       recognition.current.start();
       
     } catch (error) {
