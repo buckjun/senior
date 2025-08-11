@@ -161,6 +161,24 @@ export interface JobPosting {
   location?: string;
   salary?: string;
   url?: string;
+  // 엑셀 CSV에서 요청한 추가 필드들
+  field?: string;
+  experience?: string;
+  deadline?: string;
+  employmentType?: string;
+  companySize?: string;
+  originalData?: {
+    회사명: string;
+    공고명: string;
+    지역: string;
+    학력: string;
+    경력: string;
+    분야: string;
+    마감일: string;
+    고용형태: string;
+    기업규모: string;
+    급여: string;
+  };
 }
 
 export interface EducationProgram {
@@ -316,26 +334,50 @@ export function recommendOccupations(chosenSectors: string[], profile: UserProfi
 export function recommendJobs(chosenSectors: string[], profile: UserProfile, resumeText = '', kMin = 5, kMax = 10) {
   // 실제 CSV 데이터 사용
   const companyJobs = getCompanyJobs();
+  console.log(`Total company jobs loaded: ${companyJobs.length}`);
   
   // 선택된 업종의 회사 공고 필터링
   const filteredJobs = companyJobs.filter((job: CompanyJob) => chosenSectors.includes(job.sector));
+  console.log(`Filtered jobs for sectors ${chosenSectors}: ${filteredJobs.length}`);
   
-  // 호환성을 위해 기존 형식으로 변환
+  // CSV 데이터의 모든 필드를 보존하여 변환 (회사명, 공고명, 지역, 학력, 경력, 분야, 마감일, 고용형태, 기업규모, 급여)
   const convertedJobs = filteredJobs.map((job: CompanyJob) => ({
     id: job.id,
     sector: job.sector,
-    title: job.title,
-    company: job.company,
+    // 기본 JobPosting 필드들
+    title: job.title || '제목 없음',
+    company: job.company || '회사명 없음',
     minYears: parseExperience(job.experience),
     reqEdu: job.education || '무관',
     skills: extractSectorKeywords(job),
-    location: job.location,
-    salary: job.salary + '만원',
+    location: job.location || '지역 정보 없음',
+    salary: job.salary ? (job.salary.includes('만원') ? job.salary : job.salary + '만원') : '급여 정보 없음',
+    // 추가 CSV 필드들 (엑셀에서 요청한 상세 정보)
+    field: job.field || '분야 정보 없음',
+    experience: job.experience || '경력 정보 없음',
+    deadline: job.deadline || '마감일 정보 없음', 
+    employmentType: job.employmentType || '고용형태 정보 없음',
+    companySize: job.companySize || '기업규모 정보 없음',
+    // 원본 CSV 데이터 보존
+    originalData: {
+      회사명: job.company,
+      공고명: job.title,
+      지역: job.location, 
+      학력: job.education,
+      경력: job.experience,
+      분야: job.field,
+      마감일: job.deadline,
+      고용형태: job.employmentType,
+      기업규모: job.companySize,
+      급여: job.salary
+    },
     score: 0
   }));
   
-  // 기존 하드코딩 데이터와 결합
-  const allJobs = [...convertedJobs, ...jobPostingsDB.filter(j => chosenSectors.includes(j.sector))];
+  console.log(`Converted jobs sample:`, convertedJobs.slice(0, 2));
+  
+  // CSV 데이터만 사용 (하드코딩 데이터 제외)
+  const allJobs = convertedJobs;
   
   // 점수 계산 및 정렬 (보통 등급 이하 제외)
   const ranked = allJobs
@@ -343,7 +385,9 @@ export function recommendJobs(chosenSectors: string[], profile: UserProfile, res
     .filter(j => j.score >= MIN_RECOMMENDATION_SCORE) // "보통" 등급 이하 제외
     .sort((a, b) => b.score - a.score);
     
-  console.log(`Filtered jobs: ${ranked.length} jobs with score >= ${MIN_RECOMMENDATION_SCORE}`);
+  console.log(`Ranked jobs: ${ranked.length} jobs with score >= ${MIN_RECOMMENDATION_SCORE}`);
+  console.log(`Top 3 job scores:`, ranked.slice(0, 3).map(j => ({ title: j.title, company: j.company, score: j.score })));
+  
   const k = Math.min(kMax, Math.max(kMin, ranked.length));
   return ranked.slice(0, k);
 }

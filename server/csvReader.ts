@@ -90,27 +90,57 @@ export function loadCompanyJobsBySector(sector: string): CompanyJob[] {
 // 파일에서 Job 데이터 로드하는 헬퍼 함수
 function loadJobsFromFile(filePath: string, sector: string, source: string): CompanyJob[] {
   try {
-    const content = fs.readFileSync(filePath, 'utf-8');
+    // 한글 인코딩 처리를 위해 다양한 인코딩 시도
+    let content: string;
+    try {
+      content = fs.readFileSync(filePath, 'utf-8');
+    } catch (error) {
+      // UTF-8로 실패하면 euc-kr 시도
+      content = fs.readFileSync(filePath, 'latin1');
+    }
+    
+    console.log(`Loading ${sector} from ${filePath}`);
+    console.log(`First line of CSV: ${content.split('\n')[0]}`);
+    
     const records = parse(content, {
       columns: true,
       skip_empty_lines: true,
-      trim: true
+      trim: true,
+      encoding: 'utf8'
     });
 
-    return records.map((record: any, index: number) => ({
-      id: `job-${sector}-${source}-${index + 1}`, // source를 포함하여 중복 방지
-      company: record['회사명'] || '',
-      title: record['공고명'] || '',
-      location: record['지역'] || '',
-      education: record['학력'] || '',
-      experience: record['경력'] || '',
-      field: record['분야'] || '',
-      deadline: record['마감일'] || '',
-      employmentType: record['고용형태'] || '',
-      companySize: record['기업규모'] || '',
-      salary: record['급여(만원)'] || '',
-      sector: sector
-    }));
+    console.log(`Parsed ${records.length} records for ${sector}`);
+    console.log(`Sample record:`, records[0]);
+
+    const jobs = records.map((record: any, index: number) => {
+      // 다양한 컬럼명 변형 처리
+      const job = {
+        id: `job-${sector}-${source}-${index + 1}`,
+        company: record['회사명'] || record['ȸ'] || record['company'] || '',
+        title: record['공고명'] || record['title'] || record['공고'] || '',
+        location: record['지역'] || record['location'] || record['위치'] || '',
+        education: record['학력'] || record['education'] || record['요구학력'] || '',
+        experience: record['경력'] || record['experience'] || record['경험'] || '',
+        field: record['분야'] || record['field'] || record['업무분야'] || '',
+        deadline: record['마감일'] || record['deadline'] || record['모집마감'] || '',
+        employmentType: record['고용형태'] || record['employment'] || record['채용형태'] || '',
+        companySize: record['기업규모'] || record['size'] || record['회사크기'] || '',
+        salary: record['급여(만원)'] || record['급여'] || record['salary'] || record['연봉'] || '',
+        sector: sector
+      };
+      
+      console.log(`Job ${index + 1}:`, {
+        company: job.company,
+        title: job.title,
+        location: job.location,
+        salary: job.salary
+      });
+      
+      return job;
+    });
+
+    console.log(`Successfully loaded ${jobs.length} jobs for ${sector}`);
+    return jobs;
   } catch (error) {
     console.error(`${sector} CSV 파일 읽기 오류:`, error);
     return [];
