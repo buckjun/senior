@@ -30,21 +30,47 @@ export interface LearningProgram {
 // CSV 파일에서 회사 데이터 읽기
 export function loadCompanyJobsBySector(sector: string): CompanyJob[] {
   try {
+    let allJobs: CompanyJob[] = [];
+    
+    // 기존 제조업 파일 처리
+    if (sector === '제조업') {
+      const manufacturingPath1 = path.join(process.cwd(), 'attached_assets', `${sector}_1754742652412.csv`);
+      const manufacturingPath2 = path.join(process.cwd(), 'attached_assets', '제조업2_processed.csv');
+      
+      // 첫 번째 제조업 파일 로드
+      if (fs.existsSync(manufacturingPath1)) {
+        const jobs1 = loadJobsFromFile(manufacturingPath1, sector, 'original');
+        allJobs = allJobs.concat(jobs1);
+      }
+      
+      // 두 번째 제조업 파일 로드
+      if (fs.existsSync(manufacturingPath2)) {
+        const jobs2 = loadJobsFromFile(manufacturingPath2, sector, 'new');
+        allJobs = allJobs.concat(jobs2);
+      }
+      
+      console.log(`제조업 총 ${allJobs.length}개 공고 로드됨`);
+      return allJobs;
+    }
+    
+    // 다른 업종 파일 처리
     const csvPath = path.join(process.cwd(), 'attached_assets', `${sector}_1754742652411.csv`);
     
-    // 제조업 파일명이 다름
-    const manufacturingPath = path.join(process.cwd(), 'attached_assets', `${sector}_1754742652412.csv`);
-    
-    let filePath = csvPath;
-    if (sector === '제조업') {
-      filePath = manufacturingPath;
-    }
-    
-    if (!fs.existsSync(filePath)) {
-      console.log(`CSV 파일을 찾을 수 없습니다: ${filePath}`);
+    if (!fs.existsSync(csvPath)) {
+      console.log(`CSV 파일을 찾을 수 없습니다: ${csvPath}`);
       return [];
     }
+    
+    return loadJobsFromFile(csvPath, sector, 'original');
+  } catch (error) {
+    console.error(`${sector} 데이터 로드 중 오류:`, error);
+    return [];
+  }
+}
 
+// 파일에서 Job 데이터 로드하는 헬퍼 함수
+function loadJobsFromFile(filePath: string, sector: string, source: string): CompanyJob[] {
+  try {
     const content = fs.readFileSync(filePath, 'utf-8');
     const records = parse(content, {
       columns: true,
@@ -53,7 +79,7 @@ export function loadCompanyJobsBySector(sector: string): CompanyJob[] {
     });
 
     return records.map((record: any, index: number) => ({
-      id: `job-${sector}-${index + 1}`,
+      id: `job-${sector}-${source}-${index + 1}`, // source를 포함하여 중복 방지
       company: record['회사명'] || '',
       title: record['공고명'] || '',
       location: record['지역'] || '',

@@ -382,8 +382,8 @@ export default function UnifiedRecommendations() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recommendations.programs.map((program) => (
-                <Card key={program.id} className="border-[#2F3036]/20 hover:border-[#FF8C42]/50 transition-colors">
+              {recommendations.programs.map((program, index) => (
+                <Card key={`${program.id}-${index}`} className="border-[#2F3036]/20 hover:border-[#FF8C42]/50 transition-colors">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div>
@@ -416,8 +416,8 @@ export default function UnifiedRecommendations() {
                       <div>
                         <div className="text-sm text-[#2F3036]/70 mb-2">학습 기술</div>
                         <div className="flex flex-wrap gap-1">
-                          {program.skills.map(skill => (
-                            <Badge key={skill} variant="outline" className="border-[#FF8C42]/30 text-[#FF8C42] text-xs">
+                          {program.skills.map((skill, skillIndex) => (
+                            <Badge key={`${skill}-${skillIndex}`} variant="outline" className="border-[#FF8C42]/30 text-[#FF8C42] text-xs">
                               {skill}
                             </Badge>
                           ))}
