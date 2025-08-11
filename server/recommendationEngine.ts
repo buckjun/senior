@@ -251,8 +251,8 @@ const WEIGHTS = {
   type: 0.05 
 };
 
-// 추천 품질 기준점 - "보통" 등급 이하 제외
-const MIN_RECOMMENDATION_SCORE = 0.6; // 0.6 이상만 추천 (좋음 등급)
+// 추천 품질 기준점 - 최소 5개는 보장
+const MIN_RECOMMENDATION_SCORE = 0.3; // 낮춘 임계값으로 더 많은 결과 보장
 
 const eduRank = (v: string) => ({'무관': 0, '학사': 1, '석사': 2, '박사': 3})[v] ?? 0;
 
@@ -332,13 +332,17 @@ export function recommendOccupations(chosenSectors: string[], profile: UserProfi
 }
 
 export function recommendJobs(chosenSectors: string[], profile: UserProfile, resumeText = '', kMin = 5, kMax = 10) {
-  // 실제 CSV 데이터 사용
-  const companyJobs = getCompanyJobs();
-  console.log(`Total company jobs loaded: ${companyJobs.length}`);
+  console.log(`=== 공고 추천 시작 ===`);
+  console.log(`선택된 업종: ${chosenSectors}`);
+  console.log(`프로필:`, profile);
+  
+  // 강제로 CSV 데이터 로드
+  const companyJobs = loadAllCompanyJobs();
+  console.log(`CSV에서 로드된 총 공고 수: ${companyJobs.length}`);
   
   // 선택된 업종의 회사 공고 필터링
   const filteredJobs = companyJobs.filter((job: CompanyJob) => chosenSectors.includes(job.sector));
-  console.log(`Filtered jobs for sectors ${chosenSectors}: ${filteredJobs.length}`);
+  console.log(`업종 ${chosenSectors}에 해당하는 공고: ${filteredJobs.length}개`);
   
   // CSV 데이터의 모든 필드를 보존하여 변환 (회사명, 공고명, 지역, 학력, 경력, 분야, 마감일, 고용형태, 기업규모, 급여)
   const convertedJobs = filteredJobs.map((job: CompanyJob) => ({
@@ -374,22 +378,22 @@ export function recommendJobs(chosenSectors: string[], profile: UserProfile, res
     score: 0
   }));
   
-  console.log(`Converted jobs sample:`, convertedJobs.slice(0, 2));
+  console.log(`변환된 공고 샘플:`, convertedJobs.slice(0, 2));
   
-  // CSV 데이터만 사용 (하드코딩 데이터 제외)
-  const allJobs = convertedJobs;
-  
-  // 점수 계산 및 정렬 (보통 등급 이하 제외)
-  const ranked = allJobs
+  // 점수 계산 및 정렬 (최소 5개는 보장)
+  const ranked = convertedJobs
     .map(j => ({ ...j, score: scoreItem(j, profile, chosenSectors, resumeText) }))
-    .filter(j => j.score >= MIN_RECOMMENDATION_SCORE) // "보통" 등급 이하 제외
     .sort((a, b) => b.score - a.score);
     
-  console.log(`Ranked jobs: ${ranked.length} jobs with score >= ${MIN_RECOMMENDATION_SCORE}`);
-  console.log(`Top 3 job scores:`, ranked.slice(0, 3).map(j => ({ title: j.title, company: j.company, score: j.score })));
+  console.log(`전체 점수별 정렬된 공고: ${ranked.length}개`);
+  console.log(`상위 5개 공고 점수:`, ranked.slice(0, 5).map(j => ({ title: j.title, company: j.company, score: j.score.toFixed(2) })));
   
-  const k = Math.min(kMax, Math.max(kMin, ranked.length));
-  return ranked.slice(0, k);
+  // 최소 5개 이상 보장하되, 있는 만큼만 반환
+  const resultCount = Math.min(kMax, Math.max(kMin, ranked.length));
+  const result = ranked.slice(0, resultCount);
+  
+  console.log(`최종 반환 공고 수: ${result.length}개`);
+  return result;
 }
 
 // 경력 텍스트를 숫자로 변환하는 헬퍼 함수
