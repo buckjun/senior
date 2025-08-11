@@ -49,7 +49,7 @@ export function extractProfile(resumeText = ''): UserProfile {
 }
 
 // 4) 업종 자동 분류 (수리 우선 알고리즘 적용)
-export function rankSectors(resumeText = '', topK = 2) {
+export function rankSectors(resumeText = '', topK = 1) {
   console.log('Ranking sectors for:', resumeText);
   
   // 새로운 의도 추출 알고리즘 사용

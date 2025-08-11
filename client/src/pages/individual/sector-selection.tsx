@@ -1,25 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle2, Building2, Zap } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Building2, Zap, Plus } from "lucide-react";
 
-interface SectorSelectionProps {
-  profile: any;
-  sectorGuess: Array<{ sector: string; score: number }>;
-  sectors: string[];
-  resumeText: string;
-}
-
-export default function SectorSelection({ 
-  profile, 
-  sectorGuess, 
-  sectors, 
-  resumeText 
-}: SectorSelectionProps) {
+export default function SectorSelection() {
   const [location, setLocation] = useLocation();
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [showAdditionalSectors, setShowAdditionalSectors] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  const [sectorGuess, setSectorGuess] = useState<Array<{ sector: string; score: number }>>([]);
+  const [sectors, setSectors] = useState<string[]>([]);
+  const [resumeText, setResumeText] = useState<string>('');
+
+  // 로컬스토리지에서 데이터 로드
+  useEffect(() => {
+    try {
+      const savedProfile = localStorage.getItem('userProfile');
+      const savedSectorGuess = localStorage.getItem('sectorGuess');
+      const savedSectors = localStorage.getItem('sectors');
+      const savedResumeText = localStorage.getItem('resumeText');
+
+      // 필수 데이터가 없으면 음성 입력 페이지로 돌아가기
+      if (!savedProfile || !savedSectorGuess || !savedSectors) {
+        setLocation('/individual/voice-to-recommendation');
+        return;
+      }
+
+      if (savedProfile) {
+        const profileData = JSON.parse(savedProfile);
+        setProfile(profileData);
+      }
+
+      if (savedSectorGuess) {
+        const sectorData = JSON.parse(savedSectorGuess);
+        setSectorGuess(sectorData);
+        // AI 추천 업종을 초기값으로 설정
+        if (sectorData.length > 0) {
+          setSelectedSectors([sectorData[0].sector]);
+        }
+      }
+
+      if (savedSectors) {
+        const sectorsData = JSON.parse(savedSectors);
+        setSectors(sectorsData);
+      }
+
+      if (savedResumeText) {
+        setResumeText(savedResumeText);
+      }
+    } catch (error) {
+      console.error('Error loading data from localStorage:', error);
+      setLocation('/individual/voice-to-recommendation');
+    }
+  }, [setLocation]);
 
   // 데이터 안전성 검사
   if (!profile || !sectorGuess || !sectors) {
@@ -40,12 +75,19 @@ export default function SectorSelection({
     );
   }
 
-  const toggleSector = (sector: string) => {
+  const toggleAdditionalSector = (sector: string) => {
+    const recommendedSector = sectorGuess[0]?.sector;
+    
     setSelectedSectors(prev => {
-      if (prev.includes(sector)) {
-        return prev.filter(s => s !== sector);
-      } else if (prev.length < 2) {
-        return [...prev, sector];
+      // 추천 업종은 항상 포함
+      const baseSelection = recommendedSector ? [recommendedSector] : [];
+      
+      if (prev.includes(sector) && sector !== recommendedSector) {
+        // 추가 업종 제거
+        return baseSelection;
+      } else if (!prev.includes(sector) && sector !== recommendedSector) {
+        // 추가 업종 추가 (최대 1개)
+        return [...baseSelection, sector];
       }
       return prev;
     });
@@ -75,6 +117,16 @@ export default function SectorSelection({
     return '🏢';
   };
 
+  // 데이터 로딩 중이면 로딩 표시
+  if (!profile || !sectorGuess.length || !sectors.length) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#F5F5DC] to-white">
+        <div className="w-12 h-12 border-4 border-[#F5F5DC] border-t-[#D4B896] rounded-full animate-spin mb-4"></div>
+        <p className="text-lg font-medium text-[#2F3036] mt-4">업종 분석 결과를 불러오는 중...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-white">
       {/* Header */}
@@ -82,12 +134,12 @@ export default function SectorSelection({
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Button 
             variant="ghost" 
-            onClick={() => setLocation('/dashboard')}
+            onClick={() => setLocation('/individual/voice-to-recommendation')}
             className="flex items-center gap-2 text-[#2F3036] hover:bg-[#F5F5DC]"
-            data-testid="button-back-dashboard"
+            data-testid="button-back-voice"
           >
             <ArrowLeft className="w-4 h-4" />
-            대시보드
+            다시 입력
           </Button>
           <h1 className="text-xl font-bold text-[#2F3036]">업종 선택</h1>
           <div className="w-20"></div>
@@ -139,99 +191,108 @@ export default function SectorSelection({
           </CardContent>
         </Card>
 
-        {/* AI Recommendations */}
+        {/* AI Recommended Sector */}
         {sectorGuess.length > 0 && (
           <Card className="border-[#FF8C42]/30 bg-gradient-to-r from-[#FF8C42]/5 to-transparent">
             <CardHeader>
               <CardTitle className="text-[#2F3036] flex items-center gap-2">
                 <Zap className="w-5 h-5 text-[#FF8C42]" />
-                AI 추천 업종
+                AI 추천 업종 (자동 선택됨)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm text-[#2F3036]/70 mb-3">
-                  이력서 분석 결과, 다음 업종이 가장 적합해 보입니다
+              <div className="space-y-3">
+                <p className="text-sm text-[#2F3036]/70">
+                  이력서 분석 결과, 가장 적합한 업종입니다
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  {sectorGuess.map(({ sector, score }) => (
-                    <Badge 
-                      key={sector} 
-                      className="bg-[#FF8C42]/10 text-[#FF8C42] border-[#FF8C42]/30"
-                    >
-                      {getSectorIcon(sector)} {sector} (점수: {score})
-                    </Badge>
-                  ))}
+                <div className="bg-white rounded-lg border-2 border-[#FF8C42] p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{getSectorIcon(sectorGuess[0].sector)}</span>
+                      <div>
+                        <h3 className="font-medium text-[#2F3036]">{sectorGuess[0].sector}</h3>
+                        <p className="text-sm text-[#2F3036]/70">매칭도: {Math.round(sectorGuess[0].score * 100)}%</p>
+                      </div>
+                    </div>
+                    <CheckCircle2 className="w-6 h-6 text-[#FF8C42]" />
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Sector Selection */}
+        {/* Additional Sector Selection */}
         <Card className="border-[#2F3036]/20">
           <CardHeader>
-            <CardTitle className="text-[#2F3036]">관심 업종 선택</CardTitle>
-            <p className="text-[#2F3036]/70 text-sm">
-              최대 2개까지 선택 가능합니다. 선택하신 업종에 맞는 직업, 공고, 교육을 추천해드립니다.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {sectors.map((sector) => {
-                const isSelected = selectedSectors.includes(sector);
-                const isRecommended = sectorGuess.some(g => g.sector === sector);
-                
-                return (
-                  <Card 
-                    key={sector}
-                    className={`cursor-pointer transition-all ${
-                      isSelected 
-                        ? 'border-[#FF8C42] bg-[#FF8C42]/5 shadow-md' 
-                        : 'border-[#2F3036]/20 hover:border-[#FF8C42]/50 hover:bg-[#F5F5DC]/30'
-                    } ${selectedSectors.length >= 2 && !isSelected ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    onClick={() => toggleSector(sector)}
-                    data-testid={`sector-${sector}`}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{getSectorIcon(sector)}</span>
-                          <span className="font-medium text-[#2F3036]">{sector}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isRecommended && (
-                            <Badge className="bg-[#FF8C42]/10 text-[#FF8C42] border-[#FF8C42]/30 text-xs">
-                              AI 추천
-                            </Badge>
-                          )}
-                          {isSelected && (
-                            <CheckCircle2 className="w-5 h-5 text-[#FF8C42]" />
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-            
-            <div className="mt-6 flex items-center justify-between">
-              <div className="text-sm text-[#2F3036]/70">
-                선택된 업종: {selectedSectors.length}/2
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-[#2F3036]">추가 업종 선택 (선택사항)</CardTitle>
+                <p className="text-[#2F3036]/70 text-sm">
+                  원하시면 하나의 업종을 더 선택할 수 있습니다
+                </p>
               </div>
-              
-              <Button 
-                onClick={handleProceed}
-                disabled={selectedSectors.length === 0}
-                className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
-                data-testid="button-proceed-recommendations"
+              <Button
+                variant="outline"
+                onClick={() => setShowAdditionalSectors(!showAdditionalSectors)}
+                className="border-[#FF8C42]/30 text-[#FF8C42] hover:bg-[#FF8C42]/10"
               >
-                추천 받기 ({selectedSectors.length}개 업종)
+                <Plus className="w-4 h-4 mr-2" />
+                {showAdditionalSectors ? '숨기기' : '업종 보기'}
               </Button>
             </div>
-          </CardContent>
+          </CardHeader>
+          {showAdditionalSectors && (
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {sectors
+                  .filter(sector => sector !== sectorGuess[0]?.sector) // 추천 업종 제외
+                  .map((sector) => {
+                    const isSelected = selectedSectors.includes(sector);
+                    
+                    return (
+                      <Card 
+                        key={sector}
+                        className={`cursor-pointer transition-all border-2 ${
+                          isSelected 
+                            ? 'border-[#FF8C42] bg-[#FF8C42]/5' 
+                            : 'border-[#2F3036]/20 hover:border-[#FF8C42]/30'
+                        }`}
+                        onClick={() => toggleAdditionalSector(sector)}
+                        data-testid={`card-additional-sector-${sector}`}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{getSectorIcon(sector)}</span>
+                              <div>
+                                <h3 className="font-medium text-[#2F3036]">{sector}</h3>
+                              </div>
+                            </div>
+                            {isSelected && (
+                              <CheckCircle2 className="w-6 h-6 text-[#FF8C42]" />
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+              </div>
+            </CardContent>
+          )}
         </Card>
+
+        {/* Continue Button */}
+        <div className="flex justify-center">
+          <Button 
+            onClick={handleProceed}
+            disabled={selectedSectors.length === 0}
+            className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white px-8 py-3 text-lg"
+            data-testid="button-proceed-recommendations"
+          >
+            추천 받기 ({selectedSectors.length}개 업종)
+          </Button>
+        </div>
       </main>
     </div>
   );

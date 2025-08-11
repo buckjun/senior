@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { ArrowLeft, Mic, MicOff, Loader2, Zap } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { VoiceRecognitionModal } from '@/components/VoiceRecognitionModal';
 import { apiRequest } from '@/lib/queryClient';
-import SectorSelection from './sector-selection';
+
 
 interface ResumeAnalysisResult {
   profile: {
@@ -66,17 +66,19 @@ export default function VoiceToRecommendation() {
     }
   };
 
-  // 분석 결과가 있으면 업종 선택 화면 표시
-  if (analysisResult && analysisResult.profile && analysisResult.sectorGuess && analysisResult.sectors) {
-    return (
-      <SectorSelection 
-        profile={analysisResult.profile}
-        sectorGuess={analysisResult.sectorGuess}
-        sectors={analysisResult.sectors}
-        resumeText={analysisResult.resumeText || ''}
-      />
-    );
-  }
+  // 분석 결과가 있으면 데이터를 저장하고 업종 선택 페이지로 이동
+  useEffect(() => {
+    if (analysisResult && analysisResult.profile && analysisResult.sectorGuess && analysisResult.sectors) {
+      // 분석 결과를 로컬스토리지에 저장
+      localStorage.setItem('userProfile', JSON.stringify(analysisResult.profile));
+      localStorage.setItem('sectorGuess', JSON.stringify(analysisResult.sectorGuess));
+      localStorage.setItem('sectors', JSON.stringify(analysisResult.sectors));
+      localStorage.setItem('resumeText', analysisResult.resumeText || '');
+      
+      // 업종 선택 페이지로 이동
+      setLocation('/individual/sector-selection');
+    }
+  }, [analysisResult, setLocation]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-white">
