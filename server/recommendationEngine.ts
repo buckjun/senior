@@ -81,7 +81,50 @@ export function rankSectors(resumeText = '', topK = 2) {
   return combinedScores.slice(0, topK);
 }
 
-// 5) 샘플 데이터 (실제 서비스에서는 DB 또는 API로 교체)
+// 5) 실제 CSV 데이터 로드 함수들
+let companiesCache: CompanyJob[] = [];
+let programsCache: any[] = [];
+
+export function getCompanyJobs(): CompanyJob[] {
+  if (companiesCache.length === 0) {
+    try {
+      companiesCache = loadAllCompanyJobs();
+      console.log(`Loaded ${companiesCache.length} company jobs from CSV files`);
+    } catch (error) {
+      console.error('Error loading company jobs:', error);
+      companiesCache = [];
+    }
+  }
+  return companiesCache;
+}
+
+export function getLearningPrograms() {
+  if (programsCache.length === 0) {
+    try {
+      programsCache = loadLearningPrograms();
+      // 하드코딩된 오프라인 프로그램도 추가
+      const offlinePrograms = [
+        { id: 'pg1', title: 'PLC 자동화 교육', skills: ['PLC', '자동화', '전기'], duration: '3개월', provider: '기술교육원', type: 'offline' as const },
+        { id: 'pg2', title: '품질/공정 FMEA 교육', skills: ['품질관리', 'FMEA', '공정'], duration: '2개월', provider: '품질관리협회', type: 'offline' as const },
+        { id: 'pg3', title: 'BIM 3D 설계교육', skills: ['BIM', '3D', 'AutoCAD'], duration: '4개월', provider: '건설기술원', type: 'offline' as const },
+        { id: 'pg7', title: '물류관리사 자격과정', skills: ['물류', 'SCM', 'WMS'], duration: '3개월', provider: '물류진흥원', type: 'offline' as const },
+        { id: 'pg8', title: '의료정보시스템 운영', skills: ['EMR', '의료정보', '시스템'], duration: '2개월', provider: '의료정보협회', type: 'offline' as const },
+        { id: 'pg9', title: 'R&D 실무교육', skills: ['연구', '실험', '분석'], duration: '3개월', provider: '과학기술원', type: 'offline' as const },
+        { id: 'pg10', title: '전기설비 기초과정', skills: ['전기', '설비', '안전'], duration: '2개월', provider: '전기안전공사', type: 'offline' as const },
+        { id: 'pg11', title: '문화예술기획 실무', skills: ['기획', '예술', '문화'], duration: '2개월', provider: '문화재단', type: 'offline' as const },
+        { id: 'pg12', title: '건설안전관리 실무', skills: ['안전', '건설', '관리'], duration: '1개월', provider: '안전보건공단', type: 'offline' as const }
+      ];
+      programsCache = [...programsCache, ...offlinePrograms];
+      console.log(`Loaded ${programsCache.length} learning programs`);
+    } catch (error) {
+      console.error('Error loading learning programs:', error);
+      programsCache = [];
+    }
+  }
+  return programsCache;
+}
+
+// 샘플 데이터 (실제 서비스에서는 DB 또는 API로 교체)
 export interface Occupation {
   id: string;
   sector: string;
@@ -282,8 +325,8 @@ export function recommendPrograms(chosenSectors: string[], profile: UserProfile,
   
   // 부족 기술 (선택 업종의 주요 키워드 - 보유 기술)
   const needed = chosenSectors
-    .flatMap(s => sectorVocab[s] || [])
-    .filter((kw, i, arr) => arr.indexOf(kw) === i);
+    .flatMap((s: string) => sectorVocab[s] || [])
+    .filter((kw: string, i: number, arr: string[]) => arr.indexOf(kw) === i);
   const missing = needed.filter(kw => 
     !profile.skills.includes(kw.toLowerCase()) && !profile.skills.includes(kw)
   );
