@@ -30,6 +30,53 @@ export interface UserProfile {
   skills: string[];
 }
 
+// 자격증 추출을 위한 패턴들
+const CERTIFICATE_PATTERNS = [
+  // 일반적인 자격증 패턴
+  /([가-힣A-Za-z0-9]+)\s*(?:1급|2급|3급|기사|산업기사|기능사)?\s*자격증/gi,
+  /([가-힣A-Za-z0-9]+)\s*(?:1급|2급|3급)\s*면허/gi,
+  /([가-힣A-Za-z0-9]+)\s*(?:기사|산업기사|기능사)/gi,
+  // 운전면허 등 특수 패턴
+  /(?:1종|2종)\s*(?:보통|대형|특수)?\s*면허/gi,
+  /운전면허/gi,
+  // 기타 자격증 패턴
+  /토익\s*\d+/gi,
+  /토플\s*\d+/gi,
+  /컴활\s*(?:1급|2급)?/gi,
+  /정보처리\s*(?:기사|산업기사)/gi
+];
+
+function extractCertificatesFromText(text: string): string[] {
+  const certificates: string[] = [];
+  
+  CERTIFICATE_PATTERNS.forEach(pattern => {
+    const matches = text.match(pattern);
+    if (matches) {
+      matches.forEach(match => {
+        // 정리된 자격증명으로 변환
+        let cert = match.trim();
+        // "험할 1급 자격증" → "험할1급자격증"
+        cert = cert.replace(/\s+/g, '');
+        certificates.push(cert);
+      });
+    }
+  });
+
+  // 추가적인 문맥 기반 자격증 추출
+  // "토목 관련 일을 하고 험할 1급 자격증" 같은 패턴
+  const contextualMatches = text.match(/([가-힣]+)\s+관련.*?([가-힣]+\s*1급|[가-힣]+\s*기사)\s*자격증/gi);
+  if (contextualMatches) {
+    contextualMatches.forEach(match => {
+      const parts = match.match(/([가-힣]+)\s*(?:1급|2급|3급|기사|산업기사|기능사)/gi);
+      if (parts) {
+        parts.forEach(part => certificates.push(part.trim()));
+      }
+    });
+  }
+  
+  return Array.from(new Set(certificates));
+}
+
 export function extractProfile(resumeText = ''): UserProfile {
   const text = resumeText.toLowerCase();
   const yearsMatch = text.match(/(\d{1,2})\s*년/);
@@ -42,7 +89,11 @@ export function extractProfile(resumeText = ''): UserProfile {
   // 기존 스킬 추출에 수리 관련 키워드 추가
   const detectedSkills = ALL_SKILLS.filter(k => text.includes(k.toLowerCase()));
   const repairSkills = REPAIR_TOKENS.filter(token => text.includes(token.toLowerCase()));
-  const combinedSkills = [...detectedSkills, ...repairSkills];
+  
+  // 자격증 추출 추가
+  const certificates = extractCertificatesFromText(resumeText); // 원본 텍스트 사용 (대소문자 구분)
+  
+  const combinedSkills = [...detectedSkills, ...repairSkills, ...certificates];
   const skills = Array.from(new Set(combinedSkills));
   
   return { years, education: edu, skills };
