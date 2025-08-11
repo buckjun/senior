@@ -25,6 +25,7 @@ export function VoiceRecognitionModal({
   const [transcript, setTranscript] = useState("");
   const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef("");
 
   useEffect(() => {
     // Check if speech recognition is supported
@@ -51,13 +52,27 @@ export function VoiceRecognitionModal({
           }
         }
         if (finalTranscript) {
-          setTranscript(prev => prev + finalTranscript);
+          const newTranscript = transcriptRef.current + finalTranscript;
+          transcriptRef.current = newTranscript;
+          setTranscript(newTranscript);
         }
       };
 
       recognitionRef.current.onend = () => {
         console.log('Recognition ended');
         setIsRecording(false);
+        
+        // 음성 인식 완료 후 자동으로 결과 전달
+        setTimeout(() => {
+          const currentTranscript = transcriptRef.current.trim();
+          if (currentTranscript) {
+            console.log('Auto-submitting transcript:', currentTranscript);
+            onResult(currentTranscript);
+            onClose();
+            setTranscript("");
+            transcriptRef.current = "";
+          }
+        }, 1000); // 1초 후 자동 전달
       };
 
       recognitionRef.current.onerror = (event: any) => {
@@ -77,6 +92,7 @@ export function VoiceRecognitionModal({
     if (recognitionRef.current) {
       console.log('Attempting to start recording...');
       setTranscript("");
+      transcriptRef.current = "";
       recognitionRef.current.start();
     }
   };
@@ -102,6 +118,7 @@ export function VoiceRecognitionModal({
     }
     onClose();
     setTranscript("");
+    transcriptRef.current = "";
   };
 
   if (!isSupported) {
@@ -157,11 +174,16 @@ export function VoiceRecognitionModal({
             {isRecording ? (
               <div className="flex items-center justify-center gap-2 text-red-500">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <span>녹음 중...</span>
+                <span>녹음 중... 말씀해주세요</span>
               </div>
             ) : (
               <span className="text-[#2F3036]/70">
-                {transcript ? "녹음이 완료되었습니다" : "마이크 버튼을 클릭하여 시작하세요"}
+                {transcript ? (
+                  <div className="flex items-center justify-center gap-2 text-green-600">
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    <span>녹음 완료! 자동으로 분석이 시작됩니다...</span>
+                  </div>
+                ) : "마이크 버튼을 클릭하여 시작하세요"}
               </span>
             )}
           </div>
