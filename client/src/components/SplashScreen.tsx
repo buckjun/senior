@@ -9,10 +9,15 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    console.log('SplashScreen mounting');
     const timer = setTimeout(() => {
+      console.log('SplashScreen starting fade out');
       setIsVisible(false);
-      setTimeout(onComplete, 300); // 페이드아웃 애니메이션 후 완료
-    }, 2000); // 2초 동안 스플래시 화면 표시
+      setTimeout(() => {
+        console.log('SplashScreen calling onComplete');
+        onComplete();
+      }, 300); // 페이드아웃 애니메이션 후 완료
+    }, 1000); // 1초로 단축 (테스트용)
 
     return () => clearTimeout(timer);
   }, [onComplete]);

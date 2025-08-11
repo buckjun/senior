@@ -78,11 +78,23 @@ export default function UnifiedRecommendations() {
   const { data: recommendations, isLoading, error } = useQuery<UnifiedRecommendation>({
     queryKey: ['/api/unified-recommendations', resumeText, selectedSectors],
     queryFn: async () => {
-      const result = await apiRequest('POST', '/api/unified-recommendations', {
+      console.log('Making API request with:', { resumeText, selectedSectors });
+      const response = await apiRequest('POST', '/api/unified-recommendations', {
         resumeText,
         chosenSectors: selectedSectors
       });
-      console.log('API Response:', result);
+      
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log('API Response received:', {
+        hasProfile: !!result.profile,
+        jobsCount: result.jobs?.length || 0,
+        programsCount: result.programs?.length || 0,
+        occupationsCount: result.occupations?.length || 0
+      });
       return result;
     },
     enabled: !!resumeText && selectedSectors.length > 0,
@@ -131,13 +143,29 @@ export default function UnifiedRecommendations() {
     );
   }
 
-  if (error || !recommendations || !recommendations.occupations || !recommendations.jobs || !recommendations.programs) {
-    console.log('Error or missing data:', { error, recommendations });
+  if (error) {
+    console.log('Query error:', error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-white flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <p className="text-[#2F3036] mb-4">추천을 불러오는 중 오류가 발생했습니다.</p>
+            <p className="text-sm text-[#2F3036]/60 mb-4">{error?.message || '알 수 없는 오류'}</p>
+            <Button onClick={() => setLocation('/dashboard')} className="bg-[#FF8C42] hover:bg-[#FF8C42]/90">
+              대시보드로 돌아가기
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!recommendations) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-white flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-[#2F3036] mb-4">추천 데이터를 찾을 수 없습니다.</p>
             <Button onClick={() => setLocation('/dashboard')} className="bg-[#FF8C42] hover:bg-[#FF8C42]/90">
               대시보드로 돌아가기
             </Button>

@@ -33,13 +33,20 @@ function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const [location] = useLocation();
   const [showSplash, setShowSplash] = useState(() => {
+    // 개발 중에는 스플래시 스킵
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: skipping splash screen');
+      return false;
+    }
     // 세션에서 스플래시 표시 여부 확인
     const hasShownSplash = sessionStorage.getItem('hasShownSplash');
+    console.log('Splash screen check:', { hasShownSplash, willShow: !hasShownSplash });
     return !hasShownSplash;
   });
 
   // 스플래시 완료 핸들러
   const handleSplashComplete = () => {
+    console.log('Splash screen completed');
     sessionStorage.setItem('hasShownSplash', 'true');
     setShowSplash(false);
   };
@@ -59,6 +66,7 @@ function Router() {
 
   // 스플래시 화면이 끝난 후 인증 로딩 중이면 간단한 로딩만 표시
   if (isLoading) {
+    console.log('App is loading authentication state');
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white via-[#FFFEF0] to-white">
         <div className="w-12 h-12 border-4 border-[#F5F5DC] border-t-[#D4B896] rounded-full animate-spin mb-4"></div>
@@ -66,6 +74,8 @@ function Router() {
       </div>
     );
   }
+
+  console.log('App render state:', { isAuthenticated, isLoading, user: !!user, location, showSplash });
 
   return (
     <Switch>
