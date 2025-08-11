@@ -108,15 +108,15 @@ export default function UnifiedRecommendations() {
   });
 
   const getScoreColor = (score: number) => {
-    if (score >= 0.7) return 'text-green-600 bg-green-50';
-    if (score >= 0.5) return 'text-yellow-600 bg-yellow-50';
+    if (score >= 70) return 'text-green-600 bg-green-50';
+    if (score >= 50) return 'text-yellow-600 bg-yellow-50';
     return 'text-red-600 bg-red-50';
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 0.7) return '매우 적합';
-    if (score >= 0.5) return '적합';
-    return '보통';
+    if (score >= 70) return `매우 적합 ${score}%`;
+    if (score >= 50) return `적합 ${score}%`;
+    return `보통 ${score}%`;
   };
 
   const getSectorIcon = (sector: string) => {

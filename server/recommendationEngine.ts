@@ -325,8 +325,8 @@ function scoreItem(item: Occupation | JobPosting, profile: UserProfile, chosenSe
 // 7) 추천 함수들 (수리 우선 알고리즘 적용)
 export function recommendOccupations(chosenSectors: string[], profile: UserProfile, resumeText = '', k = 10) {
   return occupationsDB
-    .map(o => ({ ...o, score: scoreItem(o, profile, chosenSectors, resumeText) }))
-    .filter(o => o.score >= MIN_RECOMMENDATION_SCORE) // "보통" 등급 이하 제외
+    .map(o => ({ ...o, score: Math.round(scoreItem(o, profile, chosenSectors, resumeText) * 100) }))
+    .filter(o => o.score >= (MIN_RECOMMENDATION_SCORE * 100)) // 100% 스케일로 조정
     .sort((a, b) => b.score - a.score)
     .slice(0, k);
 }
@@ -398,13 +398,13 @@ export function recommendJobs(chosenSectors: string[], profile: UserProfile, res
   
   console.log(`변환된 공고 샘플:`, convertedJobs.slice(0, 2));
   
-  // 점수 계산 및 정렬 (최소 6개는 보장)
+  // 점수 계산 및 정렬 (최소 6개는 보장) - 100% 스케일로 변환
   const ranked = convertedJobs
-    .map(j => ({ ...j, score: scoreItem(j, profile, chosenSectors, resumeText) }))
+    .map(j => ({ ...j, score: Math.round(scoreItem(j, profile, chosenSectors, resumeText) * 100) }))
     .sort((a, b) => b.score - a.score);
     
   console.log(`전체 점수별 정렬된 공고: ${ranked.length}개`);
-  console.log(`상위 6개 공고 점수:`, ranked.slice(0, 6).map(j => ({ title: j.title, company: j.company, score: j.score.toFixed(2) })));
+  console.log(`상위 6개 공고 점수:`, ranked.slice(0, 6).map(j => ({ title: j.title, company: j.company, score: `${j.score}%` })));
   
   // 최소 6개 이상 보장하되, 있는 만큼만 반환
   const resultCount = Math.min(kMax, Math.max(kMin, ranked.length));
