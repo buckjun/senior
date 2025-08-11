@@ -180,7 +180,8 @@ export default function IndividualProfileSetup() {
               </div>
               <div>
                 <h3 className="text-body font-bold">말씀하슈~</h3>
-                <p className="text-gray-600">가장 쉬운 방법이에요</p>
+                <p className="text-gray-600">ai가 이야기를 듣고 
+                이력서를 작성해줘요</p>
               </div>
             </div>
             <Button 
