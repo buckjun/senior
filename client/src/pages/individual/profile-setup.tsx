@@ -180,7 +180,7 @@ export default function IndividualProfileSetup() {
                 <Mic className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="text-body font-bold">음성 녹음</h3>
+                <h3 className="text-body font-bold">음성녹음이란 형태를 말씀하슈~</h3>
                 <p className="text-gray-600">가장 쉬운 방법이에요</p>
               </div>
             </div>
