@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   BookOpen, 
   MapPin, 
@@ -16,8 +17,12 @@ import {
   Star,
   Clock,
   Users,
-  Filter
+  Filter,
+  CheckCircle2,
+  Award
 } from "lucide-react";
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import type { Course } from "@shared/schema";
 
 interface RecommendedCourse extends Course {
@@ -28,7 +33,12 @@ interface RecommendedCourse extends Course {
 export default function RecommendedCourses() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [appliedCourses, setAppliedCourses] = useState<Set<string>>(new Set());
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<RecommendedCourse | null>(null);
   
   const { data: recommendedCourses, isLoading } = useQuery<RecommendedCourse[]>({
     queryKey: ['/api/courses/recommended'],
@@ -42,6 +52,79 @@ export default function RecommendedCourses() {
   const filteredCourses = selectedCategory 
     ? recommendedCourses?.filter(course => course.category === selectedCategory)
     : recommendedCourses;
+
+  // Add education to profile mutation
+  const addToResumeMutation = useMutation({
+    mutationFn: async (course: RecommendedCourse) => {
+      const certificationName = getCertificationName(course.category);
+      const educationEntry = `${course.title} 수료 (${course.institution})`;
+      
+      return await apiRequest('POST', '/api/individual-profiles/add-education', {
+        education: educationEntry,
+        certification: certificationName,
+        skills: [`${course.category} 분야 전문교육`, '온라인 학습 완주']
+      });
+    },
+    onSuccess: (data, course) => {
+      // Remove from applied courses since it's now completed
+      setAppliedCourses(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(course.id);
+        return newSet;
+      });
+      
+      // Invalidate profile queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      
+      toast({
+        title: "축하합니다! 🎉",
+        description: "수료증이 이력서에 추가되었습니다.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "오류 발생",
+        description: error.message || "이력서 업데이트 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const getCertificationName = (category: string): string => {
+    if (category.includes('정보통신')) return '정보처리기능사 관련 교육';
+    if (category.includes('의료')) return '의료관리학 관련 자격';
+    if (category.includes('제조업')) return '품질관리 관련 자격';
+    if (category.includes('마케팅')) return '디지털마케팅 전문가 과정';
+    if (category.includes('건설업')) return '건설안전기사 관련 교육';
+    if (category.includes('운수')) return '물류관리사 관련 과정';
+    if (category.includes('과학')) return '기술사 관련 전문교육';
+    if (category.includes('예술')) return '예술심리상담사 과정';
+    if (category.includes('공급업')) return '유통관리사 관련 교육';
+    return `${category} 분야 전문과정`;
+  };
+
+  const handleApplyCourse = (course: RecommendedCourse) => {
+    setSelectedCourse(course);
+    setShowApplicationModal(true);
+  };
+
+  const handleConfirmApplication = () => {
+    if (selectedCourse) {
+      setAppliedCourses(prev => new Set([...prev, selectedCourse.id]));
+      setShowApplicationModal(false);
+      setSelectedCourse(null);
+      
+      toast({
+        title: "신청 완료!",
+        description: `${selectedCourse.title} 강의에 신청되었습니다.`,
+      });
+    }
+  };
+
+  const handleCompleteCourse = (course: RecommendedCourse) => {
+    addToResumeMutation.mutate(course);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-[#FFFEF0] to-white">
@@ -209,17 +292,37 @@ export default function RecommendedCourses() {
                       {course.category}
                     </Badge>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" className="border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-[#2F3036]/20 text-[#2F3036] hover:bg-[#F5F5DC]"
+                        onClick={() => setLocation(`/individual/course-detail/${course.id}`)}
+                        data-testid={`button-detail-course-${index}`}
+                      >
                         상세보기
                       </Button>
-                      <Button 
-                        size="sm" 
-                        className="bg-[#2F3036] text-white hover:bg-[#2F3036]/90"
-                        onClick={() => setLocation(`/individual/course-detail/${course.id}`)}
-                        data-testid={`button-apply-course-${index}`}
-                      >
-                        신청하기
-                      </Button>
+                      
+                      {!appliedCourses.has(course.id) ? (
+                        <Button 
+                          size="sm" 
+                          className="bg-[#2F3036] text-white hover:bg-[#2F3036]/90"
+                          onClick={() => handleApplyCourse(course)}
+                          data-testid={`button-apply-course-${index}`}
+                        >
+                          신청하기
+                        </Button>
+                      ) : (
+                        <Button 
+                          size="sm" 
+                          className="bg-green-600 text-white hover:bg-green-700"
+                          onClick={() => handleCompleteCourse(course)}
+                          disabled={addToResumeMutation.isPending}
+                          data-testid={`button-complete-course-${index}`}
+                        >
+                          <Award className="w-4 h-4 mr-2" />
+                          {addToResumeMutation.isPending ? '처리 중...' : '수강완료'}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -246,6 +349,46 @@ export default function RecommendedCourses() {
           </Card>
         )}
       </main>
+
+      {/* Application Success Modal */}
+      <Dialog open={showApplicationModal} onOpenChange={setShowApplicationModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-[#2F3036]">
+              신청완료되었습니다! 🎉
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="text-center space-y-4">
+            {selectedCourse && (
+              <div className="bg-[#F5F5DC] rounded-lg p-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <BookOpen className="w-5 h-5 text-[#FF8C42]" />
+                  <span className="font-semibold text-[#2F3036]">{selectedCourse.title}</span>
+                </div>
+                <p className="text-[#2F3036]/70 text-sm">{selectedCourse.institution}</p>
+              </div>
+            )}
+            
+            <div className="text-sm text-[#2F3036]/70 space-y-2">
+              <p>강의 신청이 성공적으로 완료되었습니다!</p>
+              <p>이제 <span className="font-medium text-[#FF8C42]">"수강완료"</span> 버튼을 클릭하여</p>
+              <p>이력서에 수료증을 추가하실 수 있습니다.</p>
+            </div>
+
+            <Button 
+              onClick={handleConfirmApplication}
+              className="w-full bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+              data-testid="button-confirm-application"
+            >
+              확인
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
