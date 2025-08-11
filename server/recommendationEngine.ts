@@ -1,23 +1,17 @@
-// 통합 추천 엔진 - 음성 이력서에서 업종별 직업/공고/교육 추천
+// 수리 우선 추천 알고리즘 적용 - 음성 이력서에서 업종별 직업/공고/교육 추천
 import type { IndividualProfile } from "@shared/schema";
+import { extractIntent } from "./intentExtractor";
+import { scoreJob } from "./jobScorer";
+import { synonymMap, REPAIR_TOKENS } from "./keywordMap";
 
-// 1) 업종/키워드 사전
+// 1) 업종/키워드 사전 (업데이트된 수리 우선 알고리즘 반영)
 export const SECTORS = [
   '건설업','공급업','과학 기술 서비스업','마케팅','예술',
   '운수 및 창고업','의료','정보통신','제조업'
 ];
 
-const sectorVocab: Record<string, string[]> = {
-  '건설업': ['현장','토목','건축','시공','안전','품질','공정','BIM','도면','감리','LH','철근','콘크리트','건설'],
-  '공급업': ['전기','가스','증기','공기조절','변전','배전','에너지','설비','유틸리티','계량'],
-  '과학 기술 서비스업': ['연구','실험','R&D','분석','시뮬레이션','모델링','테스트','프로토타입','성능','데이터','과학','기술'],
-  '마케팅': ['브랜딩','캠페인','디지털','콘텐츠','SEO','광고','성과지표','CRM','퍼포먼스','바이럴','마케팅'],
-  '예술': ['공연','전시','문화','디자인','기획','예술교육','무대','크리에이티브','촬영','에디팅','예술'],
-  '운수 및 창고업': ['물류','창고','WMS','운송','배차','3PL','입출고','재고','SCM','배송','운수','택배'],
-  '의료': ['병원','임상','의료기기','간호','의사','EMR','진단','재활','약무','보건','의료','병원'],
-  '정보통신': ['소프트웨어','네트워크','백엔드','프론트엔드','DB','API','클라우드','보안','모바일','AI','개발','프로그래밍','IT'],
-  '제조업': ['공정','설비','품질','양산','라인','PLC','자동화','FMEA','MES','원가','제조','생산','공장']
-};
+// 기존 업종별 키워드를 새로운 수리 우선 매핑으로 교체
+const sectorVocab: Record<string, string[]> = synonymMap;
 
 // 2) 간단 토크나이저 & 헬퍼
 const tokenize = (s = '') => (s.toLowerCase().replace(/[^a-zA-Z0-9가-힣\s]/g, ' ').split(/\s+/).filter(Boolean));
@@ -44,18 +38,46 @@ export function extractProfile(resumeText = ''): UserProfile {
               /석사/.test(text) ? '석사' : 
               /학사|대졸/.test(text) ? '학사' : '무관';
               
-  const skills = ALL_SKILLS.filter(k => text.includes(k.toLowerCase()));
+  // 기존 스킬 추출에 수리 관련 키워드 추가
+  const detectedSkills = ALL_SKILLS.filter(k => text.includes(k.toLowerCase()));
+  const repairSkills = REPAIR_TOKENS.filter(token => text.includes(token.toLowerCase()));
+  const combinedSkills = [...detectedSkills, ...repairSkills];
+  const skills = Array.from(new Set(combinedSkills));
+  
   return { years, education: edu, skills };
 }
 
-// 4) 업종 자동 분류
+// 4) 업종 자동 분류 (수리 우선 알고리즘 적용)
 export function rankSectors(resumeText = '', topK = 2) {
-  const text = resumeText.toLowerCase();
-  const scores = SECTORS.map(sector => {
-    const score = hasAny(text, sectorVocab[sector]);
-    return { sector, score };
+  console.log('Ranking sectors for:', resumeText);
+  
+  // 새로운 의도 추출 알고리즘 사용
+  const intent = extractIntent(resumeText, SECTORS);
+  console.log('Intent extraction result:', intent);
+  
+  let sectorScores = intent.candidates.map(candidate => ({
+    sector: candidate.name,
+    score: candidate.score / 10  // 0-1 범위로 정규화
+  }));
+  
+  // 기존 방식도 병행하여 결합
+  const legacyScores = SECTORS.map(sector => {
+    const score = hasAny(resumeText.toLowerCase(), sectorVocab[sector] || []);
+    return { sector, score: score / 10 };
+  });
+  
+  // 두 방식의 점수를 결합
+  const combinedScores = SECTORS.map(sector => {
+    const intentScore = sectorScores.find(s => s.sector === sector)?.score || 0;
+    const legacyScore = legacyScores.find(s => s.sector === sector)?.score || 0;
+    return {
+      sector,
+      score: Math.max(intentScore, legacyScore) // 더 높은 점수 사용
+    };
   }).sort((a, b) => b.score - a.score);
-  return scores.slice(0, topK);
+  
+  console.log('Combined sector scores:', combinedScores);
+  return combinedScores.slice(0, topK);
 }
 
 // 5) 샘플 데이터 (실제 서비스에서는 DB 또는 API로 교체)
@@ -154,40 +176,65 @@ const WEIGHTS = {
 
 const eduRank = (v: string) => ({'무관': 0, '학사': 1, '석사': 2, '박사': 3})[v] ?? 0;
 
-function scoreItem(item: Occupation | JobPosting, profile: UserProfile, chosenSectors: string[]) {
-  // 업종 일치 점수
+function scoreItem(item: Occupation | JobPosting, profile: UserProfile, chosenSectors: string[], resumeText = '') {
+  // 기존 점수 계산
   const domain = chosenSectors.includes(item.sector) ? 1 : 0;
   
-  // 기술 적합도
   const itemSkills = item.skills ?? [];
   const intersection = itemSkills.filter(s => 
     profile.skills.includes(s.toLowerCase()) || profile.skills.includes(s)
   );
   const skills = itemSkills.length ? intersection.length / itemSkills.length : 0;
   
-  // 경력 연차 점수
   const years = item.minYears ? Math.min(1, profile.years / item.minYears) : 1;
-  
-  // 학력 점수
   const edu = eduRank(profile.education) >= eduRank(item.reqEdu ?? '무관') ? 1 : 0;
-  
-  // 고용형태 점수 (현재는 중립)
   const type = 0.5;
   
-  return WEIGHTS.domain * domain + WEIGHTS.skills * skills + WEIGHTS.years * years + WEIGHTS.edu * edu + WEIGHTS.type * type;
+  let baseScore = WEIGHTS.domain * domain + WEIGHTS.skills * skills + WEIGHTS.years * years + WEIGHTS.edu * edu + WEIGHTS.type * type;
+  
+  // 수리 우선 알고리즘 적용
+  if (resumeText) {
+    const intent = extractIntent(resumeText, SECTORS);
+    
+    // 가상의 직업 아이템을 생성하여 수리 우선 점수 계산
+    const jobItem = {
+      id: item.id || '',
+      company: 'company' in item ? item.company : '',
+      title: item.title,
+      field: item.sector,
+      experience: item.minYears?.toString() || '',
+      education: item.reqEdu || '',
+      employment: '',
+      location: 'location' in item ? item.location : '',
+      description: 'description' in item ? item.description : '',
+      url: ''
+    };
+    
+    const repairScore = scoreJob(jobItem, { 
+      raw: intent.raw, 
+      topField: intent.topField, 
+      hasRepairHint: intent.hasRepairHint 
+    });
+    
+    // 수리 우선 점수를 0-1 범위로 정규화하고 기존 점수와 결합
+    const normalizedRepairScore = Math.min(1, repairScore / 20);
+    baseScore = (baseScore * 0.7) + (normalizedRepairScore * 0.3); // 기존 70% + 수리 우선 30%
+  }
+  
+  return baseScore;
 }
 
-// 7) 추천 함수들
-export function recommendOccupations(chosenSectors: string[], profile: UserProfile, k = 10) {
+// 7) 추천 함수들 (수리 우선 알고리즘 적용)
+export function recommendOccupations(chosenSectors: string[], profile: UserProfile, resumeText = '', k = 10) {
   return occupationsDB
-    .map(o => ({ ...o, score: scoreItem(o, profile, chosenSectors) }))
+    .map(o => ({ ...o, score: scoreItem(o, profile, chosenSectors, resumeText) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, k);
 }
 
-export function recommendJobs(chosenSectors: string[], profile: UserProfile, kMin = 5, kMax = 10) {
+export function recommendJobs(chosenSectors: string[], profile: UserProfile, resumeText = '', kMin = 5, kMax = 10) {
   const ranked = jobPostingsDB
-    .map(j => ({ ...j, score: scoreItem(j, profile, chosenSectors) }))
+    .map(j => ({ ...j, score: scoreItem(j, profile, chosenSectors, resumeText) }))
     .sort((a, b) => b.score - a.score);
   const k = Math.min(kMax, Math.max(kMin, ranked.length));
   return ranked.slice(0, k);
@@ -215,7 +262,8 @@ export function recommendPrograms(chosenSectors: string[], profile: UserProfile,
     .sort((a, b) => (b.cover + b.relevance) - (a.cover + a.relevance));
 
   const k = Math.min(kMax, Math.max(kMin, ranked.length || kMin));
-  return (ranked.length ? ranked : programsDB).slice(0, k);
+  const fallbackPrograms = programsDB.map(p => ({ ...p, cover: 0, relevance: 0 }));
+  return (ranked.length ? ranked : fallbackPrograms).slice(0, k);
 }
 
 // 8) 통합 추천 인터페이스
@@ -230,10 +278,22 @@ export function getUnifiedRecommendations(
   resumeText: string, 
   chosenSectors: string[]
 ): UnifiedRecommendation {
-  const profile = extractProfile(resumeText);
-  const occupations = recommendOccupations(chosenSectors, profile, 10);
-  const jobs = recommendJobs(chosenSectors, profile, 5, 10);
-  const programs = recommendPrograms(chosenSectors, profile, 3, 6);
+  console.log('Getting unified recommendations for:', { resumeText, chosenSectors });
   
-  return { profile, occupations, jobs, programs };
+  const profile = extractProfile(resumeText);
+  console.log('Extracted profile:', profile);
+  
+  const occupations = recommendOccupations(chosenSectors, profile, resumeText, 10);
+  console.log('Recommended occupations:', occupations.length);
+  
+  const jobs = recommendJobs(chosenSectors, profile, resumeText, 5, 10);
+  console.log('Recommended jobs:', jobs.length);
+  
+  const programs = recommendPrograms(chosenSectors, profile, 3, 6);
+  console.log('Recommended programs:', programs.length);
+  
+  const result = { profile, occupations, jobs, programs };
+  console.log('Final recommendation result:', result);
+  
+  return result;
 }

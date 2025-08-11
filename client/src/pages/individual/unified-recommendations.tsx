@@ -78,10 +78,12 @@ export default function UnifiedRecommendations() {
   const { data: recommendations, isLoading, error } = useQuery<UnifiedRecommendation>({
     queryKey: ['/api/unified-recommendations', resumeText, selectedSectors],
     queryFn: async () => {
-      return await apiRequest('POST', '/api/unified-recommendations', {
+      const result = await apiRequest('POST', '/api/unified-recommendations', {
         resumeText,
         chosenSectors: selectedSectors
       });
+      console.log('API Response:', result);
+      return result;
     },
     enabled: !!resumeText && selectedSectors.length > 0,
   });
@@ -129,7 +131,8 @@ export default function UnifiedRecommendations() {
     );
   }
 
-  if (error || !recommendations) {
+  if (error || !recommendations || !recommendations.occupations || !recommendations.jobs || !recommendations.programs) {
+    console.log('Error or missing data:', { error, recommendations });
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#F5F5DC] to-white flex items-center justify-center">
         <Card className="max-w-md">
@@ -186,15 +189,15 @@ export default function UnifiedRecommendations() {
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.occupations.length}</div>
+                <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.occupations?.length || 0}</div>
                 <div className="text-sm text-[#2F3036]/70">추천 직업</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.jobs.length}</div>
+                <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.jobs?.length || 0}</div>
                 <div className="text-sm text-[#2F3036]/70">추천 공고</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.programs.length}</div>
+                <div className="text-2xl font-bold text-[#FF8C42]">{recommendations.programs?.length || 0}</div>
                 <div className="text-sm text-[#2F3036]/70">추천 교육</div>
               </div>
             </div>
@@ -206,12 +209,12 @@ export default function UnifiedRecommendations() {
           <CardHeader>
             <CardTitle className="text-[#2F3036] flex items-center gap-2">
               <Briefcase className="w-5 h-5 text-[#FF8C42]" />
-              추천 직업 ({recommendations.occupations.length}개)
+              추천 직업 ({recommendations.occupations?.length || 0}개)
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recommendations.occupations.map((occupation) => (
+              {(recommendations.occupations || []).map((occupation) => (
                 <Card key={occupation.id} className="border-[#2F3036]/20 hover:border-[#FF8C42]/50 transition-colors">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">

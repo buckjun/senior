@@ -1,0 +1,537 @@
+// ================================
+// package.json
+// ================================
+{
+  "name": "voice-intent-job-matcher",
+  "version": "1.0.0",
+  "description": "음성 문장을 분야로 매핑해 모든 엑셀/CSV에서 공고를 통합 검색하고, '수리/정비' 신호를 우선 반영하는 Replit용 Node.js 앱",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "xlsx": "^0.18.5"
+  }
+}
+
+// ================================
+// server.js
+// ================================
+const express = require('express');
+const path = require('path');
+const { loadAllData, getFields } = require('./src/data-loader');
+const { extractIntent } = require('./src/intent');
+const { scoreJob, buildMatcherForField } = require('./src/score');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// 정적 파일
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 데이터 적재 (Replit에서는 ./data 폴더에 .csv/.xls/.xlsx 넣어두세요)
+const DATA_DIR = path.join(__dirname, 'data');
+const { rows, fields, byField } = loadAllData(DATA_DIR);
+
+app.get('/api/fields', (req, res) => {
+  res.json({ fields: getFields(fields) });
+});
+
+// 검색 API: /api/search?text=...
+app.get('/api/search', (req, res) => {
+  const text = (req.query.text || '').toString();
+  if (!text.trim()) {
+    return res.json({ ok: true, intent: null, items: [] });
+  }
+
+  const intent = extractIntent(text, fields);
+
+  // 기본 풀: 전체 → topField 있으면 해당 분야 우선 풀 구성
+  let pool = rows;
+  if (intent?.topField?.name) {
+    const matcher = buildMatcherForField(intent.topField.name);
+    const direct = (byField[intent.topField.name] || []).slice();
+    const spillover = rows.filter(r => matcher(r.field) && r.field !== intent.topField.name);
+    const seen = new Set();
+    pool = [...direct, ...spillover].filter(r => {
+      const key = r.__id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  const scored = pool.map(item => ({ item, score: scoreJob(item, intent) }))
+                     .sort((a, b) => b.score - a.score)
+                     .slice(0, 30)
+                     .map(({ item, score }) => ({ ...item, __score: score }));
+
+  res.json({ ok: true, intent, items: scored });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
+// ================================
+// src/data-loader.js
+// ================================
+const fs = require('fs');
+const XLSX = require('xlsx');
+const path2 = require('path');
+const { synonymMap } = require('./keywordMap');
+
+// 컬럼명 표준화 매핑 (한국어/영문/변형 지원)
+const COLMAP = {
+  company: ['회사', '회사명', '기업', '업체', 'Company'],
+  title: ['직무', '모집부문', '포지션', 'Title', '채용포지션'],
+  field: ['분야', '업종', '산업', '산업분류', '산업군', 'Field', '카테고리'],
+  experience: ['경력', '경력(년)', '경력연수', '경력요건', 'Experience'],
+  education: ['학력', 'Education'],
+  employment: ['고용형태', '형태', 'Employment'],
+  location: ['지역', '근무지', 'Location'],
+  url: ['링크', 'URL', '공고링크', '원문', 'ApplyUrl'],
+  deadline: ['마감일', '접수마감', 'Deadline'],
+  desc: ['설명', '직무설명', '주요업무', 'Description']
+};
+
+function normalizeKey(k) {
+  return (k || '').toString().trim().replace(/\s+/g, '').toLowerCase();
+}
+
+const aliasMap = (() => {
+  const m = new Map();
+  for (const std of Object.keys(COLMAP)) {
+    for (const v of COLMAP[std]) {
+      m.set(normalizeKey(v), std);
+    }
+  }
+  return m;
+})();
+
+function mapColumns(row) {
+  const out = {};
+  for (const [k, v] of Object.entries(row)) {
+    const std = aliasMap.get(normalizeKey(k));
+    if (std) out[std] = v;
+    else out[k] = v; // 알 수 없는 컬럼은 보존
+  }
+  return out;
+}
+
+function readWorkbook(filePath) {
+  const wb = XLSX.readFile(filePath, { cellDates: true });
+  const first = wb.SheetNames[0];
+  const ws = wb.Sheets[first];
+  const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+  return json.map(mapColumns);
+}
+
+function isExcelLike(name) {
+  return /\.(csv|xlsx?|xls)$/i.test(name);
+}
+
+// 간이 토크나이저(한글 특수문자, 점, 중점(·) 등 분리)
+function tokenize(s) {
+  return (s || '')
+    .toString()
+    .replace(/[\p{P}\p{S}]+/gu, ' ')
+    .replace(/[·•∙]/g, ' ')
+    .split(/\s+/)
+    .map(t => t.trim())
+    .filter(t => t.length >= 1);
+}
+
+const STOP = new Set(['및', '등', '기타', '일반', '담당', '관리', '운영', '업무', '부', '팀', '부서', '채용']);
+
+function learnFromFieldString(fieldStr, stdField) {
+  const bag = tokenize(fieldStr);
+  const syn = new Set(synonymMap[stdField] || []);
+  for (const t of bag) {
+    if (STOP.has(t)) continue;
+    if (!syn.has(t)) syn.add(t);
+  }
+  synonymMap[stdField] = Array.from(syn);
+}
+
+function loadAllData(dir) {
+  const files = fs.existsSync(dir) ? fs.readdirSync(dir) : [];
+  const rows = [];
+  const fields = new Map(); // name -> count
+  const byField = {}; // name -> rows
+
+  let autoId = 1;
+  for (const fname of files) {
+    if (!isExcelLike(fname)) continue;
+    const full = path2.join(dir, fname);
+    let arr = [];
+    try {
+      arr = readWorkbook(full);
+    } catch (e) {
+      console.error('파일 읽기 실패:', full, e.message);
+      continue;
+    }
+
+    for (const r of arr) {
+      const fieldName = (r.field || '').toString().trim() || '미분류';
+      // 간이 학습: 분야 문자열을 동의어에 자동 추가
+      learnFromFieldString(fieldName, fieldName);
+
+      const item = {
+        __id: `${fname}#${autoId++}`,
+        sourceFile: fname,
+        company: r.company || '',
+        title: r.title || '',
+        field: fieldName,
+        experience: r.experience || '',
+        education: r.education || '',
+        employment: r.employment || '',
+        location: r.location || '',
+        url: r.url || '',
+        deadline: r.deadline || '',
+        desc: r.desc || ''
+      };
+      rows.push(item);
+      const key = item.field;
+      fields.set(key, (fields.get(key) || 0) + 1);
+      if (!byField[key]) byField[key] = [];
+      byField[key].push(item);
+    }
+  }
+
+  // 데이터에서 파생된 분야명이 시드에 없으면 등록
+  for (const f of fields.keys()) {
+    if (!synonymMap[f]) synonymMap[f] = [];
+  }
+
+  return { rows, fields, byField };
+}
+
+function getFields(fieldsMap) {
+  return Array.from(fieldsMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count }));
+}
+
+module.exports = { loadAllData, getFields };
+
+// ================================
+// src/keywordMap.js
+// ================================
+// 분야별 동의어/연관키워드 시드 (필요시 자유롭게 보강)
+const synonymMap = {
+  '마케팅': ['마케팅', '광고', '브랜딩', '프로모션', '캠페인', '퍼포먼스', '디지털', '콘텐츠', 'sns', '마케터','홍보','경영','기획','영업','MD'],
+  '제조업': ['제조','네트워크','IT','웹프로그램','전자', '소프트웨어','생산', '공정', '설비', '보전', '품질', 'qaqc', '원가', '자재', '라인', '현장', '수리', '정비', '유지보수', '보수', 'a/s', 'as', 'maintenance', 'repair', '서비스','전산'],
+  '정보통신업': ['it', '빅데이터','인공지능','데이터베이스','정보통신', '개발', '백엔드', '프론트', '네트워크', '보안', '데이터', '모바일', '서버', 'si', 'pm', 'qa', '헬프데스크', 'it지원', '장비수리', '장비 유지보수'],
+  '운수 및 창고업': ['운수', '운송', '물류', '창고', '3pl', 'wms', '재고', '포워딩', '택배', '터미널', '배송', '장비정비', '지게차정비','MD','HRM','패션','영업'],
+  '건설업': ['건설', '시공', '토목', '기계','건축', '안전', '품질', '전기', '견적', '원가', '현장소장', '유지보수','인테리어','시설','설계','주택관리','현장','조경'],
+  '과학 기술 서비스업': ['과학기술', 'r&d', '연구', '실험', '분석', '컨설팅', '특허', '기술이전', '검교정', '장비유지보수','화학'],
+  '의료': ['의료', '병원', '간호', '원무', 'crc', '임상', '의료기기', '의사', '간호조무사','약무','바이오','보건'],
+  '예술': ['예술', '전시', '공연', '무대', '디자인', '영상', '사진', '브랜딩', '편집', '아트','출판','방송제작','스포츠'],
+  '서비스업': ['호텔','요리','숙박']
+};
+
+// 분야 표시명이 파일마다 다르면 이 표준 라벨로 맵핑하세요
+const fieldAlias = {
+  '호텔,요리 및 숙박 서비스업': '서비스업',
+  '정보통신': '정보통신업',
+  '정보통신업(IT)': '정보통신업',
+  '운수·창고': '운수 및 창고업',
+  '운수/창고': '운수 및 창고업',
+  '마케팅/광고': '마케팅'
+};
+
+module.exports = { synonymMap, fieldAlias };
+
+// ================================
+// src/intent.js
+// ================================
+const { synonymMap, fieldAlias } = require('./keywordMap');
+
+function normalizeText(s) {
+  return (s || '')
+    .toString()
+    .replace(/[\p{P}\p{S}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractYears(s) {
+  const m = s.match(/(\d+)\s*년/g);
+  if (!m) return null;
+  const nums = m.map(x => parseInt(x.replace(/[^0-9]/g, ''), 10)).filter(n => !isNaN(n));
+  if (!nums.length) return null;
+  return Math.max(...nums);
+}
+
+function canonicalFieldName(name) {
+  if (!name) return name;
+  return fieldAlias[name] || name;
+}
+
+const REPAIR_TOKENS = ['수리', '정비', '유지보수', '보수', 'a/s', 'as', '에이에스', 'maintenance', 'repair', '서비스', '고장', '장비수리'];
+
+function extractIntent(text, fieldsMap) {
+  const raw = normalizeText(text);
+  const lower = raw.toLowerCase();
+  const years = extractYears(raw);
+
+  const candidates = [];
+  const fields = Array.from(fieldsMap?.keys?.() || []);
+
+  const addScore = (map, key, by = 1) => {
+    map[key] = (map[key] || 0) + by;
+  };
+
+  const scoreMap = {};
+
+  // 1) 표준 분야명 직접 일치
+  for (const f of fields) {
+    const cf = canonicalFieldName(f);
+    if (!cf) continue;
+    if (raw.includes(cf)) addScore(scoreMap, cf, 3);
+  }
+
+  // 2) 동의어/연관어 부분일치
+  for (const [f, syns] of Object.entries(synonymMap)) {
+    const cf = canonicalFieldName(f);
+    for (const term of syns) {
+      if (!term) continue;
+      if (lower.includes(String(term).toLowerCase())) addScore(scoreMap, cf, 1);
+    }
+  }
+
+  // 3) "수리/정비" 류 신호가 있으면, 그 키워드를 동의어로 가진 분야들을 가산
+  const hasRepairHint = REPAIR_TOKENS.some(t => lower.includes(t.toLowerCase()));
+  if (hasRepairHint) {
+    for (const [f, syns] of Object.entries(synonymMap)) {
+      if (syns.some(s => REPAIR_TOKENS.includes(String(s).toLowerCase()))) {
+        addScore(scoreMap, canonicalFieldName(f), 2);
+      }
+    }
+  }
+
+  // 4) 룰 힌트(부서/팀/직무 패턴)
+  const ruleHints = [
+    { re: /(마케팅|광고|브랜딩|퍼포먼스|crm)/i, f: '마케팅', w: 2 },
+    { re: /(생산|공정|품질|설비|보전|기계|수리|금속|섬유|화학|환경)/i, f: '제조업', w: 2 },
+    { re: /(개발|서버|네트워크|보안|데이터|it|앱|웹)/i, f: '정보통신업', w: 2 },
+    { re: /(물류|창고|wms|운송|배송|포워딩|택배)/i, f: '운수 및 창고업', w: 2 },
+    { re: /(건설|시공|토목|건축|안전|견적|전기설비)/i, f: '건설업', w: 2 },
+    { re: /(r&d|연구|실험|분석|특허|컨설팅)/i, f: '과학 기술 서비스업', w: 2 },
+    { re: /(병원|간호|임상|원무|의료기기)/i, f: '의료', w: 2 },
+    { re: /(전시|공연|디자인|영상|사진|브랜딩)/i, f: '예술', w: 2 },
+    { re: /(전기|가스|증기|공조|배전|변전|난방|에너지)/i, f: '공급업', w: 2 },
+    { re: /(수리|정비|유지보수|보수|a\/s|maintenance|repair)/i, f: '제조업', w: 3 }
+  ];
+  for (const r of ruleHints) {
+    if (r.re.test(raw)) addScore(scoreMap, r.f, r.w);
+  }
+
+  for (const [name, score] of Object.entries(scoreMap)) {
+    if (!score) continue;
+    candidates.push({ name, score });
+  }
+
+  candidates.sort((a, b) => b.score - a.score);
+  const topField = candidates[0] || null;
+
+  return {
+    raw,
+    years,
+    candidates,
+    topField
+  };
+}
+
+module.exports = { extractIntent };
+
+// ================================
+// src/score.js
+// ================================
+const { synonymMap } = require('./keywordMap');
+
+function buildMatcherForField(fieldName) {
+  const syns = new Set([fieldName, ...(synonymMap[fieldName] || [])]);
+  return (value) => {
+    const s = (value || '').toString().toLowerCase();
+    for (const t of syns) {
+      if (!t) continue;
+      if (s.includes(String(t).toLowerCase())) return true;
+    }
+    return false;
+  };
+}
+
+const REPAIR_TOKENS = ['수리', '정비', '유지보수', '보수', 'a/s', 'as', '에이에스', 'maintenance', 'repair', '서비스', '고장', '장비수리'];
+
+function hasAnyToken(text, tokens) {
+  const s = (text || '').toString().toLowerCase();
+  return tokens.some(t => s.includes(String(t).toLowerCase()));
+}
+
+function scoreJob(item, intent) {
+  let score = 0;
+  const query = (intent?.raw || '').toLowerCase();
+  const topField = intent?.topField?.name || null;
+
+  // 1) 분야 정확도
+  if (topField) {
+    if ((item.field || '').toString() === topField) score += 10; // 같은 분야 최우선
+    else if (hasAnyToken(item.field, [topField])) score += 6; // 부분 일치
+  }
+
+  // 2) 수리/정비 키워드: 분야/제목/설명에 있을 때 가산 (사용자 문장에 수리류 신호가 있을수록 더 가산)
+  const userWantsRepair = hasAnyToken(query, REPAIR_TOKENS);
+  if (userWantsRepair) {
+    if (hasAnyToken(item.field, REPAIR_TOKENS)) score += 8; // 분야에 바로 표시
+    if (hasAnyToken(item.title, REPAIR_TOKENS)) score += 4;
+    if (hasAnyToken(item.desc, REPAIR_TOKENS)) score += 3;
+  } else {
+    // 사용자 문장에 수리 신호 없더라도, 공고에 있으면 약한 보너스
+    if (hasAnyToken(item.field, REPAIR_TOKENS)) score += 3;
+  }
+
+  // 3) 동의어 매칭 (사용자 문장 ↔ 해당 분야 동의어)
+  const fSyns = synonymMap[item.field] || [];
+  for (const term of fSyns) {
+    if (!term) continue;
+    if (query.includes(String(term).toLowerCase())) score += 1;
+  }
+
+  // 4) 기타 휴리스틱: 제목/설명에 분야명 포함
+  if (hasAnyToken(item.title, [item.field])) score += 1;
+  if (hasAnyToken(item.desc, [item.field])) score += 1;
+
+  return score;
+}
+
+module.exports = { buildMatcherForField, scoreJob };
+
+// ================================
+// public/index.html
+// ================================
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>음성 기반 분야 매칭</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    .row { display: flex; gap: 12px; align-items: center; }
+    textarea { width: 100%; height: 80px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; font-size: 14px; }
+    th { background: #f7f7f7; }
+    .score { font-variant-numeric: tabular-nums; color: #444; }
+  </style>
+</head>
+<body>
+  <h1>음성 기반 분야 매칭</h1>
+  <div class="row">
+    <button id="btnMic">🎙️ 음성 입력</button>
+    <button id="btnSearch">검색</button>
+  </div>
+  <textarea id="q" placeholder="예) 나는 삼성에서 기계 수리 일을 했다"></textarea>
+  <div id="intent"></div>
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th>점수</th>
+        <th>회사</th>
+        <th>직무</th>
+        <th>분야</th>
+        <th>지역</th>
+        <th>링크</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script src="/app.js"></script>
+</body>
+</html>
+
+// ================================
+// public/app.js
+// ================================
+async function search(text) {
+  const url = '/api/search?text=' + encodeURIComponent(text || '');
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const intentDiv = document.getElementById('intent');
+  intentDiv.innerHTML = '<pre>' + JSON.stringify(data.intent, null, 2) + '</pre>';
+
+  const tb = document.querySelector('#tbl tbody');
+  tb.innerHTML = '';
+  for (const it of data.items) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="score">${it.__score}</td>
+      <td>${it.company || ''}</td>
+      <td>${it.title || ''}</td>
+      <td>${it.field || ''}</td>
+      <td>${it.location || ''}</td>
+      <td>${it.url ? `<a href="${it.url}" target="_blank">원문</a>` : ''}</td>
+    `;
+    tb.appendChild(tr);
+  }
+}
+
+// 음성 인식(Web Speech API)
+const micBtn = document.getElementById('btnMic');
+const searchBtn = document.getElementById('btnSearch');
+const qEl = document.getElementById('q');
+
+searchBtn.addEventListener('click', () => search(qEl.value));
+
+micBtn.addEventListener('click', async () => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('이 브라우저는 음성 인식을 지원하지 않습니다.'); return; }
+  const r = new SR();
+  r.lang = 'ko-KR';
+  r.interimResults = false;
+  r.maxAlternatives = 1;
+  r.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    qEl.value = text;
+    search(text);
+  };
+  r.onerror = (e) => alert('음성 인식 오류: ' + e.error);
+  r.start();
+});
+
+// ================================
+// README.md (요약)
+// ================================
+/*
+1) Replit에서 Node.js 프로젝트 생성 → 위 파일 구조 그대로 추가
+   - /data 폴더를 만들고, 업로드한 CSV/엑셀(예: 제조업.csv, 마케팅.csv 등)을 모두 넣으세요.
+   - 각 파일에는 최소한 '분야' 컬럼이 있어야 합니다. (회사/직무/지역 등은 있으면 가산점 계산에 활용)
+
+2) 설치 & 실행
+   npm i
+   npm start
+   → 브라우저에서 https://<repl-주소> 접속
+
+3) 동작 원리(핵심)
+   - 데이터 로드 시, 각 공고의 '분야' 문자열을 토크나이즈해 해당 분야의 동의어 사전에 자동 추가(=간이 학습)
+   - 사용자가 "나는 삼성에서 기계 수리 일을 했다" 같이 말하면 intent 추출에서 '수리/정비' 신호를 감지
+   - /api/search는 intent.topField(최상위 분야 후보)를 기준으로 풀을 만들고,
+     scoreJob()에서 다음 가중치로 정렬합니다:
+       · 같은 분야 정확 일치 +10, 부분 일치 +6
+       · 사용자 문장에 수리 신호가 있으면 분야/제목/설명에 수리 관련어가 있을 때 각각 +8/+4/+3 (없어도 분야에 있으면 +3)
+       · 분야 동의어가 사용자 문장에 등장할 때 +1씩 누적
+       · 제목/설명에 분야명이 포함될 때 +1씩
+
+4) 바로 테스트 예시
+   - 입력: "나는 삼성에서 기계 수리 일을 했다"
+   - 기대: '수리/정비/유지보수/A/S' 등이 포함된 '분야'의 공고가 최상단에 랭크됨(특히 제조업/설비/정비 관련)
+
+5) 커스터마이즈
+   - src/keywordMap.js의 synonymMap에 분야별 키워드를 더 넣거나,
+   - src/data-loader.js의 STOP 리스트를 조정해 자동 학습 품질을 높일 수 있습니다.
+*/
