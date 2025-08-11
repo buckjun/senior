@@ -211,7 +211,7 @@ export default function SectorSelection() {
                       <span className="text-2xl">{getSectorIcon(sectorGuess[0].sector)}</span>
                       <div>
                         <h3 className="font-medium text-[#2F3036]">{sectorGuess[0].sector}</h3>
-                        <p className="text-sm text-[#2F3036]/70">매칭도: {Math.round(sectorGuess[0].score * 100)}%</p>
+                        <p className="text-sm text-[#2F3036]/70">매칭도: {Math.min(100, Math.round(sectorGuess[0].score * 100))}%</p>
                       </div>
                     </div>
                     <CheckCircle2 className="w-6 h-6 text-[#FF8C42]" />
