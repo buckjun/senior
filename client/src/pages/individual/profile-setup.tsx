@@ -169,6 +169,7 @@ export default function IndividualProfileSetup() {
           <div className="w-10"></div>
         </div>
       </div>
+      
       <div className="p-6 pb-8">
         {/* Profile Setup Options */}
         <div className="space-y-6">
@@ -179,9 +180,8 @@ export default function IndividualProfileSetup() {
                 <Mic className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="text-body font-bold">말씀하슈~</h3>
-                <p className="text-gray-600">ai가 이야기를 듣고 
-                이력서를 작성해줘요</p>
+                <h3 className="text-body font-bold">음성녹음이란 형태를 말씀하슈~</h3>
+                <p className="text-gray-600">가장 쉬운 방법이에요</p>
               </div>
             </div>
             <Button 
@@ -195,30 +195,6 @@ export default function IndividualProfileSetup() {
             </Button>
             <p className="text-sm text-gray-500 mt-2 text-center">
               "10년간 전자제품 매장에서 매니저로 일했습니다"
-            </p>
-          </div>
-          
-          {/* Natural Language AI Conversion */}
-          <div className="border-2 border-[#F5F5DC] rounded-2xl p-6 bg-[#FFFEF0]/50">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-[#F5F5DC] rounded-xl flex items-center justify-center mr-4">
-                <Edit className="text-[#D4B896] text-xl" />
-              </div>
-              <div>
-                <h3 className="text-body font-bold">써보셔유~</h3>
-                <p className="text-gray-600">평소 말하듯이 작성하면 AI가 변환</p>
-              </div>
-            </div>
-            <Button 
-              onClick={() => setIsAIResumeModalOpen(true)}
-              className="w-full bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
-              data-testid="button-ai-resume-writer"
-            >
-              <Edit className="mr-2 h-5 w-5" />
-              텍스트 변환 시작
-            </Button>
-            <p className="text-sm text-gray-500 mt-2 text-center">
-              "저는 25년간 제조업에서 생산관리를..."
             </p>
           </div>
           
@@ -274,8 +250,49 @@ export default function IndividualProfileSetup() {
               className="hidden"
             />
           </div>
+          
+          {/* Natural Language AI Conversion */}
+          <div className="border-2 border-[#F5F5DC] rounded-2xl p-6 bg-[#FFFEF0]/50">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-[#F5F5DC] rounded-xl flex items-center justify-center mr-4">
+                <Edit className="text-[#D4B896] text-xl" />
+              </div>
+              <div>
+                <h3 className="text-body font-bold">텍스트 변환</h3>
+                <p className="text-gray-600">평소 말하듯이 작성하면 AI가 변환</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setIsAIResumeModalOpen(true)}
+              className="w-full bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+              data-testid="button-ai-resume-writer"
+            >
+              <Edit className="mr-2 h-5 w-5" />
+              텍스트 변환 시작
+            </Button>
+            <p className="text-sm text-gray-500 mt-2 text-center">
+              "저는 25년간 제조업에서 생산관리를..."
+            </p>
+          </div>
 
-
+          {/* Manual Input */}
+          <div className="border-2 border-gray-200 rounded-2xl p-6">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mr-4">
+                <Edit className="text-gray-600 text-xl" />
+              </div>
+              <div>
+                <h3 className="text-body font-bold">직접 입력하기</h3>
+                <p className="text-gray-600">양식에 맞춰 작성</p>
+              </div>
+            </div>
+            <Link href="/individual/manual-input">
+              <Button className="w-full btn-ghost" data-testid="button-manual-input">
+                <Edit className="mr-2 h-5 w-5" />
+                양식 작성하기
+              </Button>
+            </Link>
+          </div>
         </div>
         
         {/* Skip Option */}
@@ -288,6 +305,7 @@ export default function IndividualProfileSetup() {
           나중에 입력하기
         </Button>
       </div>
+
       {/* Voice Input Modal */}
       <VoiceInput
         isOpen={isVoiceModalOpen}
@@ -295,6 +313,7 @@ export default function IndividualProfileSetup() {
         onTranscript={handleVoiceTranscript}
         placeholder="경력에 대해 자유롭게 말씀해주세요"
       />
+
       {/* AI Resume Writer Modal */}
       {isAIResumeModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
