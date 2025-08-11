@@ -56,9 +56,10 @@ export function LoginForm({ isIndividual, onShowSignup }: LoginFormProps) {
       }
     } catch (error) {
       console.error('Login error:', error);
+      console.error('Login error details:', error instanceof Error ? error.message : 'Unknown error');
       toast({
         title: "로그인 실패",
-        description: "서버 연결에 실패했습니다.",
+        description: error instanceof Error ? error.message : "서버 연결에 실패했습니다.",
         variant: "destructive",
       });
     } finally {

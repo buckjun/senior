@@ -75,9 +75,10 @@ export function SignupForm({ isIndividual, onBackToLogin }: SignupFormProps) {
       }
     } catch (error) {
       console.error('Signup error:', error);
+      console.error('Signup error details:', error instanceof Error ? error.message : 'Unknown error');
       toast({
         title: "회원가입 실패",
-        description: "서버 연결에 실패했습니다.",
+        description: error instanceof Error ? error.message : "서버 연결에 실패했습니다.",
         variant: "destructive",
       });
     } finally {
