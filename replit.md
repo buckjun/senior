@@ -14,7 +14,20 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (August 2025)
 
-## AI Resume Profile Data Display Fix
+## Complete Resume Creation System Unification
+- **Date**: August 11, 2025
+- **Changes**: Fixed issue where only certain resume creation methods updated user profile
+  - **Problem**: Text-based resume creation and image upload weren't updating user profiles
+  - **Solution**: Modified ALL resume creation endpoints to automatically update profiles:
+    - `/api/parse-resume` (text input) - now auto-updates profile
+    - `/api/ai/analyze-resume-image` (image upload) - now auto-updates profile  
+    - `/api/ai/process-voice` (voice input) - already working
+  - **Client-Side Simplification**: Removed duplicate profile update logic from AIResumeWriter
+  - **Consistent Experience**: All resume creation methods now automatically save to "내정보"
+  - **User Flow**: Parse → Auto-save → Cache invalidation → Success message → Dashboard redirect
+  - **Status**: Universal profile updates working for all resume creation methods
+
+## AI Resume Profile Data Display Fix  
 - **Date**: August 11, 2025
 - **Changes**: Fixed critical issue where AI-generated resume data wasn't showing in user profile
   - **Root Cause**: Profile view was checking for non-existent `education` field in database schema

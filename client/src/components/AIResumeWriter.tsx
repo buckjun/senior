@@ -6,7 +6,7 @@ import { ResumePreview } from "@/components/ResumePreview";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Wand2, Save, Sparkles, AlertCircle } from "lucide-react";
+import { Wand2, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface ParsedResume {
   name: string;
@@ -29,10 +29,11 @@ interface AIResumeWriterProps {
 export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileUpdated }: AIResumeWriterProps) {
   const [inputText, setInputText] = useState(initialText);
   const [parsedData, setParsedData] = useState<ParsedResume | null>(null);
+  const [isProfileUpdated, setIsProfileUpdated] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Parse resume mutation
+  // Parse resume mutation - now automatically updates profile on server
   const parseResumeMutation = useMutation({
     mutationFn: async (text: string): Promise<ParsedResume> => {
       const response = await apiRequest("POST", "/api/parse-resume", { text });
@@ -41,63 +42,30 @@ export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileU
     },
     onSuccess: (data) => {
       setParsedData(data);
+      setIsProfileUpdated(true);
       onResumeGenerated?.(data);
       
-      toast({
-        title: "이력서 분석 완료! ✨",
-        description: "자연어에서 이력서 정보를 성공적으로 추출했습니다.",
-      });
-    },
-    onError: (error: any) => {
-      console.error('Resume parsing error:', error);
-      toast({
-        title: "분석 실패",
-        description: error.message || "이력서 분석 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update profile mutation
-  const updateProfileMutation = useMutation({
-    mutationFn: async (data: ParsedResume) => {
-      console.log('Updating profile with data:', data);
-      
-      const updateData: Record<string, any> = {};
-      
-      if (data.summary?.trim()) updateData.summary = data.summary.trim();
-      if (data.skills?.length > 0) updateData.skills = data.skills.filter(skill => skill.trim());
-      if (data.experience?.length > 0) updateData.experience = data.experience;
-      
-      // 서버 API가 기대하는 필드명으로 매핑
-      if (data.title?.trim()) updateData.title = data.title.trim();
-      if (data.location?.trim()) updateData.location = data.location.trim();
-
-      console.log('Final update data:', updateData);
-      return await apiRequest("POST", "/api/individual-profiles/ai-resume", updateData);
-    },
-    onSuccess: (response) => {
-      console.log('Profile update success:', response);
+      // Invalidate caches since profile was updated automatically on server
       queryClient.invalidateQueries({ queryKey: ['/api/individual-profiles/me'] });
       queryClient.invalidateQueries({ queryKey: ['/api/jobs/recommended'] });
       queryClient.invalidateQueries({ queryKey: ['/api/recommendations'] });
       onProfileUpdated?.();
       
       toast({
-        title: "프로필 업데이트 완료! 🎉",
-        description: "이제 맞춤 회사 추천을 받으실 수 있습니다.",
+        title: "이력서 생성 및 프로필 업데이트 완료! 🎉",
+        description: "자연어에서 이력서 정보를 추출하고 내 정보에 자동 저장했습니다.",
       });
 
-      // Navigate to dashboard instead of recommendations
+      // Navigate to dashboard
       setTimeout(() => {
         window.location.href = '/individual/dashboard';
-      }, 1500);
+      }, 2000);
     },
     onError: (error: any) => {
-      console.error('Profile update error:', error);
+      console.error('Resume parsing error:', error);
       toast({
-        title: "업데이트 실패",
-        description: error.message || "프로필 업데이트 중 오류가 발생했습니다.",
+        title: "분석 실패",
+        description: error.message || "이력서 분석 중 오류가 발생했습니다.",
         variant: "destructive",
       });
     },
@@ -113,12 +81,8 @@ export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileU
       return;
     }
 
+    setIsProfileUpdated(false);
     parseResumeMutation.mutate(inputText);
-  };
-
-  const handleUpdateProfile = () => {
-    if (!parsedData) return;
-    updateProfileMutation.mutate(parsedData);
   };
 
   const handleSampleText = () => {
@@ -136,7 +100,7 @@ export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileU
             자연어로 이력서 작성하기
           </CardTitle>
           <p className="text-sm text-[#2F3036]/70">
-            평소 말하듯이 자연스럽게 경력과 경험을 설명해주세요. AI가 자동으로 이력서 형태로 정리해드립니다.
+            평소 말하듯이 자연스럽게 경력과 경험을 설명해주세요. AI가 자동으로 이력서 형태로 정리하고 내 정보에 저장해드립니다.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -174,64 +138,53 @@ export function AIResumeWriter({ initialText = "", onResumeGenerated, onProfileU
             {parseResumeMutation.isPending ? (
               <>
                 <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                AI 분석 중...
+                AI 분석 및 프로필 업데이트 중...
               </>
             ) : (
               <>
                 <Wand2 className="h-4 w-4 mr-2" />
-                이력서로 변환하기
+                이력서로 변환하고 내정보에 저장하기
               </>
             )}
           </Button>
         </CardContent>
       </Card>
 
-      {/* 분석 결과 미리보기 */}
+      {/* 분석 결과 및 성공 확인 */}
       {parsedData && (
         <Card className="border-[#2F3036]/20 bg-[#F5F5DC]/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-[#2F3036]">
-              <Sparkles className="h-5 w-5" />
-              AI 분석 결과
+              {isProfileUpdated ? (
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              ) : (
+                <Sparkles className="h-5 w-5" />
+              )}
+              {isProfileUpdated ? "완료! 내정보에 저장됨" : "AI 분석 결과"}
             </CardTitle>
             <p className="text-sm text-[#2F3036]/70">
-              자연어 입력에서 다음 정보를 추출했습니다.
+              {isProfileUpdated 
+                ? "아래 정보가 자동으로 내 정보에 저장되었습니다."
+                : "자연어 입력에서 다음 정보를 추출했습니다."
+              }
             </p>
           </CardHeader>
           <CardContent>
             <ResumePreview data={parsedData} />
             
-            <div className="mt-6 pt-4 border-t">
-              <div className="flex items-start gap-3 mb-4 p-3 bg-[#F5F5DC]/50 rounded-lg border border-[#2F3036]/20">
-                <AlertCircle className="h-5 w-5 text-[#2F3036] mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-[#2F3036]">프로필 업데이트 확인</p>
-                  <p className="text-[#2F3036]/70 mt-1">
-                    위 정보로 내 프로필을 업데이트하시겠습니까? 기존 정보는 새로운 정보로 덮어쓰기됩니다.
-                  </p>
+            {isProfileUpdated && (
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-green-800">프로필 업데이트 완료</p>
+                    <p className="text-green-700 mt-1">
+                      위 정보가 내 정보에 자동으로 저장되었습니다. 잠시 후 대시보드로 이동합니다.
+                    </p>
+                  </div>
                 </div>
               </div>
-              
-              <Button 
-                onClick={handleUpdateProfile}
-                disabled={updateProfileMutation.isPending}
-                className="w-full"
-                size="lg"
-                data-testid="button-update-profile"
-              >
-                {updateProfileMutation.isPending ? (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                    프로필 업데이트 중...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    내 정보에 적용하기
-                  </>
-                )}
-              </Button>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}
