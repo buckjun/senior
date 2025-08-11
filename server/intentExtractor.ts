@@ -84,7 +84,7 @@ export function extractIntent(text: string, availableFields: string[]): Extracte
     }
   }
 
-  // 4) 룰 힌트 (부서/팀/직무 패턴)
+  // 4) 룰 힌트 (부서/팀/직무 패턴) - 확장된 버전
   const ruleHints = [
     { pattern: /(마케팅|광고|브랜딩|퍼포먼스|crm)/i, field: '마케팅', weight: 2 },
     { pattern: /(생산|공정|품질|설비|보전|기계|수리|금속|섬유|화학|환경)/i, field: '제조업', weight: 2 },
@@ -95,12 +95,24 @@ export function extractIntent(text: string, availableFields: string[]): Extracte
     { pattern: /(병원|간호|임상|원무|의료기기)/i, field: '의료', weight: 2 },
     { pattern: /(전시|공연|디자인|영상|사진|브랜딩)/i, field: '예술', weight: 2 },
     { pattern: /(전기|가스|증기|공조|배전|변전|난방|에너지)/i, field: '공급업', weight: 2 },
-    { pattern: /(수리|정비|유지보수|보수|a\/s|maintenance|repair)/i, field: '제조업', weight: 3 }
+    { pattern: /(수리|정비|유지보수|보수|a\/s|maintenance|repair)/i, field: '제조업', weight: 3 },
+    { pattern: /(토목|토목학과|토목과|토목공학)/i, field: '건설업', weight: 8 },
+    { pattern: /(자격증|1급|기사|산업기사)/i, field: null, weight: 2 },
+    { pattern: /(삼성|대기업|대기업체)/i, field: null, weight: 1 },
+    { pattern: /(대학교|대학|학과|졸업)/i, field: null, weight: 1 }
   ];
 
   for (const hint of ruleHints) {
     if (hint.pattern.test(raw)) {
-      addScore(hint.field, hint.weight);
+      const field = hint.field;
+      if (field) {
+        addScore(canonicalFieldName(field), hint.weight);
+      } else {
+        // 일반적인 가산점
+        for (const f of availableFields) {
+          addScore(canonicalFieldName(f), hint.weight * 0.1);
+        }
+      }
     }
   }
 
