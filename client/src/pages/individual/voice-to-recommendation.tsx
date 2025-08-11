@@ -29,7 +29,8 @@ export default function VoiceToRecommendation() {
   // 음성 이력서 분석 mutation
   const analyzeResumeMutation = useMutation({
     mutationFn: async (resumeText: string): Promise<ResumeAnalysisResult> => {
-      const result = await apiRequest('POST', '/api/resume-analysis', { resumeText });
+      const response = await apiRequest('POST', '/api/resume-analysis', { resumeText });
+      const result = await response.json();
       return result as ResumeAnalysisResult;
     },
     onSuccess: (data) => {
