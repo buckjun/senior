@@ -1,0 +1,155 @@
+import fs from 'fs';
+import path from 'path';
+import { parse } from 'csv-parse/sync';
+
+export interface CompanyJob {
+  id: string;
+  company: string;
+  title: string;
+  location: string;
+  education: string;
+  experience: string;
+  field: string;
+  deadline: string;
+  employmentType: string;
+  companySize: string;
+  salary: string;
+  sector: string;
+}
+
+export interface LearningProgram {
+  id: string;
+  title: string;
+  sector: string;
+  skills: string[];
+  duration: string;
+  provider: string;
+  type: 'online' | 'offline';
+}
+
+// CSV 파일에서 회사 데이터 읽기
+export function loadCompanyJobsBySector(sector: string): CompanyJob[] {
+  try {
+    const csvPath = path.join(process.cwd(), 'attached_assets', `${sector}_1754742652411.csv`);
+    
+    // 제조업 파일명이 다름
+    const manufacturingPath = path.join(process.cwd(), 'attached_assets', `${sector}_1754742652412.csv`);
+    
+    let filePath = csvPath;
+    if (sector === '제조업') {
+      filePath = manufacturingPath;
+    }
+    
+    if (!fs.existsSync(filePath)) {
+      console.log(`CSV 파일을 찾을 수 없습니다: ${filePath}`);
+      return [];
+    }
+
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const records = parse(content, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true
+    });
+
+    return records.map((record: any, index: number) => ({
+      id: `job-${sector}-${index + 1}`,
+      company: record['회사명'] || '',
+      title: record['공고명'] || '',
+      location: record['지역'] || '',
+      education: record['학력'] || '',
+      experience: record['경력'] || '',
+      field: record['분야'] || '',
+      deadline: record['마감일'] || '',
+      employmentType: record['고용형태'] || '',
+      companySize: record['기업규모'] || '',
+      salary: record['급여(만원)'] || '',
+      sector: sector
+    }));
+  } catch (error) {
+    console.error(`${sector} CSV 파일 읽기 오류:`, error);
+    return [];
+  }
+}
+
+// 모든 업종의 회사 데이터 로드
+export function loadAllCompanyJobs(): CompanyJob[] {
+  const sectors = [
+    '건설업', '공급업', '과학 기술 서비스업', '마케팅', '예술',
+    '운수 및 창고업', '의료', '정보통신', '제조업'
+  ];
+  
+  let allJobs: CompanyJob[] = [];
+  
+  for (const sector of sectors) {
+    const jobs = loadCompanyJobsBySector(sector);
+    allJobs = allJobs.concat(jobs);
+    console.log(`${sector}: ${jobs.length}개 공고 로드됨`);
+  }
+  
+  console.log(`총 ${allJobs.length}개 공고 로드됨`);
+  return allJobs;
+}
+
+// 학습 프로그램 데이터 로드 (온라인 과정)
+export function loadLearningPrograms(): LearningProgram[] {
+  try {
+    const csvPath = path.join(process.cwd(), 'attached_assets', 'seoul_learn_4050_ONLINE_courses_RECAT_20250810_025713_1754796069639.csv');
+    
+    if (!fs.existsSync(csvPath)) {
+      console.log('학습 프로그램 CSV 파일을 찾을 수 없습니다');
+      return [];
+    }
+
+    const content = fs.readFileSync(csvPath, 'utf-8');
+    const records = parse(content, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true
+    });
+
+    return records.map((record: any, index: number) => {
+      const title = record['프로그램명'] || record['과정명'] || record['title'] || '';
+      const category = record['카테고리'] || record['분야'] || record['category'] || '';
+      
+      // 카테고리를 업종으로 매핑
+      let sector = '정보통신'; // 기본값
+      if (category.includes('건설') || category.includes('토목')) sector = '건설업';
+      else if (category.includes('제조') || category.includes('생산')) sector = '제조업';
+      else if (category.includes('의료') || category.includes('보건')) sector = '의료';
+      else if (category.includes('디자인') || category.includes('예술')) sector = '예술';
+      else if (category.includes('물류') || category.includes('운송')) sector = '운수 및 창고업';
+      else if (category.includes('마케팅') || category.includes('영업')) sector = '마케팅';
+      
+      return {
+        id: `program-${index + 1}`,
+        title: title,
+        sector: sector,
+        skills: title.split(' ').slice(0, 3), // 제목에서 키워드 추출
+        duration: record['기간'] || record['duration'] || '2개월',
+        provider: record['기관명'] || record['provider'] || '서울시',
+        type: 'online' as const
+      };
+    }).filter(program => program.title.length > 0);
+  } catch (error) {
+    console.error('학습 프로그램 CSV 파일 읽기 오류:', error);
+    return [];
+  }
+}
+
+// 업종별 키워드 추출 함수
+export function extractSectorKeywords(job: CompanyJob): string[] {
+  const keywords: string[] = [];
+  
+  // 제목에서 키워드 추출
+  const titleWords = job.title.toLowerCase().split(/[^가-힣a-z0-9]/);
+  keywords.push(...titleWords.filter(word => word.length > 1));
+  
+  // 분야에서 키워드 추출
+  if (job.field) {
+    const fieldWords = job.field.split(/[,·\s]+/);
+    keywords.push(...fieldWords.filter(word => word.length > 1));
+  }
+  
+  return Array.from(new Set(keywords));
+}

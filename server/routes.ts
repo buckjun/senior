@@ -137,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           existingSkills = [];
         }
       } catch (error) {
-        console.log('Error parsing existing skills, using empty array:', error instanceof Error ? error.message : String(error));
+        console.log('Error parsing existing skills, using empty array:', error instanceof Error ? error.message : 'Unknown error');
         existingSkills = [];
       }
       
@@ -147,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           existingExperience = [];
         }
       } catch (error) {
-        console.log('Error parsing existing experience, using empty array:', error instanceof Error ? error.message : String(error));
+        console.log('Error parsing existing experience, using empty array:', error instanceof Error ? error.message : 'Unknown error');
         existingExperience = [];
       }
 
@@ -837,6 +837,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { getUnifiedRecommendations } = await import('./recommendationEngine');
       
       const recommendations = getUnifiedRecommendations(resumeText, chosenSectors);
+      console.log('Sending recommendations to client:', JSON.stringify(recommendations, null, 2));
       
       res.json(recommendations);
     } catch (error) {

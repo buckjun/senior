@@ -3,6 +3,7 @@ import type { IndividualProfile } from "@shared/schema";
 import { extractIntent } from "./intentExtractor";
 import { scoreJob } from "./jobScorer";
 import { synonymMap, REPAIR_TOKENS } from "./keywordMap";
+import { loadAllCompanyJobs, loadLearningPrograms, extractSectorKeywords, type CompanyJob } from "./csvReader";
 
 // 1) 업종/키워드 사전 (업데이트된 수리 우선 알고리즘 반영)
 export const SECTORS = [
@@ -150,7 +151,7 @@ export const jobPostingsDB: JobPosting[] = [
   { id: 'job12', sector: '마케팅', title: 'CRM 매니저', company: '리테일L', minYears: 3, reqEdu: '학사', skills: ['CRM','데이터'], location: '송파', salary: '4100만원' },
 ];
 
-export const programsDB: EducationProgram[] = [
+export const educationProgramsDB: EducationProgram[] = [
   { id: 'pg1', title: 'PLC 자동화 실무과정', skills: ['PLC','자동화'], duration: '3개월', provider: '폴리텍대학', type: 'offline' },
   { id: 'pg2', title: '품질/공정 FMEA 교육', skills: ['품질','FMEA'], duration: '2개월', provider: '품질관리협회', type: 'offline' },
   { id: 'pg3', title: 'React 프론트엔드 개발', skills: ['React','웹'], duration: '4개월', provider: '코드스테이츠', type: 'online' },
@@ -233,14 +234,52 @@ export function recommendOccupations(chosenSectors: string[], profile: UserProfi
 }
 
 export function recommendJobs(chosenSectors: string[], profile: UserProfile, resumeText = '', kMin = 5, kMax = 10) {
-  const ranked = jobPostingsDB
+  // 실제 CSV 데이터 사용
+  const companyJobs = getCompanyJobs();
+  
+  // 선택된 업종의 회사 공고 필터링
+  const filteredJobs = companyJobs.filter((job: CompanyJob) => chosenSectors.includes(job.sector));
+  
+  // 호환성을 위해 기존 형식으로 변환
+  const convertedJobs = filteredJobs.map((job: CompanyJob) => ({
+    id: job.id,
+    sector: job.sector,
+    title: job.title,
+    company: job.company,
+    minYears: parseExperience(job.experience),
+    reqEdu: job.education || '무관',
+    skills: extractSectorKeywords(job),
+    location: job.location,
+    salary: job.salary + '만원',
+    score: 0
+  }));
+  
+  // 기존 하드코딩 데이터와 결합
+  const allJobs = [...convertedJobs, ...jobPostingsDB.filter(j => chosenSectors.includes(j.sector))];
+  
+  // 점수 계산 및 정렬
+  const ranked = allJobs
     .map(j => ({ ...j, score: scoreItem(j, profile, chosenSectors, resumeText) }))
     .sort((a, b) => b.score - a.score);
+    
   const k = Math.min(kMax, Math.max(kMin, ranked.length));
   return ranked.slice(0, k);
 }
 
+// 경력 텍스트를 숫자로 변환하는 헬퍼 함수
+function parseExperience(expText: string): number {
+  if (!expText) return 0;
+  const match = expText.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
 export function recommendPrograms(chosenSectors: string[], profile: UserProfile, kMin = 3, kMax = 6) {
+  // 실제 학습 프로그램 데이터 사용
+  const learningPrograms = getLearningPrograms();
+  
+  // 선택된 업종과 관련된 프로그램 필터링 + 기존 프로그램
+  const allPrograms = [...learningPrograms, ...educationProgramsDB];
+  
   // 부족 기술 (선택 업종의 주요 키워드 - 보유 기술)
   const needed = chosenSectors
     .flatMap(s => sectorVocab[s] || [])
@@ -250,7 +289,7 @@ export function recommendPrograms(chosenSectors: string[], profile: UserProfile,
   );
 
   // 프로그램이 커버하는 기술 교집합 수로 정렬
-  const ranked = programsDB
+  const ranked = allPrograms
     .map(p => ({ 
       ...p, 
       cover: p.skills.filter(s => missing.includes(s)).length,
@@ -258,11 +297,11 @@ export function recommendPrograms(chosenSectors: string[], profile: UserProfile,
         chosenSectors.some(sector => sectorVocab[sector]?.includes(s))
       ).length
     }))
-    .filter(p => p.cover > 0 || p.relevance > 0)
+    .filter(p => p.cover > 0 || p.relevance > 0 || chosenSectors.includes(p.sector))
     .sort((a, b) => (b.cover + b.relevance) - (a.cover + a.relevance));
 
   const k = Math.min(kMax, Math.max(kMin, ranked.length || kMin));
-  const fallbackPrograms = programsDB.map(p => ({ ...p, cover: 0, relevance: 0 }));
+  const fallbackPrograms = allPrograms.slice(0, kMin).map(p => ({ ...p, cover: 0, relevance: 0 }));
   return (ranked.length ? ranked : fallbackPrograms).slice(0, k);
 }
 
