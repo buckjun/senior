@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { parseResumeFromText } from "./naturalLanguageService";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -28,13 +28,13 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Auth middleware - handles signup/login/logout/user endpoints
+  setupAuth(app);
 
-  // Auth routes
+  // Get current user with profile
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       const profile = await storage.getUserProfile(userId);
       
@@ -51,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User profile routes
   app.post('/api/profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profileData = insertUserProfileSchema.parse({
         ...req.body,
         userId
@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const updates = req.body;
       
       const profile = await storage.updateUserProfile(userId, updates);
@@ -81,7 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Individual profile routes
   app.post('/api/individual-profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profileData = insertIndividualProfileSchema.parse({
         ...req.body,
         userId
@@ -97,7 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/individual-profiles/me', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profile = await storage.getIndividualProfile(userId);
       res.json(profile);
     } catch (error) {
@@ -109,7 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add education to profile route
   app.post('/api/individual-profiles/add-education', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { education, certification, skills } = req.body;
 
       // Get existing profile
@@ -185,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/individual-profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const updates = req.body;
       
       const profile = await storage.updateIndividualProfile(userId, updates);
@@ -199,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company profile routes
   app.post('/api/company-profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profileData = insertCompanyProfileSchema.parse({
         ...req.body,
         userId
@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/company-profiles/me', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profile = await storage.getCompanyProfile(userId);
       res.json(profile);
     } catch (error) {
@@ -230,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/company-profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const updates = req.body;
       
       const profile = await storage.updateCompanyProfile(userId, updates);
@@ -315,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job posting routes
   app.post('/api/jobs', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       
       if (!companyProfile) {
@@ -352,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/jobs/recommended', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const jobs = await storage.getRecommendedJobs(userId);
       res.json(jobs);
     } catch (error) {
@@ -363,7 +363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/jobs/my', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       
       if (!companyProfile) {
@@ -393,7 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/jobs/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       const job = await storage.getJobPosting(req.params.id);
       
@@ -413,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Job application routes
   app.post('/api/jobs/:jobId/apply', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const individualProfile = await storage.getIndividualProfile(userId);
       
       if (!individualProfile) {
@@ -445,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/jobs/:jobId/applications', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       const job = await storage.getJobPosting(req.params.jobId);
       
@@ -463,7 +463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/applications/my', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const individualProfile = await storage.getIndividualProfile(userId);
       
       if (!individualProfile) {
@@ -481,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Saved jobs routes
   app.post('/api/jobs/:jobId/save', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const savedJob = await storage.saveJob(userId, req.params.jobId);
       res.json(savedJob);
     } catch (error) {
@@ -492,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/jobs/:jobId/save', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       await storage.unsaveJob(userId, req.params.jobId);
       res.json({ success: true });
     } catch (error) {
@@ -503,7 +503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/saved-jobs', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const savedJobs = await storage.getSavedJobs(userId);
       res.json(savedJobs);
     } catch (error) {
@@ -515,7 +515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI recommendations routes
   app.get('/api/jobs/:jobId/ai-recommendations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const companyProfile = await storage.getCompanyProfile(userId);
       const job = await storage.getJobPosting(req.params.jobId);
       
@@ -852,7 +852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update individual profile with AI-generated resume data
   app.post('/api/individual-profiles/ai-resume', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { 
         summary, 
         skills, 
@@ -1040,7 +1040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/courses/recommended', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const userProfile = await storage.getUserProfile(userId);
       const individualProfile = await storage.getIndividualProfile(userId);
       

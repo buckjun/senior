@@ -14,7 +14,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table for Replit Auth
+// Session storage table for traditional auth
 export const sessions = pgTable(
   "sessions",
   {
@@ -25,19 +25,24 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for Replit Auth
+// User types (must be defined before users table)
+export const userTypeEnum = pgEnum('user_type', ['individual', 'company']);
+
+// User storage table - Traditional signup system
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
+  username: varchar("username", { length: 50 }).unique().notNull(),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password").notNull(), // hashed password
+  phoneNumber: varchar("phone_number", { length: 20 }),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  userType: userTypeEnum("user_type").notNull().default('individual'),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
-
-// User types
-export const userTypeEnum = pgEnum('user_type', ['individual', 'company']);
 
 // User profiles (extends users table)
 export const userProfiles = pgTable("user_profiles", {
@@ -297,6 +302,29 @@ export const insertSeniorReemploymentDataSchema = createInsertSchema(seniorReemp
   createdAt: true,
   updatedAt: true,
 });
+
+// User types and schemas
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+
+// Authentication schemas
+export const signupSchema = createInsertSchema(users, {
+  username: z.string().min(3, "아이디는 3글자 이상이어야 합니다").max(50, "아이디는 50글자 이하여야 합니다"),
+  email: z.string().email("유효한 이메일 주소를 입력해주세요"),
+  password: z.string().min(6, "비밀번호는 6글자 이상이어야 합니다"),
+  phoneNumber: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true, profileImageUrl: true, isActive: true });
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "아이디를 입력해주세요"),
+  password: z.string().min(1, "비밀번호를 입력해주세요"),
+  userType: z.enum(['individual', 'company']).default('individual'),
+});
+
+export type SignupData = z.infer<typeof signupSchema>;
+export type LoginData = z.infer<typeof loginSchema>;
 
 export const insertReemploymentStatisticsSchema = createInsertSchema(reemploymentStatistics).omit({
   id: true,
