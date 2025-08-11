@@ -323,9 +323,6 @@ export const loginSchema = z.object({
 export type SignupData = z.infer<typeof signupSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 
-export type SignupData = z.infer<typeof signupSchema>;
-export type LoginData = z.infer<typeof loginSchema>;
-
 export const insertReemploymentStatisticsSchema = createInsertSchema(reemploymentStatistics).omit({
   id: true,
   createdAt: true,

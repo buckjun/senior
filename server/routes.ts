@@ -98,7 +98,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/individual-profiles/me', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const profile = await storage.getIndividualProfile(userId);
+      let profile = await storage.getIndividualProfile(userId);
+      
+      if (!profile) {
+        // Create a default profile if it doesn't exist
+        profile = await storage.createIndividualProfile({
+          userId: userId,
+          birthYear: null,
+          summary: null,
+          experience: [],
+          skills: [],
+          preferredJobTypes: [],
+          preferredLocations: ['서울'],
+          workTimeFlexibility: false,
+
+          resumeFileUrl: null
+        });
+      }
+      
       res.json(profile);
     } catch (error) {
       console.error("Error fetching individual profile:", error);

@@ -132,6 +132,24 @@ export function setupAuth(app: Express) {
 
       const user = await storage.createUser(userData);
 
+      // Create appropriate profile based on user type
+      if (user.userType === 'individual') {
+        await storage.createIndividualProfile({
+          userId: user.id,
+          birthYear: null,
+          summary: null,
+          experience: [],
+          skills: [],
+          preferredJobTypes: [],
+          preferredLocations: ['서울'],
+          workTimeFlexibility: false,
+
+          resumeFileUrl: null
+        });
+      } else if (user.userType === 'company') {
+        // We can add company profile creation here if needed
+      }
+
       // Login user immediately after signup
       req.login(user, (err) => {
         if (err) return next(err);
