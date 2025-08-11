@@ -92,8 +92,29 @@ function loadJobsFromFile(filePath: string, sector: string, source: string): Com
   try {
     console.log(`Loading ${sector} from ${filePath}`);
     
-    const content = fs.readFileSync(filePath, 'utf-8');
-    console.log(`First line of CSV: ${content.split('\n')[0]}`);
+    // 한글 CSV 파일을 위한 인코딩 시도 순서: utf-8, euc-kr, cp949
+    let content = '';
+    try {
+      content = fs.readFileSync(filePath, 'utf-8');
+      // UTF-8이 제대로 읽어지는지 확인 (한글이 깨지지 않았는지)
+      if (content.includes('�') || content.includes('ȸ')) {
+        throw new Error('UTF-8 encoding failed');
+      }
+    } catch {
+      try {
+        // EUC-KR 시도
+        const iconv = require('iconv-lite');
+        const buffer = fs.readFileSync(filePath);
+        content = iconv.decode(buffer, 'euc-kr');
+        console.log(`Successfully read with EUC-KR encoding`);
+      } catch {
+        // 최후 수단으로 UTF-8 사용
+        content = fs.readFileSync(filePath, 'utf-8');
+        console.log(`Fallback to UTF-8 encoding`);
+      }
+    }
+    
+    console.log(`First line of CSV: ${content.split('\n')[0].substring(0, 100)}`);
     
     const records = parse(content, {
       columns: true,
