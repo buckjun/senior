@@ -1259,6 +1259,22 @@ ${allOnlineCourses.slice(0, 30).map((course, index) =>
     }
   });
 
+  // User interests route
+  app.post('/api/user/interests', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { interests } = req.body;
+      
+      // Update user profile with interests
+      await storage.updateUserProfile(userId, { interests: JSON.stringify(interests) });
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error saving user interests:", error);
+      res.status(500).json({ message: "Failed to save interests" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

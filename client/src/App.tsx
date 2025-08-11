@@ -28,6 +28,8 @@ import CourseDetail from "@/pages/individual/course-detail";
 import VoiceToRecommendation from "@/pages/individual/voice-to-recommendation";
 import SectorSelection from "@/pages/individual/sector-selection";
 import UnifiedRecommendations from "@/pages/individual/unified-recommendations";
+import SignupSuccessPage from "@/pages/signup-success";
+import SignupInterestsPage from "@/pages/signup-interests";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -80,7 +82,11 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated ? (
-        <Route path="/" component={Welcome} />
+        <>
+          <Route path="/" component={Welcome} />
+          <Route path="/signup/success" component={SignupSuccessPage} />
+          <Route path="/signup/interests" component={SignupInterestsPage} />
+        </>
       ) : (
         <>
           <Route path="/" component={IndividualDashboard} />

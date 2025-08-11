@@ -62,9 +62,9 @@ export function SignupForm({ isIndividual, onBackToLogin }: SignupFormProps) {
         // Update auth state
         queryClient.invalidateQueries({ queryKey: ['/api/user'] });
         
-        // Redirect to dashboard after successful signup and auto-login
+        // Redirect to signup success page for 2-step signup process
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = '/signup/success';
         }, 1000);
       } else {
         toast({
