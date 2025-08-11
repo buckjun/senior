@@ -230,10 +230,10 @@ export default function Dashboard() {
                 일있슈가 회원님의 경험과 관심사에 맞는 기업을 추천해드립니다.
               </CardDescription>
               <div className="pt-4 space-y-3">
-                <Link href="/individual/job-category-selection">
+                <Link href="/individual/voice-to-recommendation">
                   <Button className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white w-full">
                     <Building className="w-4 h-4 mr-2" />
-                    나에게 맞는 기업 찾기
+                    음성으로 맞춤 추천받기
                   </Button>
                 </Link>
                 <Link href="/individual/algorithm-visualization">

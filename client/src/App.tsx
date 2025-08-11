@@ -25,6 +25,9 @@ import AIRecommendations from "@/pages/company/ai-recommendations";
 import ExcelUploadPage from "@/pages/admin/excel-upload";
 import AlgorithmVisualization from "@/pages/individual/algorithm-visualization";
 import CourseDetail from "@/pages/individual/course-detail";
+import VoiceToRecommendation from "@/pages/individual/voice-to-recommendation";
+import SectorSelection from "@/pages/individual/sector-selection";
+import UnifiedRecommendations from "@/pages/individual/unified-recommendations";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -85,6 +88,9 @@ function Router() {
           <Route path="/individual/dashboard" component={IndividualDashboard} />
           <Route path="/individual/algorithm-visualization" component={AlgorithmVisualization} />
           <Route path="/individual/search" component={JobSearch} />
+          <Route path="/individual/voice-to-recommendation" component={VoiceToRecommendation} />
+          <Route path="/individual/sector-selection" component={SectorSelection} />
+          <Route path="/individual/unified-recommendations" component={UnifiedRecommendations} />
           <Route path="/saved-jobs" component={SavedJobs} />
           <Route path="/company/signup" component={CompanySignup} />
           <Route path="/company/dashboard" component={CompanyDashboard} />

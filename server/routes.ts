@@ -772,7 +772,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Natural language processing for resume generation
+  // Natural language processing for resume generation (legacy)
   app.post('/api/parse-resume', isAuthenticated, async (req: any, res) => {
     try {
       const { text } = req.body;
@@ -788,6 +788,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('자연어 처리 오류:', error);
       res.status(500).json({ 
         error: '텍스트 처리 중 오류가 발생했습니다.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // New unified recommendation system
+  app.post('/api/resume-analysis', isAuthenticated, async (req: any, res) => {
+    try {
+      const { resumeText } = req.body;
+      
+      if (!resumeText || typeof resumeText !== "string") {
+        return res.status(400).json({ error: "이력서 텍스트가 필요합니다." });
+      }
+
+      const { extractProfile, rankSectors, SECTORS } = await import('./recommendationEngine');
+      
+      const profile = extractProfile(resumeText);
+      const sectorGuess = rankSectors(resumeText, 2);
+      
+      res.json({ 
+        profile, 
+        sectorGuess, 
+        sectors: SECTORS 
+      });
+    } catch (error) {
+      console.error('이력서 분석 오류:', error);
+      res.status(500).json({ 
+        error: '이력서 분석 중 오류가 발생했습니다.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.post('/api/unified-recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const { resumeText, chosenSectors } = req.body;
+      
+      if (!resumeText || typeof resumeText !== "string") {
+        return res.status(400).json({ error: "이력서 텍스트가 필요합니다." });
+      }
+      
+      if (!chosenSectors || !Array.isArray(chosenSectors) || chosenSectors.length === 0) {
+        return res.status(400).json({ error: "1-2개 업종을 선택해주세요." });
+      }
+
+      const { getUnifiedRecommendations } = await import('./recommendationEngine');
+      
+      const recommendations = getUnifiedRecommendations(resumeText, chosenSectors);
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error('통합 추천 오류:', error);
+      res.status(500).json({ 
+        error: '추천 생성 중 오류가 발생했습니다.',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
