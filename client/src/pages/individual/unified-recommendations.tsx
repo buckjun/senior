@@ -20,6 +20,8 @@ import {
   ExternalLink
 } from "lucide-react";
 import { apiRequest } from '@/lib/queryClient';
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/hooks/useAuth';
 
 interface UnifiedRecommendation {
   profile: {
@@ -69,6 +71,8 @@ export default function UnifiedRecommendations() {
   const [location, setLocation] = useLocation();
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [resumeText, setResumeText] = useState<string>('');
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     const sectors = localStorage.getItem('selectedSectors');
@@ -117,6 +121,22 @@ export default function UnifiedRecommendations() {
     if (score >= 70) return `매우 적합 ${score}%`;
     if (score >= 50) return `적합 ${score}%`;
     return `보통 ${score}%`;
+  };
+
+  const handleJobApply = (jobTitle: string) => {
+    toast({
+      title: "온라인 지원완료",
+      description: `온라인 지원완료 되었습니다. ${user?.username || user?.id}의 합격을 응원합니다.`,
+      variant: "default",
+    });
+  };
+
+  const handleProgramRegister = (programTitle: string) => {
+    toast({
+      title: "신청 완료", 
+      description: "신청 완료 하였습니다.",
+      variant: "default",
+    });
   };
 
   const getSectorIcon = (sector: string) => {
@@ -335,7 +355,12 @@ export default function UnifiedRecommendations() {
                     )}
                     
                     <div className="flex justify-end">
-                      <Button size="sm" className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white">
+                      <Button 
+                        size="sm" 
+                        className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+                        onClick={() => handleJobApply(job.title)}
+                        data-testid={`button-apply-job-${job.id}`}
+                      >
                         <ExternalLink className="w-4 h-4 mr-2" />
                         지원하기
                       </Button>
@@ -420,7 +445,12 @@ export default function UnifiedRecommendations() {
                         )}
                         
                         <div className="flex justify-end">
-                          <Button size="sm" className="bg-[#2F3036] hover:bg-[#2F3036]/90 text-white">
+                          <Button 
+                            size="sm" 
+                            className="bg-[#2F3036] hover:bg-[#2F3036]/90 text-white"
+                            onClick={() => handleProgramRegister(program.title)}
+                            data-testid={`button-register-program-${program.id}`}
+                          >
                             <Award className="w-4 h-4 mr-2" />
                             신청하기
                           </Button>
