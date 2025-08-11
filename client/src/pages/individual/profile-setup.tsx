@@ -169,7 +169,6 @@ export default function IndividualProfileSetup() {
           <div className="w-10"></div>
         </div>
       </div>
-      
       <div className="p-6 pb-8">
         {/* Profile Setup Options */}
         <div className="space-y-6">
@@ -180,7 +179,7 @@ export default function IndividualProfileSetup() {
                 <Mic className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="text-body font-bold">음성녹음이란 형태를 말씀하슈~</h3>
+                <h3 className="text-body font-bold">음성녹음</h3>
                 <p className="text-gray-600">가장 쉬운 방법이에요</p>
               </div>
             </div>
@@ -305,7 +304,6 @@ export default function IndividualProfileSetup() {
           나중에 입력하기
         </Button>
       </div>
-
       {/* Voice Input Modal */}
       <VoiceInput
         isOpen={isVoiceModalOpen}
@@ -313,7 +311,6 @@ export default function IndividualProfileSetup() {
         onTranscript={handleVoiceTranscript}
         placeholder="경력에 대해 자유롭게 말씀해주세요"
       />
-
       {/* AI Resume Writer Modal */}
       {isAIResumeModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
