@@ -115,6 +115,7 @@ export interface IStorage {
   getAllJobCategories(): Promise<JobCategory[]>;
   getUserJobCategories(userId: string): Promise<JobCategory[]>;
   saveUserJobCategories(userId: string, categoryIds: string[]): Promise<void>;
+  saveUserInterests(userId: string, interests: string[]): Promise<void>;
   
   // Company operations  
   getCompaniesByCategories(categories: string[]): Promise<Company[]>;
@@ -604,6 +605,11 @@ export class DatabaseStorage implements IStorage {
         .insert(userJobCategories)
         .values(insertData);
     }
+  }
+
+  async saveUserInterests(userId: string, interests: string[]): Promise<void> {
+    // Use the same logic as saveUserJobCategories since interests are categories
+    await this.saveUserJobCategories(userId, interests);
   }
 
   // Company operations

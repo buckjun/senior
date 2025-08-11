@@ -132,21 +132,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let existingExperience = [];
       
       try {
-        existingSkills = JSON.parse(existingProfile.skills || '[]');
+        existingSkills = JSON.parse(existingProfile.skills ?? '[]');
         if (!Array.isArray(existingSkills)) {
           existingSkills = [];
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log('Error parsing existing skills, using empty array:', error instanceof Error ? error.message : 'Unknown error');
         existingSkills = [];
       }
       
       try {
-        existingExperience = JSON.parse(existingProfile.experience || '[]');
+        existingExperience = JSON.parse(existingProfile.experience ?? '[]');
         if (!Array.isArray(existingExperience)) {
           existingExperience = [];
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log('Error parsing existing experience, using empty array:', error instanceof Error ? error.message : 'Unknown error');
         existingExperience = [];
       }
@@ -945,6 +945,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save user interests (관심 분야 저장)
+  app.post("/api/user/interests", isAuthenticated, async (req: any, res) => {
+    try {
+      const { interests } = req.body;
+      
+      if (!interests || !Array.isArray(interests) || interests.length === 0) {
+        return res.status(400).json({ message: "최소 1개의 관심 분야를 선택해주세요." });
+      }
+
+      if (interests.length > 2) {
+        return res.status(400).json({ message: "최대 2개까지만 선택할 수 있습니다." });
+      }
+
+      const userId = req.user.id;
+      await storage.saveUserInterests(userId, interests);
+      
+      res.json({ message: "관심 분야가 저장되었습니다." });
+    } catch (error) {
+      console.error("Error saving user interests:", error);
+      res.status(500).json({ message: "관심 분야 저장 중 오류가 발생했습니다." });
+    }
+  });
+
   app.get("/api/user/job-categories", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub;
@@ -1259,21 +1282,7 @@ ${allOnlineCourses.slice(0, 30).map((course, index) =>
     }
   });
 
-  // User interests route
-  app.post('/api/user/interests', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const { interests } = req.body;
-      
-      // Update user profile with interests
-      await storage.updateUserProfile(userId, { interests: JSON.stringify(interests) });
-      
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error saving user interests:", error);
-      res.status(500).json({ message: "Failed to save interests" });
-    }
-  });
+
 
   const httpServer = createServer(app);
 
