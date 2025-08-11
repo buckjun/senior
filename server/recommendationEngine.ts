@@ -218,6 +218,9 @@ const WEIGHTS = {
   type: 0.05 
 };
 
+// 추천 품질 기준점 - "보통" 등급 이하 제외
+const MIN_RECOMMENDATION_SCORE = 0.6; // 0.6 이상만 추천 (좋음 등급)
+
 const eduRank = (v: string) => ({'무관': 0, '학사': 1, '석사': 2, '박사': 3})[v] ?? 0;
 
 function scoreItem(item: Occupation | JobPosting, profile: UserProfile, chosenSectors: string[], resumeText = '') {
@@ -272,6 +275,7 @@ function scoreItem(item: Occupation | JobPosting, profile: UserProfile, chosenSe
 export function recommendOccupations(chosenSectors: string[], profile: UserProfile, resumeText = '', k = 10) {
   return occupationsDB
     .map(o => ({ ...o, score: scoreItem(o, profile, chosenSectors, resumeText) }))
+    .filter(o => o.score >= MIN_RECOMMENDATION_SCORE) // "보통" 등급 이하 제외
     .sort((a, b) => b.score - a.score)
     .slice(0, k);
 }
@@ -300,11 +304,13 @@ export function recommendJobs(chosenSectors: string[], profile: UserProfile, res
   // 기존 하드코딩 데이터와 결합
   const allJobs = [...convertedJobs, ...jobPostingsDB.filter(j => chosenSectors.includes(j.sector))];
   
-  // 점수 계산 및 정렬
+  // 점수 계산 및 정렬 (보통 등급 이하 제외)
   const ranked = allJobs
     .map(j => ({ ...j, score: scoreItem(j, profile, chosenSectors, resumeText) }))
+    .filter(j => j.score >= MIN_RECOMMENDATION_SCORE) // "보통" 등급 이하 제외
     .sort((a, b) => b.score - a.score);
     
+  console.log(`Filtered jobs: ${ranked.length} jobs with score >= ${MIN_RECOMMENDATION_SCORE}`);
   const k = Math.min(kMax, Math.max(kMin, ranked.length));
   return ranked.slice(0, k);
 }
@@ -335,8 +341,8 @@ export function recommendPrograms(chosenSectors: string[], profile: UserProfile,
   const ranked = allPrograms
     .map(p => ({ 
       ...p, 
-      cover: p.skills.filter(s => missing.includes(s)).length,
-      relevance: p.skills.filter(s => 
+      cover: p.skills.filter((s: string) => missing.includes(s)).length,
+      relevance: p.skills.filter((s: string) => 
         chosenSectors.some(sector => sectorVocab[sector]?.includes(s))
       ).length
     }))
