@@ -38,7 +38,8 @@ export function setupAuth(app: Express) {
   const PostgresSessionStore = connectPg(session);
   const sessionStore = new PostgresSessionStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: true
+    createTableIfMissing: true,
+    tableName: 'user_sessions' // Use different table name to avoid conflicts
   });
 
   const sessionSettings: session.SessionOptions = {
@@ -161,7 +162,7 @@ export function setupAuth(app: Express) {
       });
     }
 
-    passport.authenticate("local", (err: any, user: User | false, info: any) => {
+    passport.authenticate("local", (err: any, user: UserType | false, info: any) => {
       if (err) {
         return res.status(500).json({ message: "로그인 중 오류가 발생했습니다." });
       }
