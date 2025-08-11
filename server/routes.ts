@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let existingExperience = [];
       
       try {
-        existingSkills = JSON.parse(existingProfile.skills ?? '[]');
+        existingSkills = JSON.parse((existingProfile.skills || '[]') as string);
         if (!Array.isArray(existingSkills)) {
           existingSkills = [];
         }
@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       try {
-        existingExperience = JSON.parse(existingProfile.experience ?? '[]');
+        existingExperience = JSON.parse((existingProfile.experience || '[]') as string);
         if (!Array.isArray(existingExperience)) {
           existingExperience = [];
         }
@@ -545,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Object storage routes for file uploads
   app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
-    const userId = req.user?.claims?.sub;
+    const userId = req.user.id; // Using traditional auth, not Replit Auth
     const objectStorageService = new ObjectStorageService();
     try {
       const objectFile = await objectStorageService.getObjectEntityFile(
@@ -580,7 +580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: "resumeFileURL is required" });
     }
 
-    const userId = req.user?.claims?.sub;
+    const userId = req.user.id; // Using traditional auth, not Replit Auth
 
     try {
       const objectStorageService = new ObjectStorageService();
@@ -970,7 +970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/user/job-categories", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.id; // Using traditional auth, not Replit Auth
       const categories = await storage.getUserJobCategories(userId);
       res.json(categories);
     } catch (error) {
@@ -981,8 +981,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/user/job-categories", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.id; // Using traditional auth, not Replit Auth
       const { categoryIds } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
       
       if (!Array.isArray(categoryIds) || categoryIds.length === 0 || categoryIds.length > 2) {
         return res.status(400).json({ error: "Must select 1-2 categories" });
@@ -999,7 +1003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company recommendations endpoint
   app.get("/api/recommendations", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.user.id; // Using traditional auth, not Replit Auth
       
       // Get user's selected categories
       const userCategories = await storage.getUserJobCategories(userId);
