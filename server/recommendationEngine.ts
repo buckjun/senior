@@ -350,12 +350,12 @@ export function recommendJobs(chosenSectors: string[], profile: UserProfile, res
   // 각 업종별 fallback 데이터 (최소 6개 보장)
   if (chosenSectors.includes('건설업') && filteredJobs.length < 6) {
     const fallbackConstructionJobs = [
-      { id: 'fallback-cs-1', sector: '건설업', title: '토목 현장관리자', company: '대한건설', education: '학사', experience: '5년 이상', location: '서울', field: '토목', deadline: '2024-12-31', employmentType: '정규직', companySize: '중견기업', salary: '4000만원' },
-      { id: 'fallback-cs-2', sector: '건설업', title: '건축 시공관리', company: '한국건설', education: '학사', experience: '3년 이상', location: '부산', field: '건축', deadline: '2024-12-31', employmentType: '정규직', companySize: '대기업', salary: '4500만원' },
-      { id: 'fallback-cs-3', sector: '건설업', title: '토목 설계 엔지니어', company: '서울종합건설', education: '학사', experience: '7년 이상', location: '경기', field: '토목설계', deadline: '2024-12-31', employmentType: '정규직', companySize: '대기업', salary: '5000만원' },
-      { id: 'fallback-cs-4', sector: '건설업', title: '건설 품질관리', company: '태평양건설', education: '학사', experience: '4년 이상', location: '인천', field: '품질관리', deadline: '2024-12-31', employmentType: '정규직', companySize: '중견기업', salary: '3800만원' },
-      { id: 'fallback-cs-5', sector: '건설업', title: '토목 공사 감리', company: '동아건설', education: '학사', experience: '8년 이상', location: '서울', field: '감리', deadline: '2024-12-31', employmentType: '정규직', companySize: '중견기업', salary: '4200만원' },
-      { id: 'fallback-cs-6', sector: '건설업', title: '건설 안전관리자', company: '현대건설', education: '학사', experience: '6년 이상', location: '울산', field: '안전관리', deadline: '2024-12-31', employmentType: '정규직', companySize: '대기업', salary: '4300만원' }
+      { id: 'fallback-cs-1', sector: '건설업', title: '토목 현장관리자', company: '대한건설', education: '학사', experience: '5년 이상', location: '대전', field: '토목', deadline: '2024-12-31', employmentType: '정규직', companySize: '중견기업', salary: '4000만원' },
+      { id: 'fallback-cs-2', sector: '건설업', title: '건축 시공관리', company: '한국건설', education: '학사', experience: '3년 이상', location: '대전', field: '건축', deadline: '2024-12-31', employmentType: '정규직', companySize: '대기업', salary: '4500만원' },
+      { id: 'fallback-cs-3', sector: '건설업', title: '토목 설계 엔지니어', company: '서울종합건설', education: '학사', experience: '7년 이상', location: '대전', field: '토목설계', deadline: '2024-12-31', employmentType: '정규직', companySize: '대기업', salary: '5000만원' },
+      { id: 'fallback-cs-4', sector: '건설업', title: '건설 품질관리', company: '태평양건설', education: '학사', experience: '4년 이상', location: '대전', field: '품질관리', deadline: '2024-12-31', employmentType: '정규직', companySize: '중견기업', salary: '3800만원' },
+      { id: 'fallback-cs-5', sector: '건설업', title: '토목 공사 감리', company: '동아건설', education: '학사', experience: '8년 이상', location: '대전', field: '감리', deadline: '2024-12-31', employmentType: '정규직', companySize: '중견기업', salary: '4200만원' },
+      { id: 'fallback-cs-6', sector: '건설업', title: '건설 안전관리자', company: '현대건설', education: '학사', experience: '6년 이상', location: '대전', field: '안전관리', deadline: '2024-12-31', employmentType: '정규직', companySize: '대기업', salary: '4300만원' }
     ];
     
     allJobSources = [...allJobSources, ...fallbackConstructionJobs.slice(0, Math.max(0, 6 - filteredJobs.length))];
