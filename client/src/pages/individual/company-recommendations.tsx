@@ -334,13 +334,20 @@ export default function CompanyRecommendationsPage() {
                   </div>
                 </div>
 
-                {/* Action Button */}
-                <div className="flex justify-end">
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3">
                   <Button 
-                    className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+                    variant="outline"
+                    className="border-[#FF8C42] text-[#FF8C42] hover:bg-[#FFFEF0]"
                     data-testid={`button-view-company-${index}`}
                   >
                     상세 정보 보기
+                  </Button>
+                  <Button 
+                    className="bg-[#FF8C42] hover:bg-[#FF8C42]/90 text-white"
+                    data-testid={`button-apply-company-${index}`}
+                  >
+                    지원하기
                   </Button>
                 </div>
               </div>
